@@ -1,7 +1,64 @@
 package flow
 
-type Service struct {}
+import (
+	"context"
+	"errors"
+	"fmt"
+	"time"
 
-func NewService() *Service {
-	return &Service{}
+	"github.com/neatflowcv/focus/internal/pkg/domain"
+	"github.com/neatflowcv/focus/internal/pkg/idmaker"
+	"github.com/neatflowcv/focus/internal/pkg/repository"
+)
+
+type Service struct {
+	idmaker idmaker.IDMaker
+	repo    repository.Repository
+}
+
+func NewService(idmaker idmaker.IDMaker, repo repository.Repository) *Service {
+	return &Service{idmaker: idmaker, repo: repo}
+}
+
+func (s *Service) CreateTask(ctx context.Context, input *CreateTaskInput, now time.Time) (*domain.Task, error) {
+	if input.ParentID != "" {
+		_, err := s.repo.GetTask(ctx, input.Username, input.ParentID)
+		if err != nil {
+			if errors.Is(err, repository.ErrTaskNotFound) {
+				return nil, ErrParentTaskNotFound
+			}
+
+			return nil, fmt.Errorf("failed to get parent task: %w", err)
+		}
+	}
+
+	count, err := s.repo.CountSubtasks(ctx, input.Username, input.ParentID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to count subtasks: %w", err)
+	}
+
+	task := domain.NewTask(
+		s.idmaker.MakeID(),
+		input.ParentID,
+		input.Title,
+		now,
+		domain.TaskStatusTodo,
+		float64(count)*10.0+10.0, //nolint:mnd
+	)
+
+	err = s.repo.CreateTask(ctx, input.Username, task)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create task: %w", err)
+	}
+
+	return task, nil
+}
+
+func (s *Service) ListTasks(ctx context.Context, input *ListTasksInput) ([]*domain.Task, error) {
+	ret, err := s.repo.ListTasks(ctx, input.Username, input.ParentID, input.Recursive)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list tasks: %w", err)
+	}
+
+	return ret, nil
 }
