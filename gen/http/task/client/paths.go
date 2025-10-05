@@ -9,10 +9,10 @@ package client
 
 // CreateTaskPath returns the URL path to the task service create HTTP endpoint.
 func CreateTaskPath() string {
-	return "/tasks"
+	return "/focus/tasks"
 }
 
 // ListTaskPath returns the URL path to the task service list HTTP endpoint.
 func ListTaskPath() string {
-	return "/tasks"
+	return "/focus/tasks"
 }

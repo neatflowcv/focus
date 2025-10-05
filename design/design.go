@@ -4,9 +4,7 @@ import (
 	"goa.design/goa/v3/dsl"
 )
 
-var _ = dsl.Service("focus", func() {
-	dsl.Description("The focus service provides a REST API for managing focus.")
-
+var _ = dsl.API("focus", func() {
 	dsl.HTTP(func() {
 		dsl.Path("/focus")
 	})

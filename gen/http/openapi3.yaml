@@ -6,7 +6,7 @@ servers:
     - url: http://localhost:80
       description: Default server for focus
 paths:
-    /tasks:
+    /focus/tasks:
         get:
             tags:
                 - task
@@ -183,6 +183,4 @@ components:
                   status: Deleniti est est.
                   title: Quia veniam recusandae aperiam quia.
 tags:
-    - name: focus
-      description: The focus service provides a REST API for managing focus.
     - name: task
