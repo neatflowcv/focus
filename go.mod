@@ -2,7 +2,10 @@ module github.com/neatflowcv/focus
 
 go 1.25.1
 
-require goa.design/goa/v3 v3.22.5
+require (
+	github.com/urfave/cli/v3 v3.4.1
+	goa.design/goa/v3 v3.22.5
+)
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect

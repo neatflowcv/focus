@@ -50,14 +50,14 @@ var _ = dsl.Service("task", func() {
 	})
 })
 
-var TaskInput = dsl.Type("TaskInput", func() {
+var TaskInput = dsl.Type("TaskInput", func() { //nolint:gochecknoglobals
 	dsl.Attribute("parent_id", dsl.String, "The parent ID of the task")
 	dsl.Attribute("title", dsl.String, "The title of the task")
 
 	dsl.Required("title")
 })
 
-var TaskDetail = dsl.ResultType("TaskDetail", func() {
+var TaskDetail = dsl.ResultType("TaskDetail", func() { //nolint:gochecknoglobals
 	dsl.Attribute("id", dsl.String, "The ID of the task")
 	dsl.Attribute("parent_id", dsl.String, "The parent ID of the task")
 	dsl.Attribute("title", dsl.String, "The title of the task")
