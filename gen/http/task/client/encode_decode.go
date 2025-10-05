@@ -43,6 +43,10 @@ func EncodeCreateRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 		if !ok {
 			return goahttp.ErrInvalidType("task", "create", "*task.TaskInput", v)
 		}
+		{
+			head := p.Authorization
+			req.Header.Set("authorization", head)
+		}
 		body := NewCreateRequestBody(p)
 		if err := encoder(req).Encode(&body); err != nil {
 			return goahttp.ErrEncodingError("task", "create", err)
@@ -54,6 +58,9 @@ func EncodeCreateRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 // DecodeCreateResponse returns a decoder for responses returned by the task
 // create endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
+// DecodeCreateResponse may return the following errors:
+//   - "InternalServerError" (type *goa.ServiceError): http.StatusInternalServerError
+//   - error: internal error
 func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
 	return func(resp *http.Response) (any, error) {
 		if restoreBody {
@@ -86,6 +93,20 @@ func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			}
 			res := task.NewTaskdetail(vres)
 			return res, nil
+		case http.StatusInternalServerError:
+			var (
+				body CreateInternalServerErrorResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("task", "create", err)
+			}
+			err = ValidateCreateInternalServerErrorResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("task", "create", err)
+			}
+			return nil, NewCreateInternalServerError(&body)
 		default:
 			body, _ := io.ReadAll(resp.Body)
 			return nil, goahttp.ErrInvalidResponse("task", "create", resp.StatusCode, string(body))
@@ -116,6 +137,10 @@ func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 		if !ok {
 			return goahttp.ErrInvalidType("task", "list", "*task.ListPayload", v)
 		}
+		{
+			head := p.Authorization
+			req.Header.Set("authorization", head)
+		}
 		values := req.URL.Query()
 		if p.ParentID != nil {
 			values.Add("parent_id", *p.ParentID)
@@ -131,6 +156,9 @@ func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 // DecodeListResponse returns a decoder for responses returned by the task list
 // endpoint. restoreBody controls whether the response body should be restored
 // after having been read.
+// DecodeListResponse may return the following errors:
+//   - "InternalServerError" (type *goa.ServiceError): http.StatusInternalServerError
+//   - error: internal error
 func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
 	return func(resp *http.Response) (any, error) {
 		if restoreBody {
@@ -163,6 +191,20 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			}
 			res := task.NewTaskdetailCollection(vres)
 			return res, nil
+		case http.StatusInternalServerError:
+			var (
+				body ListInternalServerErrorResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("task", "list", err)
+			}
+			err = ValidateListInternalServerErrorResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("task", "list", err)
+			}
+			return nil, NewListInternalServerError(&body)
 		default:
 			body, _ := io.ReadAll(resp.Body)
 			return nil, goahttp.ErrInvalidResponse("task", "list", resp.StatusCode, string(body))

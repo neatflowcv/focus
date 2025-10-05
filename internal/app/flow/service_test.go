@@ -37,7 +37,8 @@ func TestServiceCreateTask(t *testing.T) {
 		Username: "test",
 		ParentID: "",
 		Title:    "test",
-	}, now)
+		Now:      now,
+	})
 
 	require.NoError(t, err)
 	require.Equal(t, "test", ret.Title())
@@ -87,7 +88,8 @@ func TestServiceListTasks(t *testing.T) {
 		Username: "test",
 		ParentID: "",
 		Title:    "test",
-	}, now)
+		Now:      now,
+	})
 
 	ret, err := service.ListTasks(t.Context(), &flow.ListTasksInput{
 		Username:  "test",

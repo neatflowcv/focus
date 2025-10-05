@@ -55,9 +55,49 @@ func DecodeCreateRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.
 		if err != nil {
 			return nil, err
 		}
-		payload := NewCreateTaskInput(&body)
+
+		var (
+			authorization string
+		)
+		authorization = r.Header.Get("authorization")
+		if authorization == "" {
+			err = goa.MergeErrors(err, goa.MissingFieldError("authorization", "header"))
+		}
+		if err != nil {
+			return nil, err
+		}
+		payload := NewCreateTaskInput(&body, authorization)
 
 		return payload, nil
+	}
+}
+
+// EncodeCreateError returns an encoder for errors returned by the create task
+// endpoint.
+func EncodeCreateError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder, formatter func(ctx context.Context, err error) goahttp.Statuser) func(context.Context, http.ResponseWriter, error) error {
+	encodeError := goahttp.ErrorEncoder(encoder, formatter)
+	return func(ctx context.Context, w http.ResponseWriter, v error) error {
+		var en goa.GoaErrorNamer
+		if !errors.As(v, &en) {
+			return encodeError(ctx, w, v)
+		}
+		switch en.GoaErrorName() {
+		case "InternalServerError":
+			var res *goa.ServiceError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewCreateInternalServerErrorResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusInternalServerError)
+			return enc.Encode(body)
+		default:
+			return encodeError(ctx, w, v)
+		}
 	}
 }
 
@@ -78,9 +118,10 @@ func EncodeListResponse(encoder func(context.Context, http.ResponseWriter) goaht
 func DecodeListRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (*task.ListPayload, error) {
 	return func(r *http.Request) (*task.ListPayload, error) {
 		var (
-			parentID  *string
-			recursive *bool
-			err       error
+			parentID      *string
+			recursive     *bool
+			authorization string
+			err           error
 		)
 		qp := r.URL.Query()
 		parentIDRaw := qp.Get("parent_id")
@@ -97,12 +138,45 @@ func DecodeListRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.De
 				recursive = &v
 			}
 		}
+		authorization = r.Header.Get("authorization")
+		if authorization == "" {
+			err = goa.MergeErrors(err, goa.MissingFieldError("authorization", "header"))
+		}
 		if err != nil {
 			return nil, err
 		}
-		payload := NewListPayload(parentID, recursive)
+		payload := NewListPayload(parentID, recursive, authorization)
 
 		return payload, nil
+	}
+}
+
+// EncodeListError returns an encoder for errors returned by the list task
+// endpoint.
+func EncodeListError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder, formatter func(ctx context.Context, err error) goahttp.Statuser) func(context.Context, http.ResponseWriter, error) error {
+	encodeError := goahttp.ErrorEncoder(encoder, formatter)
+	return func(ctx context.Context, w http.ResponseWriter, v error) error {
+		var en goa.GoaErrorNamer
+		if !errors.As(v, &en) {
+			return encodeError(ctx, w, v)
+		}
+		switch en.GoaErrorName() {
+		case "InternalServerError":
+			var res *goa.ServiceError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewListInternalServerErrorResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusInternalServerError)
+			return enc.Encode(body)
+		default:
+			return encodeError(ctx, w, v)
+		}
 	}
 }
 

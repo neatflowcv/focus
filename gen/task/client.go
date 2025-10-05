@@ -28,6 +28,9 @@ func NewClient(create, list goa.Endpoint) *Client {
 }
 
 // Create calls the "create" endpoint of the "task" service.
+// Create may return the following errors:
+//   - "InternalServerError" (type *goa.ServiceError): Internal server error
+//   - error: internal error
 func (c *Client) Create(ctx context.Context, p *TaskInput) (res *Taskdetail, err error) {
 	var ires any
 	ires, err = c.CreateEndpoint(ctx, p)
@@ -38,6 +41,9 @@ func (c *Client) Create(ctx context.Context, p *TaskInput) (res *Taskdetail, err
 }
 
 // List calls the "list" endpoint of the "task" service.
+// List may return the following errors:
+//   - "InternalServerError" (type *goa.ServiceError): Internal server error
+//   - error: internal error
 func (c *Client) List(ctx context.Context, p *ListPayload) (res TaskdetailCollection, err error) {
 	var ires any
 	ires, err = c.ListEndpoint(ctx, p)

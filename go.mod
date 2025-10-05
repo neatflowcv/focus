@@ -3,6 +3,7 @@ module github.com/neatflowcv/focus
 go 1.25.1
 
 require (
+	github.com/neatflowcv/key-stone v0.0.2
 	github.com/oklog/ulid/v2 v2.1.1
 	github.com/stretchr/testify v1.11.1
 	github.com/urfave/cli/v3 v3.4.1
@@ -14,6 +15,7 @@ require (
 	github.com/dimfeld/httppath v0.0.0-20170720192232-ee938bf73598 // indirect
 	github.com/go-chi/chi/v5 v5.2.3 // indirect
 	github.com/gohugoio/hashstructure v0.5.0 // indirect
+	github.com/golang-jwt/jwt/v5 v5.3.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/manveru/faker v0.0.0-20171103152722-9fbc68a78c4d // indirect

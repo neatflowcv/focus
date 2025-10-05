@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/neatflowcv/focus/internal/pkg/domain"
 	"github.com/neatflowcv/focus/internal/pkg/idmaker"
@@ -20,7 +19,7 @@ func NewService(idmaker idmaker.IDMaker, repo repository.Repository) *Service {
 	return &Service{idmaker: idmaker, repo: repo}
 }
 
-func (s *Service) CreateTask(ctx context.Context, input *CreateTaskInput, now time.Time) (*domain.Task, error) {
+func (s *Service) CreateTask(ctx context.Context, input *CreateTaskInput) (*domain.Task, error) {
 	if input.ParentID != "" {
 		_, err := s.repo.GetTask(ctx, input.Username, input.ParentID)
 		if err != nil {
@@ -41,7 +40,7 @@ func (s *Service) CreateTask(ctx context.Context, input *CreateTaskInput, now ti
 		s.idmaker.MakeID(),
 		input.ParentID,
 		input.Title,
-		now,
+		input.Now,
 		domain.TaskStatusTodo,
 		float64(count)*10.0+10.0, //nolint:mnd
 	)

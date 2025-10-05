@@ -15,6 +15,8 @@ var _ = dsl.Service("task", func() {
 		dsl.Path("/tasks")
 	})
 
+	dsl.Error("InternalServerError", dsl.ErrorResult, "Internal server error")
+
 	dsl.Method("create", func() {
 		dsl.Description("Create a new task.")
 
@@ -24,7 +26,10 @@ var _ = dsl.Service("task", func() {
 		dsl.HTTP(func() {
 			dsl.POST("/")
 
+			dsl.Header("authorization", dsl.String, "The authorization header")
+
 			dsl.Response(dsl.StatusOK)
+			dsl.Response("InternalServerError", dsl.StatusInternalServerError)
 		})
 	})
 
@@ -32,27 +37,33 @@ var _ = dsl.Service("task", func() {
 		dsl.Description("List all tasks.")
 
 		dsl.Payload(func() {
+			dsl.Attribute("authorization", dsl.String, "The authorization header")
 			dsl.Attribute("parent_id", dsl.String, "The ID of the parent task")
 			dsl.Attribute("recursive", dsl.Boolean, "Whether to include all subtasks recursively")
+
+			dsl.Required("authorization")
 		})
 		dsl.Result(dsl.CollectionOf(TaskDetail))
 
 		dsl.HTTP(func() {
 			dsl.GET("/")
 
+			dsl.Header("authorization", dsl.String, "The authorization header")
 			dsl.Param("parent_id")
 			dsl.Param("recursive")
 
 			dsl.Response(dsl.StatusOK)
+			dsl.Response("InternalServerError", dsl.StatusInternalServerError)
 		})
 	})
 })
 
 var TaskInput = dsl.Type("TaskInput", func() { //nolint:gochecknoglobals
+	dsl.Attribute("authorization", dsl.String, "The authorization header")
 	dsl.Attribute("parent_id", dsl.String, "The parent ID of the task")
 	dsl.Attribute("title", dsl.String, "The title of the task")
 
-	dsl.Required("title")
+	dsl.Required("authorization", "title")
 })
 
 var TaskDetail = dsl.ResultType("TaskDetail", func() { //nolint:gochecknoglobals

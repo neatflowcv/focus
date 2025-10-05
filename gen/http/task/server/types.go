@@ -43,6 +43,42 @@ type CreateResponseBody struct {
 // endpoint HTTP response body.
 type TaskdetailResponseCollection []*TaskdetailResponse
 
+// CreateInternalServerErrorResponseBody is the type of the "task" service
+// "create" endpoint HTTP response body for the "InternalServerError" error.
+type CreateInternalServerErrorResponseBody struct {
+	// Name is the name of this class of errors.
+	Name string `form:"name" json:"name" xml:"name"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID string `form:"id" json:"id" xml:"id"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message string `form:"message" json:"message" xml:"message"`
+	// Is the error temporary?
+	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
+	// Is the error a timeout?
+	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
+	// Is the error a server-side fault?
+	Fault bool `form:"fault" json:"fault" xml:"fault"`
+}
+
+// ListInternalServerErrorResponseBody is the type of the "task" service "list"
+// endpoint HTTP response body for the "InternalServerError" error.
+type ListInternalServerErrorResponseBody struct {
+	// Name is the name of this class of errors.
+	Name string `form:"name" json:"name" xml:"name"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID string `form:"id" json:"id" xml:"id"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message string `form:"message" json:"message" xml:"message"`
+	// Is the error temporary?
+	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
+	// Is the error a timeout?
+	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
+	// Is the error a server-side fault?
+	Fault bool `form:"fault" json:"fault" xml:"fault"`
+}
+
 // TaskdetailResponse is used to define fields on response body types.
 type TaskdetailResponse struct {
 	// The ID of the task
@@ -83,21 +119,51 @@ func NewTaskdetailResponseCollection(res taskviews.TaskdetailCollectionView) Tas
 	return body
 }
 
+// NewCreateInternalServerErrorResponseBody builds the HTTP response body from
+// the result of the "create" endpoint of the "task" service.
+func NewCreateInternalServerErrorResponseBody(res *goa.ServiceError) *CreateInternalServerErrorResponseBody {
+	body := &CreateInternalServerErrorResponseBody{
+		Name:      res.Name,
+		ID:        res.ID,
+		Message:   res.Message,
+		Temporary: res.Temporary,
+		Timeout:   res.Timeout,
+		Fault:     res.Fault,
+	}
+	return body
+}
+
+// NewListInternalServerErrorResponseBody builds the HTTP response body from
+// the result of the "list" endpoint of the "task" service.
+func NewListInternalServerErrorResponseBody(res *goa.ServiceError) *ListInternalServerErrorResponseBody {
+	body := &ListInternalServerErrorResponseBody{
+		Name:      res.Name,
+		ID:        res.ID,
+		Message:   res.Message,
+		Temporary: res.Temporary,
+		Timeout:   res.Timeout,
+		Fault:     res.Fault,
+	}
+	return body
+}
+
 // NewCreateTaskInput builds a task service create endpoint payload.
-func NewCreateTaskInput(body *CreateRequestBody) *task.TaskInput {
+func NewCreateTaskInput(body *CreateRequestBody, authorization string) *task.TaskInput {
 	v := &task.TaskInput{
 		ParentID: body.ParentID,
 		Title:    *body.Title,
 	}
+	v.Authorization = authorization
 
 	return v
 }
 
 // NewListPayload builds a task service list endpoint payload.
-func NewListPayload(parentID *string, recursive *bool) *task.ListPayload {
+func NewListPayload(parentID *string, recursive *bool, authorization string) *task.ListPayload {
 	v := &task.ListPayload{}
 	v.ParentID = parentID
 	v.Recursive = recursive
+	v.Authorization = authorization
 
 	return v
 }

@@ -11,6 +11,7 @@ import (
 	"context"
 
 	taskviews "github.com/neatflowcv/focus/gen/task/views"
+	goa "goa.design/goa/v3/pkg"
 )
 
 // Service is the task service interface.
@@ -39,6 +40,8 @@ var MethodNames = [2]string{"create", "list"}
 
 // ListPayload is the payload type of the task service list method.
 type ListPayload struct {
+	// The authorization header
+	Authorization string
 	// The ID of the parent task
 	ParentID *string
 	// Whether to include all subtasks recursively
@@ -47,6 +50,8 @@ type ListPayload struct {
 
 // TaskInput is the payload type of the task service create method.
 type TaskInput struct {
+	// The authorization header
+	Authorization string
 	// The parent ID of the task
 	ParentID *string
 	// The title of the task
@@ -71,6 +76,11 @@ type Taskdetail struct {
 
 // TaskdetailCollection is the result type of the task service list method.
 type TaskdetailCollection []*Taskdetail
+
+// MakeInternalServerError builds a goa.ServiceError from an error.
+func MakeInternalServerError(err error) *goa.ServiceError {
+	return goa.NewServiceError(err, "InternalServerError", false, false, false)
+}
 
 // NewTaskdetail initializes result type Taskdetail from viewed result type
 // Taskdetail.

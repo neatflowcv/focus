@@ -30,9 +30,9 @@ func UsageCommands() []string {
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
 	return os.Args[0] + ` task create --body '{
-      "parent_id": "Quis quae.",
-      "title": "Modi architecto rerum."
-   }'` + "\n" +
+      "parent_id": "Et quae omnis quia est.",
+      "title": "Explicabo provident ut quis nesciunt perferendis."
+   }' --authorization "Dolor quia odio unde et in molestias."` + "\n" +
 		""
 }
 
@@ -48,12 +48,14 @@ func ParseEndpoint(
 	var (
 		taskFlags = flag.NewFlagSet("task", flag.ContinueOnError)
 
-		taskCreateFlags    = flag.NewFlagSet("create", flag.ExitOnError)
-		taskCreateBodyFlag = taskCreateFlags.String("body", "REQUIRED", "")
+		taskCreateFlags             = flag.NewFlagSet("create", flag.ExitOnError)
+		taskCreateBodyFlag          = taskCreateFlags.String("body", "REQUIRED", "")
+		taskCreateAuthorizationFlag = taskCreateFlags.String("authorization", "REQUIRED", "")
 
-		taskListFlags         = flag.NewFlagSet("list", flag.ExitOnError)
-		taskListParentIDFlag  = taskListFlags.String("parent-id", "", "")
-		taskListRecursiveFlag = taskListFlags.String("recursive", "", "")
+		taskListFlags             = flag.NewFlagSet("list", flag.ExitOnError)
+		taskListParentIDFlag      = taskListFlags.String("parent-id", "", "")
+		taskListRecursiveFlag     = taskListFlags.String("recursive", "", "")
+		taskListAuthorizationFlag = taskListFlags.String("authorization", "REQUIRED", "")
 	)
 	taskFlags.Usage = taskUsage
 	taskCreateFlags.Usage = taskCreateUsage
@@ -126,10 +128,10 @@ func ParseEndpoint(
 			switch epn {
 			case "create":
 				endpoint = c.Create()
-				data, err = taskc.BuildCreatePayload(*taskCreateBodyFlag)
+				data, err = taskc.BuildCreatePayload(*taskCreateBodyFlag, *taskCreateAuthorizationFlag)
 			case "list":
 				endpoint = c.List()
-				data, err = taskc.BuildListPayload(*taskListParentIDFlag, *taskListRecursiveFlag)
+				data, err = taskc.BuildListPayload(*taskListParentIDFlag, *taskListRecursiveFlag, *taskListAuthorizationFlag)
 			}
 		}
 	}
@@ -155,6 +157,7 @@ func taskCreateUsage() {
 	// Header with flags
 	fmt.Fprintf(os.Stderr, "%s [flags] task create", os.Args[0])
 	fmt.Fprint(os.Stderr, " -body JSON")
+	fmt.Fprint(os.Stderr, " -authorization STRING")
 	fmt.Fprintln(os.Stderr)
 
 	// Description
@@ -163,14 +166,15 @@ func taskCreateUsage() {
 
 	// Flags list
 	fmt.Fprintln(os.Stderr, `    -body JSON: `)
+	fmt.Fprintln(os.Stderr, `    -authorization STRING: `)
 
 	// Example block: pass example as parameter to avoid format parsing of % characters
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
 	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], `task create --body '{
-      "parent_id": "Quis quae.",
-      "title": "Modi architecto rerum."
-   }'`)
+      "parent_id": "Et quae omnis quia est.",
+      "title": "Explicabo provident ut quis nesciunt perferendis."
+   }' --authorization "Dolor quia odio unde et in molestias."`)
 }
 
 func taskListUsage() {
@@ -178,6 +182,7 @@ func taskListUsage() {
 	fmt.Fprintf(os.Stderr, "%s [flags] task list", os.Args[0])
 	fmt.Fprint(os.Stderr, " -parent-id STRING")
 	fmt.Fprint(os.Stderr, " -recursive BOOL")
+	fmt.Fprint(os.Stderr, " -authorization STRING")
 	fmt.Fprintln(os.Stderr)
 
 	// Description
@@ -187,9 +192,10 @@ func taskListUsage() {
 	// Flags list
 	fmt.Fprintln(os.Stderr, `    -parent-id STRING: `)
 	fmt.Fprintln(os.Stderr, `    -recursive BOOL: `)
+	fmt.Fprintln(os.Stderr, `    -authorization STRING: `)
 
 	// Example block: pass example as parameter to avoid format parsing of % characters
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], `task list --parent-id "At illo iure provident enim ipsam." --recursive false`)
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], `task list --parent-id "Quia numquam in beatae nobis." --recursive true --authorization "Omnis laborum eligendi repudiandae ratione quis veniam."`)
 }

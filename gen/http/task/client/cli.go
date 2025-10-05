@@ -17,26 +17,31 @@ import (
 
 // BuildCreatePayload builds the payload for the task create endpoint from CLI
 // flags.
-func BuildCreatePayload(taskCreateBody string) (*task.TaskInput, error) {
+func BuildCreatePayload(taskCreateBody string, taskCreateAuthorization string) (*task.TaskInput, error) {
 	var err error
 	var body CreateRequestBody
 	{
 		err = json.Unmarshal([]byte(taskCreateBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"parent_id\": \"Quis quae.\",\n      \"title\": \"Modi architecto rerum.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"parent_id\": \"Et quae omnis quia est.\",\n      \"title\": \"Explicabo provident ut quis nesciunt perferendis.\"\n   }'")
 		}
+	}
+	var authorization string
+	{
+		authorization = taskCreateAuthorization
 	}
 	v := &task.TaskInput{
 		ParentID: body.ParentID,
 		Title:    body.Title,
 	}
+	v.Authorization = authorization
 
 	return v, nil
 }
 
 // BuildListPayload builds the payload for the task list endpoint from CLI
 // flags.
-func BuildListPayload(taskListParentID string, taskListRecursive string) (*task.ListPayload, error) {
+func BuildListPayload(taskListParentID string, taskListRecursive string, taskListAuthorization string) (*task.ListPayload, error) {
 	var err error
 	var parentID *string
 	{
@@ -55,9 +60,14 @@ func BuildListPayload(taskListParentID string, taskListRecursive string) (*task.
 			}
 		}
 	}
+	var authorization string
+	{
+		authorization = taskListAuthorization
+	}
 	v := &task.ListPayload{}
 	v.ParentID = parentID
 	v.Recursive = recursive
+	v.Authorization = authorization
 
 	return v, nil
 }
