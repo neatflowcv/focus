@@ -6,6 +6,10 @@ build:
 install:
 	CGO_ENABLED=0 GOOS=linux go install ./cmd/...
 
+.PHONY: docs
+docs:
+	goa gen github.com/neatflowcv/focus/design
+
 .PHONY: update
 update:
 	go get -u -t ./...

@@ -3,6 +3,9 @@ package main
 import (
 	"log"
 	"runtime/debug"
+
+	_ "goa.design/goa/v3/codegen"
+	_ "goa.design/goa/v3/codegen/generator"
 )
 
 func version() string {
