@@ -5,7 +5,7 @@ repos:
         name: update module
         entry: make update
         language: system
-        types: [go]
+        always_run: true
 
       - id: golangci-lint
         name: golangci-lint
