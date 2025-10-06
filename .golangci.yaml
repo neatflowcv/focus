@@ -6,6 +6,8 @@ linters:
     - depguard
     - tagliatelle
     - wsl # deprecated
+    - prealloc
+    - varnamelen
   exclusions:
     paths:
       - "gen/"
