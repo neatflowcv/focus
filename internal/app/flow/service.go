@@ -22,7 +22,7 @@ func NewService(idmaker idmaker.IDMaker, repo repository.Repository) *Service {
 
 func (s *Service) CreateTask(ctx context.Context, input *CreateTaskInput) (*domain.Task, error) {
 	if input.ParentID != "" {
-		_, err := s.repo.GetTask(ctx, input.Username, input.ParentID)
+		_, err := s.repo.GetTask(ctx, input.Username, domain.TaskID(input.ParentID))
 		if err != nil {
 			if errors.Is(err, repository.ErrTaskNotFound) {
 				return nil, ErrParentTaskNotFound
@@ -32,14 +32,14 @@ func (s *Service) CreateTask(ctx context.Context, input *CreateTaskInput) (*doma
 		}
 	}
 
-	count, err := s.repo.CountSubtasks(ctx, input.Username, input.ParentID)
+	count, err := s.repo.CountSubtasks(ctx, input.Username, domain.TaskID(input.ParentID))
 	if err != nil {
 		return nil, fmt.Errorf("failed to count subtasks: %w", err)
 	}
 
 	task := domain.NewTask(
 		domain.TaskID(s.idmaker.MakeID()),
-		input.ParentID,
+		domain.TaskID(input.ParentID),
 		input.Title,
 		input.Now,
 		domain.TaskStatusTodo,
@@ -66,7 +66,7 @@ func (s *Service) ListTasks(ctx context.Context, input *ListTasksInput) ([]*doma
 		listFn = s.repo.ListSubTasks
 	}
 
-	ret, err := listFn(ctx, input.Username, input.ParentID)
+	ret, err := listFn(ctx, input.Username, domain.TaskID(input.ParentID))
 	if err != nil {
 		return nil, fmt.Errorf("failed to list tasks: %w", err)
 	}

@@ -38,7 +38,7 @@ func (h *Handler) Create(ctx context.Context, input *task.TaskInput) (*task.Task
 
 	ret, err := h.service.CreateTask(ctx, &flow.CreateTaskInput{
 		Username: username,
-		ParentID: domain.TaskID(parentID),
+		ParentID: parentID,
 		Title:    input.Title,
 		Now:      now,
 	})
@@ -70,7 +70,7 @@ func (h *Handler) List(ctx context.Context, input *task.ListPayload) (task.Taskd
 
 	ret, err := h.service.ListTasks(ctx, &flow.ListTasksInput{
 		Username:  username,
-		ParentID:  domain.TaskID(parentID),
+		ParentID:  parentID,
 		Recursive: recursive,
 	})
 	if err != nil {

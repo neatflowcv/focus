@@ -16,10 +16,15 @@ update:
 	go mod tidy
 	go mod vendor
 
+.PHONY: fix
+fix:
+	go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.5.0
+	golangci-lint run --fix
+
 .PHONY: lint
 lint:
 	go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.5.0
-	golangci-lint run --fix --allow-parallel-runners
+	golangci-lint run --allow-parallel-runners
 
 .PHONY: test
 test:
