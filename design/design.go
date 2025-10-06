@@ -56,6 +56,37 @@ var _ = dsl.Service("task", func() {
 			dsl.Response("InternalServerError", dsl.StatusInternalServerError)
 		})
 	})
+
+	dsl.Method("update", func() {
+		dsl.Description("Update a task.")
+
+		dsl.Payload(TaskUpdateInput)
+		dsl.Result(TaskDetail)
+
+		dsl.HTTP(func() {
+			dsl.PATCH("/{task_id}")
+
+			dsl.Header("authorization", dsl.String, "The authorization header")
+
+			dsl.Response(dsl.StatusOK)
+			dsl.Response("InternalServerError", dsl.StatusInternalServerError)
+		})
+	})
+
+	dsl.Method("delete", func() {
+		dsl.Description("Delete a task.")
+
+		dsl.Payload(TaskDeleteInput)
+
+		dsl.HTTP(func() {
+			dsl.DELETE("/{task_id}")
+
+			dsl.Header("authorization", dsl.String, "The authorization header")
+
+			dsl.Response(dsl.StatusNoContent)
+			dsl.Response("InternalServerError", dsl.StatusInternalServerError)
+		})
+	})
 })
 
 var TaskInput = dsl.Type("TaskInput", func() { //nolint:gochecknoglobals
@@ -66,13 +97,44 @@ var TaskInput = dsl.Type("TaskInput", func() { //nolint:gochecknoglobals
 	dsl.Required("authorization", "title")
 })
 
+var TaskUpdateInput = dsl.Type("TaskUpdateInput", func() { //nolint:gochecknoglobals
+	dsl.Attribute("authorization", dsl.String, "The authorization header")
+	dsl.Attribute("task_id", dsl.String, "The ID of the task")
+
+	dsl.Attribute("title", dsl.String, "The title of the task")
+	dsl.Attribute("parent_id", dsl.String, "The parent ID of the task")
+	dsl.Attribute("status", dsl.String, "The status of the task")
+	dsl.Attribute("order", dsl.Float64, "The order of the task")
+	dsl.Attribute("estimated_time", dsl.Int64, "The estimated time of the task")
+
+	dsl.Required("authorization", "task_id")
+})
+
 var TaskDetail = dsl.ResultType("TaskDetail", func() { //nolint:gochecknoglobals
 	dsl.Attribute("id", dsl.String, "The ID of the task")
 	dsl.Attribute("parent_id", dsl.String, "The parent ID of the task")
+
 	dsl.Attribute("title", dsl.String, "The title of the task")
-	dsl.Attribute("created_at", dsl.Int64, "The timestamp when the task was created")
 	dsl.Attribute("status", dsl.String, "The status of the task")
+
+	dsl.Attribute("is_leaf", dsl.Boolean, "Whether the task is a leaf task")
+
 	dsl.Attribute("order", dsl.Float64, "The order of the task")
 
+	// 시간 관련 속성
+	dsl.Attribute("created_at", dsl.Int64, "The timestamp when the task was created")
+	dsl.Attribute("completed_at", dsl.Int64, "The timestamp when the task was completed")
+	dsl.Attribute("started_at", dsl.Int64, "The timestamp when the task was started")
+	dsl.Attribute("lead_time", dsl.Int64, "The lead time of the task")
+	dsl.Attribute("estimated_time", dsl.Int64, "The estimated time of the task")
+	dsl.Attribute("actual_time", dsl.Int64, "The actual time of the task")
+
 	dsl.Required("id", "title", "created_at", "status", "order")
+})
+
+var TaskDeleteInput = dsl.Type("TaskDeleteInput", func() { //nolint:gochecknoglobals
+	dsl.Attribute("authorization", dsl.String, "The authorization header")
+	dsl.Attribute("task_id", dsl.String, "The ID of the task")
+
+	dsl.Required("authorization", "task_id")
 })

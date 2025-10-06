@@ -180,16 +180,166 @@ func EncodeListError(encoder func(context.Context, http.ResponseWriter) goahttp.
 	}
 }
 
+// EncodeUpdateResponse returns an encoder for responses returned by the task
+// update endpoint.
+func EncodeUpdateResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
+	return func(ctx context.Context, w http.ResponseWriter, v any) error {
+		res := v.(*taskviews.Taskdetail)
+		enc := encoder(ctx, w)
+		body := NewUpdateResponseBody(res.Projected)
+		w.WriteHeader(http.StatusOK)
+		return enc.Encode(body)
+	}
+}
+
+// DecodeUpdateRequest returns a decoder for requests sent to the task update
+// endpoint.
+func DecodeUpdateRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (*task.TaskUpdateInput, error) {
+	return func(r *http.Request) (*task.TaskUpdateInput, error) {
+		var (
+			body UpdateRequestBody
+			err  error
+		)
+		err = decoder(r).Decode(&body)
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				return nil, goa.MissingPayloadError()
+			}
+			var gerr *goa.ServiceError
+			if errors.As(err, &gerr) {
+				return nil, gerr
+			}
+			return nil, goa.DecodePayloadError(err.Error())
+		}
+
+		var (
+			taskID        string
+			authorization string
+
+			params = mux.Vars(r)
+		)
+		taskID = params["task_id"]
+		authorization = r.Header.Get("authorization")
+		if authorization == "" {
+			err = goa.MergeErrors(err, goa.MissingFieldError("authorization", "header"))
+		}
+		if err != nil {
+			return nil, err
+		}
+		payload := NewUpdateTaskUpdateInput(&body, taskID, authorization)
+
+		return payload, nil
+	}
+}
+
+// EncodeUpdateError returns an encoder for errors returned by the update task
+// endpoint.
+func EncodeUpdateError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder, formatter func(ctx context.Context, err error) goahttp.Statuser) func(context.Context, http.ResponseWriter, error) error {
+	encodeError := goahttp.ErrorEncoder(encoder, formatter)
+	return func(ctx context.Context, w http.ResponseWriter, v error) error {
+		var en goa.GoaErrorNamer
+		if !errors.As(v, &en) {
+			return encodeError(ctx, w, v)
+		}
+		switch en.GoaErrorName() {
+		case "InternalServerError":
+			var res *goa.ServiceError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewUpdateInternalServerErrorResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusInternalServerError)
+			return enc.Encode(body)
+		default:
+			return encodeError(ctx, w, v)
+		}
+	}
+}
+
+// EncodeDeleteResponse returns an encoder for responses returned by the task
+// delete endpoint.
+func EncodeDeleteResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
+	return func(ctx context.Context, w http.ResponseWriter, v any) error {
+		w.WriteHeader(http.StatusNoContent)
+		return nil
+	}
+}
+
+// DecodeDeleteRequest returns a decoder for requests sent to the task delete
+// endpoint.
+func DecodeDeleteRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (*task.TaskDeleteInput, error) {
+	return func(r *http.Request) (*task.TaskDeleteInput, error) {
+		var (
+			taskID        string
+			authorization string
+			err           error
+
+			params = mux.Vars(r)
+		)
+		taskID = params["task_id"]
+		authorization = r.Header.Get("authorization")
+		if authorization == "" {
+			err = goa.MergeErrors(err, goa.MissingFieldError("authorization", "header"))
+		}
+		if err != nil {
+			return nil, err
+		}
+		payload := NewDeleteTaskDeleteInput(taskID, authorization)
+
+		return payload, nil
+	}
+}
+
+// EncodeDeleteError returns an encoder for errors returned by the delete task
+// endpoint.
+func EncodeDeleteError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder, formatter func(ctx context.Context, err error) goahttp.Statuser) func(context.Context, http.ResponseWriter, error) error {
+	encodeError := goahttp.ErrorEncoder(encoder, formatter)
+	return func(ctx context.Context, w http.ResponseWriter, v error) error {
+		var en goa.GoaErrorNamer
+		if !errors.As(v, &en) {
+			return encodeError(ctx, w, v)
+		}
+		switch en.GoaErrorName() {
+		case "InternalServerError":
+			var res *goa.ServiceError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewDeleteInternalServerErrorResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusInternalServerError)
+			return enc.Encode(body)
+		default:
+			return encodeError(ctx, w, v)
+		}
+	}
+}
+
 // marshalTaskviewsTaskdetailViewToTaskdetailResponse builds a value of type
 // *TaskdetailResponse from a value of type *taskviews.TaskdetailView.
 func marshalTaskviewsTaskdetailViewToTaskdetailResponse(v *taskviews.TaskdetailView) *TaskdetailResponse {
 	res := &TaskdetailResponse{
-		ID:        *v.ID,
-		ParentID:  v.ParentID,
-		Title:     *v.Title,
-		CreatedAt: *v.CreatedAt,
-		Status:    *v.Status,
-		Order:     *v.Order,
+		ID:            *v.ID,
+		ParentID:      v.ParentID,
+		Title:         *v.Title,
+		Status:        *v.Status,
+		IsLeaf:        v.IsLeaf,
+		Order:         *v.Order,
+		CreatedAt:     *v.CreatedAt,
+		CompletedAt:   v.CompletedAt,
+		StartedAt:     v.StartedAt,
+		LeadTime:      v.LeadTime,
+		EstimatedTime: v.EstimatedTime,
+		ActualTime:    v.ActualTime,
 	}
 
 	return res

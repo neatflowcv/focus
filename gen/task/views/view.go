@@ -36,12 +36,24 @@ type TaskdetailView struct {
 	ParentID *string
 	// The title of the task
 	Title *string
-	// The timestamp when the task was created
-	CreatedAt *int64
 	// The status of the task
 	Status *string
+	// Whether the task is a leaf task
+	IsLeaf *bool
 	// The order of the task
 	Order *float64
+	// The timestamp when the task was created
+	CreatedAt *int64
+	// The timestamp when the task was completed
+	CompletedAt *int64
+	// The timestamp when the task was started
+	StartedAt *int64
+	// The lead time of the task
+	LeadTime *int64
+	// The estimated time of the task
+	EstimatedTime *int64
+	// The actual time of the task
+	ActualTime *int64
 }
 
 // TaskdetailCollectionView is a type that runs validations on a projected type.
@@ -55,9 +67,15 @@ var (
 			"id",
 			"parent_id",
 			"title",
-			"created_at",
 			"status",
+			"is_leaf",
 			"order",
+			"created_at",
+			"completed_at",
+			"started_at",
+			"lead_time",
+			"estimated_time",
+			"actual_time",
 		},
 	}
 	// TaskdetailCollectionMap is a map indexing the attribute names of
@@ -67,9 +85,15 @@ var (
 			"id",
 			"parent_id",
 			"title",
-			"created_at",
 			"status",
+			"is_leaf",
 			"order",
+			"created_at",
+			"completed_at",
+			"started_at",
+			"lead_time",
+			"estimated_time",
+			"actual_time",
 		},
 	}
 )

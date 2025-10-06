@@ -17,13 +17,17 @@ import (
 type Client struct {
 	CreateEndpoint goa.Endpoint
 	ListEndpoint   goa.Endpoint
+	UpdateEndpoint goa.Endpoint
+	DeleteEndpoint goa.Endpoint
 }
 
 // NewClient initializes a "task" service client given the endpoints.
-func NewClient(create, list goa.Endpoint) *Client {
+func NewClient(create, list, update, delete_ goa.Endpoint) *Client {
 	return &Client{
 		CreateEndpoint: create,
 		ListEndpoint:   list,
+		UpdateEndpoint: update,
+		DeleteEndpoint: delete_,
 	}
 }
 
@@ -51,4 +55,26 @@ func (c *Client) List(ctx context.Context, p *ListPayload) (res TaskdetailCollec
 		return
 	}
 	return ires.(TaskdetailCollection), nil
+}
+
+// Update calls the "update" endpoint of the "task" service.
+// Update may return the following errors:
+//   - "InternalServerError" (type *goa.ServiceError): Internal server error
+//   - error: internal error
+func (c *Client) Update(ctx context.Context, p *TaskUpdateInput) (res *Taskdetail, err error) {
+	var ires any
+	ires, err = c.UpdateEndpoint(ctx, p)
+	if err != nil {
+		return
+	}
+	return ires.(*Taskdetail), nil
+}
+
+// Delete calls the "delete" endpoint of the "task" service.
+// Delete may return the following errors:
+//   - "InternalServerError" (type *goa.ServiceError): Internal server error
+//   - error: internal error
+func (c *Client) Delete(ctx context.Context, p *TaskDeleteInput) (err error) {
+	_, err = c.DeleteEndpoint(ctx, p)
+	return
 }

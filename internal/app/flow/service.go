@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/neatflowcv/focus/internal/pkg/domain"
 	"github.com/neatflowcv/focus/internal/pkg/idmaker"
@@ -43,6 +44,10 @@ func (s *Service) CreateTask(ctx context.Context, input *CreateTaskInput) (*doma
 		input.Now,
 		domain.TaskStatusTodo,
 		float64(count)*10.0+10.0, //nolint:mnd
+		time.Time{},
+		time.Time{},
+		time.Duration(0),
+		time.Duration(0),
 	)
 
 	err = s.repo.CreateTask(ctx, input.Username, task)

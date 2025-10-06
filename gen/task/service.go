@@ -20,6 +20,10 @@ type Service interface {
 	Create(context.Context, *TaskInput) (res *Taskdetail, err error)
 	// List all tasks.
 	List(context.Context, *ListPayload) (res TaskdetailCollection, err error)
+	// Update a task.
+	Update(context.Context, *TaskUpdateInput) (res *Taskdetail, err error)
+	// Delete a task.
+	Delete(context.Context, *TaskDeleteInput) (err error)
 }
 
 // APIName is the name of the API as defined in the design.
@@ -36,7 +40,7 @@ const ServiceName = "task"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [2]string{"create", "list"}
+var MethodNames = [4]string{"create", "list", "update", "delete"}
 
 // ListPayload is the payload type of the task service list method.
 type ListPayload struct {
@@ -46,6 +50,14 @@ type ListPayload struct {
 	ParentID *string
 	// Whether to include all subtasks recursively
 	Recursive *bool
+}
+
+// TaskDeleteInput is the payload type of the task service delete method.
+type TaskDeleteInput struct {
+	// The authorization header
+	Authorization string
+	// The ID of the task
+	TaskID string
 }
 
 // TaskInput is the payload type of the task service create method.
@@ -58,6 +70,24 @@ type TaskInput struct {
 	Title string
 }
 
+// TaskUpdateInput is the payload type of the task service update method.
+type TaskUpdateInput struct {
+	// The authorization header
+	Authorization string
+	// The ID of the task
+	TaskID string
+	// The title of the task
+	Title *string
+	// The parent ID of the task
+	ParentID *string
+	// The status of the task
+	Status *string
+	// The order of the task
+	Order *float64
+	// The estimated time of the task
+	EstimatedTime *int64
+}
+
 // Taskdetail is the result type of the task service create method.
 type Taskdetail struct {
 	// The ID of the task
@@ -66,12 +96,24 @@ type Taskdetail struct {
 	ParentID *string
 	// The title of the task
 	Title string
-	// The timestamp when the task was created
-	CreatedAt int64
 	// The status of the task
 	Status string
+	// Whether the task is a leaf task
+	IsLeaf *bool
 	// The order of the task
 	Order float64
+	// The timestamp when the task was created
+	CreatedAt int64
+	// The timestamp when the task was completed
+	CompletedAt *int64
+	// The timestamp when the task was started
+	StartedAt *int64
+	// The lead time of the task
+	LeadTime *int64
+	// The estimated time of the task
+	EstimatedTime *int64
+	// The actual time of the task
+	ActualTime *int64
 }
 
 // TaskdetailCollection is the result type of the task service list method.
@@ -112,7 +154,13 @@ func NewViewedTaskdetailCollection(res TaskdetailCollection, view string) taskvi
 // newTaskdetail converts projected type Taskdetail to service type Taskdetail.
 func newTaskdetail(vres *taskviews.TaskdetailView) *Taskdetail {
 	res := &Taskdetail{
-		ParentID: vres.ParentID,
+		ParentID:      vres.ParentID,
+		IsLeaf:        vres.IsLeaf,
+		CompletedAt:   vres.CompletedAt,
+		StartedAt:     vres.StartedAt,
+		LeadTime:      vres.LeadTime,
+		EstimatedTime: vres.EstimatedTime,
+		ActualTime:    vres.ActualTime,
 	}
 	if vres.ID != nil {
 		res.ID = *vres.ID
@@ -120,14 +168,14 @@ func newTaskdetail(vres *taskviews.TaskdetailView) *Taskdetail {
 	if vres.Title != nil {
 		res.Title = *vres.Title
 	}
-	if vres.CreatedAt != nil {
-		res.CreatedAt = *vres.CreatedAt
-	}
 	if vres.Status != nil {
 		res.Status = *vres.Status
 	}
 	if vres.Order != nil {
 		res.Order = *vres.Order
+	}
+	if vres.CreatedAt != nil {
+		res.CreatedAt = *vres.CreatedAt
 	}
 	return res
 }
@@ -136,12 +184,18 @@ func newTaskdetail(vres *taskviews.TaskdetailView) *Taskdetail {
 // TaskdetailView using the "default" view.
 func newTaskdetailView(res *Taskdetail) *taskviews.TaskdetailView {
 	vres := &taskviews.TaskdetailView{
-		ID:        &res.ID,
-		ParentID:  res.ParentID,
-		Title:     &res.Title,
-		CreatedAt: &res.CreatedAt,
-		Status:    &res.Status,
-		Order:     &res.Order,
+		ID:            &res.ID,
+		ParentID:      res.ParentID,
+		Title:         &res.Title,
+		Status:        &res.Status,
+		IsLeaf:        res.IsLeaf,
+		Order:         &res.Order,
+		CreatedAt:     &res.CreatedAt,
+		CompletedAt:   res.CompletedAt,
+		StartedAt:     res.StartedAt,
+		LeadTime:      res.LeadTime,
+		EstimatedTime: res.EstimatedTime,
+		ActualTime:    res.ActualTime,
 	}
 	return vres
 }

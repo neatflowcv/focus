@@ -17,6 +17,8 @@ import (
 type Endpoints struct {
 	Create goa.Endpoint
 	List   goa.Endpoint
+	Update goa.Endpoint
+	Delete goa.Endpoint
 }
 
 // NewEndpoints wraps the methods of the "task" service with endpoints.
@@ -24,6 +26,8 @@ func NewEndpoints(s Service) *Endpoints {
 	return &Endpoints{
 		Create: NewCreateEndpoint(s),
 		List:   NewListEndpoint(s),
+		Update: NewUpdateEndpoint(s),
+		Delete: NewDeleteEndpoint(s),
 	}
 }
 
@@ -31,6 +35,8 @@ func NewEndpoints(s Service) *Endpoints {
 func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 	e.Create = m(e.Create)
 	e.List = m(e.List)
+	e.Update = m(e.Update)
+	e.Delete = m(e.Delete)
 }
 
 // NewCreateEndpoint returns an endpoint function that calls the method
@@ -58,5 +64,28 @@ func NewListEndpoint(s Service) goa.Endpoint {
 		}
 		vres := NewViewedTaskdetailCollection(res, "default")
 		return vres, nil
+	}
+}
+
+// NewUpdateEndpoint returns an endpoint function that calls the method
+// "update" of service "task".
+func NewUpdateEndpoint(s Service) goa.Endpoint {
+	return func(ctx context.Context, req any) (any, error) {
+		p := req.(*TaskUpdateInput)
+		res, err := s.Update(ctx, p)
+		if err != nil {
+			return nil, err
+		}
+		vres := NewViewedTaskdetail(res, "default")
+		return vres, nil
+	}
+}
+
+// NewDeleteEndpoint returns an endpoint function that calls the method
+// "delete" of service "task".
+func NewDeleteEndpoint(s Service) goa.Endpoint {
+	return func(ctx context.Context, req any) (any, error) {
+		p := req.(*TaskDeleteInput)
+		return nil, s.Delete(ctx, p)
 	}
 }

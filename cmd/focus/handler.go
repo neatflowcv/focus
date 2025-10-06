@@ -93,11 +93,25 @@ func toTaskDetail(domainTask *domain.Task) *task.Taskdetail {
 	parentID := string(domainTask.ParentID())
 
 	return &task.Taskdetail{
-		ID:        string(domainTask.ID()),
-		ParentID:  &parentID,
-		Title:     domainTask.Title(),
-		CreatedAt: domainTask.CreatedAt().Unix(),
-		Status:    string(domainTask.Status()),
-		Order:     domainTask.Order(),
+		ID:            string(domainTask.ID()),
+		ParentID:      &parentID,
+		Title:         domainTask.Title(),
+		CreatedAt:     domainTask.CreatedAt().Unix(),
+		Status:        string(domainTask.Status()),
+		Order:         domainTask.Order(),
+		IsLeaf:        nil,
+		CompletedAt:   nil,
+		StartedAt:     nil,
+		LeadTime:      nil,
+		EstimatedTime: nil,
+		ActualTime:    nil,
 	}
+}
+
+func (h *Handler) Delete(context.Context, *task.TaskDeleteInput) error {
+	panic("unimplemented")
+}
+
+func (h *Handler) Update(context.Context, *task.TaskUpdateInput) (*task.Taskdetail, error) {
+	panic("unimplemented")
 }

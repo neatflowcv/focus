@@ -212,16 +212,211 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 	}
 }
 
+// BuildUpdateRequest instantiates a HTTP request object with method and path
+// set to call the "task" service "update" endpoint
+func (c *Client) BuildUpdateRequest(ctx context.Context, v any) (*http.Request, error) {
+	var (
+		taskID string
+	)
+	{
+		p, ok := v.(*task.TaskUpdateInput)
+		if !ok {
+			return nil, goahttp.ErrInvalidType("task", "update", "*task.TaskUpdateInput", v)
+		}
+		taskID = p.TaskID
+	}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: UpdateTaskPath(taskID)}
+	req, err := http.NewRequest("PATCH", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("task", "update", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeUpdateRequest returns an encoder for requests sent to the task update
+// server.
+func EncodeUpdateRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
+		p, ok := v.(*task.TaskUpdateInput)
+		if !ok {
+			return goahttp.ErrInvalidType("task", "update", "*task.TaskUpdateInput", v)
+		}
+		{
+			head := p.Authorization
+			req.Header.Set("authorization", head)
+		}
+		body := NewUpdateRequestBody(p)
+		if err := encoder(req).Encode(&body); err != nil {
+			return goahttp.ErrEncodingError("task", "update", err)
+		}
+		return nil
+	}
+}
+
+// DecodeUpdateResponse returns a decoder for responses returned by the task
+// update endpoint. restoreBody controls whether the response body should be
+// restored after having been read.
+// DecodeUpdateResponse may return the following errors:
+//   - "InternalServerError" (type *goa.ServiceError): http.StatusInternalServerError
+//   - error: internal error
+func DecodeUpdateResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
+		if restoreBody {
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusOK:
+			var (
+				body UpdateResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("task", "update", err)
+			}
+			p := NewUpdateTaskdetailOK(&body)
+			view := "default"
+			vres := &taskviews.Taskdetail{Projected: p, View: view}
+			if err = taskviews.ValidateTaskdetail(vres); err != nil {
+				return nil, goahttp.ErrValidationError("task", "update", err)
+			}
+			res := task.NewTaskdetail(vres)
+			return res, nil
+		case http.StatusInternalServerError:
+			var (
+				body UpdateInternalServerErrorResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("task", "update", err)
+			}
+			err = ValidateUpdateInternalServerErrorResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("task", "update", err)
+			}
+			return nil, NewUpdateInternalServerError(&body)
+		default:
+			body, _ := io.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("task", "update", resp.StatusCode, string(body))
+		}
+	}
+}
+
+// BuildDeleteRequest instantiates a HTTP request object with method and path
+// set to call the "task" service "delete" endpoint
+func (c *Client) BuildDeleteRequest(ctx context.Context, v any) (*http.Request, error) {
+	var (
+		taskID string
+	)
+	{
+		p, ok := v.(*task.TaskDeleteInput)
+		if !ok {
+			return nil, goahttp.ErrInvalidType("task", "delete", "*task.TaskDeleteInput", v)
+		}
+		taskID = p.TaskID
+	}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: DeleteTaskPath(taskID)}
+	req, err := http.NewRequest("DELETE", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("task", "delete", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeDeleteRequest returns an encoder for requests sent to the task delete
+// server.
+func EncodeDeleteRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
+		p, ok := v.(*task.TaskDeleteInput)
+		if !ok {
+			return goahttp.ErrInvalidType("task", "delete", "*task.TaskDeleteInput", v)
+		}
+		{
+			head := p.Authorization
+			req.Header.Set("authorization", head)
+		}
+		return nil
+	}
+}
+
+// DecodeDeleteResponse returns a decoder for responses returned by the task
+// delete endpoint. restoreBody controls whether the response body should be
+// restored after having been read.
+// DecodeDeleteResponse may return the following errors:
+//   - "InternalServerError" (type *goa.ServiceError): http.StatusInternalServerError
+//   - error: internal error
+func DecodeDeleteResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
+		if restoreBody {
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusNoContent:
+			return nil, nil
+		case http.StatusInternalServerError:
+			var (
+				body DeleteInternalServerErrorResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("task", "delete", err)
+			}
+			err = ValidateDeleteInternalServerErrorResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("task", "delete", err)
+			}
+			return nil, NewDeleteInternalServerError(&body)
+		default:
+			body, _ := io.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("task", "delete", resp.StatusCode, string(body))
+		}
+	}
+}
+
 // unmarshalTaskdetailResponseToTaskviewsTaskdetailView builds a value of type
 // *taskviews.TaskdetailView from a value of type *TaskdetailResponse.
 func unmarshalTaskdetailResponseToTaskviewsTaskdetailView(v *TaskdetailResponse) *taskviews.TaskdetailView {
 	res := &taskviews.TaskdetailView{
-		ID:        v.ID,
-		ParentID:  v.ParentID,
-		Title:     v.Title,
-		CreatedAt: v.CreatedAt,
-		Status:    v.Status,
-		Order:     v.Order,
+		ID:            v.ID,
+		ParentID:      v.ParentID,
+		Title:         v.Title,
+		Status:        v.Status,
+		IsLeaf:        v.IsLeaf,
+		Order:         v.Order,
+		CreatedAt:     v.CreatedAt,
+		CompletedAt:   v.CompletedAt,
+		StartedAt:     v.StartedAt,
+		LeadTime:      v.LeadTime,
+		EstimatedTime: v.EstimatedTime,
+		ActualTime:    v.ActualTime,
 	}
 
 	return res

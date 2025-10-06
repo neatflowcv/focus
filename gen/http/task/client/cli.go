@@ -23,7 +23,7 @@ func BuildCreatePayload(taskCreateBody string, taskCreateAuthorization string) (
 	{
 		err = json.Unmarshal([]byte(taskCreateBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"parent_id\": \"Et quae omnis quia est.\",\n      \"title\": \"Explicabo provident ut quis nesciunt perferendis.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"parent_id\": \"Cumque autem quidem quaerat dolore.\",\n      \"title\": \"Magnam ut ullam dolor sint.\"\n   }'")
 		}
 	}
 	var authorization string
@@ -67,6 +67,56 @@ func BuildListPayload(taskListParentID string, taskListRecursive string, taskLis
 	v := &task.ListPayload{}
 	v.ParentID = parentID
 	v.Recursive = recursive
+	v.Authorization = authorization
+
+	return v, nil
+}
+
+// BuildUpdatePayload builds the payload for the task update endpoint from CLI
+// flags.
+func BuildUpdatePayload(taskUpdateBody string, taskUpdateTaskID string, taskUpdateAuthorization string) (*task.TaskUpdateInput, error) {
+	var err error
+	var body UpdateRequestBody
+	{
+		err = json.Unmarshal([]byte(taskUpdateBody), &body)
+		if err != nil {
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"estimated_time\": 5770555716060993335,\n      \"order\": 0.02819929842800078,\n      \"parent_id\": \"Dolorum est.\",\n      \"status\": \"Ratione consequatur quis ullam quisquam necessitatibus.\",\n      \"title\": \"Dolores culpa dolore possimus.\"\n   }'")
+		}
+	}
+	var taskID string
+	{
+		taskID = taskUpdateTaskID
+	}
+	var authorization string
+	{
+		authorization = taskUpdateAuthorization
+	}
+	v := &task.TaskUpdateInput{
+		Title:         body.Title,
+		ParentID:      body.ParentID,
+		Status:        body.Status,
+		Order:         body.Order,
+		EstimatedTime: body.EstimatedTime,
+	}
+	v.TaskID = taskID
+	v.Authorization = authorization
+
+	return v, nil
+}
+
+// BuildDeletePayload builds the payload for the task delete endpoint from CLI
+// flags.
+func BuildDeletePayload(taskDeleteTaskID string, taskDeleteAuthorization string) (*task.TaskDeleteInput, error) {
+	var taskID string
+	{
+		taskID = taskDeleteTaskID
+	}
+	var authorization string
+	{
+		authorization = taskDeleteAuthorization
+	}
+	v := &task.TaskDeleteInput{}
+	v.TaskID = taskID
 	v.Authorization = authorization
 
 	return v, nil

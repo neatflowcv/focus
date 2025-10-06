@@ -7,6 +7,10 @@
 
 package server
 
+import (
+	"fmt"
+)
+
 // CreateTaskPath returns the URL path to the task service create HTTP endpoint.
 func CreateTaskPath() string {
 	return "/focus/tasks"
@@ -15,4 +19,14 @@ func CreateTaskPath() string {
 // ListTaskPath returns the URL path to the task service list HTTP endpoint.
 func ListTaskPath() string {
 	return "/focus/tasks"
+}
+
+// UpdateTaskPath returns the URL path to the task service update HTTP endpoint.
+func UpdateTaskPath(taskID string) string {
+	return fmt.Sprintf("/focus/tasks/%v", taskID)
+}
+
+// DeleteTaskPath returns the URL path to the task service delete HTTP endpoint.
+func DeleteTaskPath(taskID string) string {
+	return fmt.Sprintf("/focus/tasks/%v", taskID)
 }

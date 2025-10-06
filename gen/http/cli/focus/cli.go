@@ -23,16 +23,16 @@ import (
 //	command (subcommand1|subcommand2|...)
 func UsageCommands() []string {
 	return []string{
-		"task (create|list)",
+		"task (create|list|update|delete)",
 	}
 }
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
 	return os.Args[0] + ` task create --body '{
-      "parent_id": "Et quae omnis quia est.",
-      "title": "Explicabo provident ut quis nesciunt perferendis."
-   }' --authorization "Dolor quia odio unde et in molestias."` + "\n" +
+      "parent_id": "Cumque autem quidem quaerat dolore.",
+      "title": "Magnam ut ullam dolor sint."
+   }' --authorization "Aut enim saepe voluptatem vel error."` + "\n" +
 		""
 }
 
@@ -56,10 +56,21 @@ func ParseEndpoint(
 		taskListParentIDFlag      = taskListFlags.String("parent-id", "", "")
 		taskListRecursiveFlag     = taskListFlags.String("recursive", "", "")
 		taskListAuthorizationFlag = taskListFlags.String("authorization", "REQUIRED", "")
+
+		taskUpdateFlags             = flag.NewFlagSet("update", flag.ExitOnError)
+		taskUpdateBodyFlag          = taskUpdateFlags.String("body", "REQUIRED", "")
+		taskUpdateTaskIDFlag        = taskUpdateFlags.String("task-id", "REQUIRED", "The ID of the task")
+		taskUpdateAuthorizationFlag = taskUpdateFlags.String("authorization", "REQUIRED", "")
+
+		taskDeleteFlags             = flag.NewFlagSet("delete", flag.ExitOnError)
+		taskDeleteTaskIDFlag        = taskDeleteFlags.String("task-id", "REQUIRED", "The ID of the task")
+		taskDeleteAuthorizationFlag = taskDeleteFlags.String("authorization", "REQUIRED", "")
 	)
 	taskFlags.Usage = taskUsage
 	taskCreateFlags.Usage = taskCreateUsage
 	taskListFlags.Usage = taskListUsage
+	taskUpdateFlags.Usage = taskUpdateUsage
+	taskDeleteFlags.Usage = taskDeleteUsage
 
 	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
 		return nil, nil, err
@@ -101,6 +112,12 @@ func ParseEndpoint(
 			case "list":
 				epf = taskListFlags
 
+			case "update":
+				epf = taskUpdateFlags
+
+			case "delete":
+				epf = taskDeleteFlags
+
 			}
 
 		}
@@ -132,6 +149,12 @@ func ParseEndpoint(
 			case "list":
 				endpoint = c.List()
 				data, err = taskc.BuildListPayload(*taskListParentIDFlag, *taskListRecursiveFlag, *taskListAuthorizationFlag)
+			case "update":
+				endpoint = c.Update()
+				data, err = taskc.BuildUpdatePayload(*taskUpdateBodyFlag, *taskUpdateTaskIDFlag, *taskUpdateAuthorizationFlag)
+			case "delete":
+				endpoint = c.Delete()
+				data, err = taskc.BuildDeletePayload(*taskDeleteTaskIDFlag, *taskDeleteAuthorizationFlag)
 			}
 		}
 	}
@@ -149,6 +172,8 @@ func taskUsage() {
 	fmt.Fprintln(os.Stderr, "COMMAND:")
 	fmt.Fprintln(os.Stderr, `    create: Create a new task.`)
 	fmt.Fprintln(os.Stderr, `    list: List all tasks.`)
+	fmt.Fprintln(os.Stderr, `    update: Update a task.`)
+	fmt.Fprintln(os.Stderr, `    delete: Delete a task.`)
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Additional help:")
 	fmt.Fprintf(os.Stderr, "    %s task COMMAND --help\n", os.Args[0])
@@ -172,9 +197,9 @@ func taskCreateUsage() {
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
 	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], `task create --body '{
-      "parent_id": "Et quae omnis quia est.",
-      "title": "Explicabo provident ut quis nesciunt perferendis."
-   }' --authorization "Dolor quia odio unde et in molestias."`)
+      "parent_id": "Cumque autem quidem quaerat dolore.",
+      "title": "Magnam ut ullam dolor sint."
+   }' --authorization "Aut enim saepe voluptatem vel error."`)
 }
 
 func taskListUsage() {
@@ -197,5 +222,55 @@ func taskListUsage() {
 	// Example block: pass example as parameter to avoid format parsing of % characters
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], `task list --parent-id "Quia numquam in beatae nobis." --recursive true --authorization "Omnis laborum eligendi repudiandae ratione quis veniam."`)
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], `task list --parent-id "Tempore ut sit voluptatum unde voluptatem." --recursive true --authorization "Laudantium sunt facilis quia voluptas autem."`)
+}
+
+func taskUpdateUsage() {
+	// Header with flags
+	fmt.Fprintf(os.Stderr, "%s [flags] task update", os.Args[0])
+	fmt.Fprint(os.Stderr, " -body JSON")
+	fmt.Fprint(os.Stderr, " -task-id STRING")
+	fmt.Fprint(os.Stderr, " -authorization STRING")
+	fmt.Fprintln(os.Stderr)
+
+	// Description
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, `Update a task.`)
+
+	// Flags list
+	fmt.Fprintln(os.Stderr, `    -body JSON: `)
+	fmt.Fprintln(os.Stderr, `    -task-id STRING: The ID of the task`)
+	fmt.Fprintln(os.Stderr, `    -authorization STRING: `)
+
+	// Example block: pass example as parameter to avoid format parsing of % characters
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, "Example:")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], `task update --body '{
+      "estimated_time": 5770555716060993335,
+      "order": 0.02819929842800078,
+      "parent_id": "Dolorum est.",
+      "status": "Ratione consequatur quis ullam quisquam necessitatibus.",
+      "title": "Dolores culpa dolore possimus."
+   }' --task-id "Labore qui qui error eos." --authorization "Ut omnis eum aut."`)
+}
+
+func taskDeleteUsage() {
+	// Header with flags
+	fmt.Fprintf(os.Stderr, "%s [flags] task delete", os.Args[0])
+	fmt.Fprint(os.Stderr, " -task-id STRING")
+	fmt.Fprint(os.Stderr, " -authorization STRING")
+	fmt.Fprintln(os.Stderr)
+
+	// Description
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, `Delete a task.`)
+
+	// Flags list
+	fmt.Fprintln(os.Stderr, `    -task-id STRING: The ID of the task`)
+	fmt.Fprintln(os.Stderr, `    -authorization STRING: `)
+
+	// Example block: pass example as parameter to avoid format parsing of % characters
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, "Example:")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], `task delete --task-id "Atque quo reiciendis eveniet eaque iusto eum." --authorization "Quam fugiat aut officia ut non modi."`)
 }
