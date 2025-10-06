@@ -54,7 +54,14 @@ func (s *Service) CreateTask(ctx context.Context, input *CreateTaskInput) (*doma
 }
 
 func (s *Service) ListTasks(ctx context.Context, input *ListTasksInput) ([]*domain.Task, error) {
-	ret, err := s.repo.ListTasks(ctx, input.Username, input.ParentID, input.Recursive)
+	var listFn func(ctx context.Context, username string, parentID domain.TaskID) ([]*domain.Task, error)
+	if input.Recursive {
+		listFn = s.repo.ListDescendantsTasks
+	} else {
+		listFn = s.repo.ListSubTasks
+	}
+
+	ret, err := listFn(ctx, input.Username, input.ParentID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list tasks: %w", err)
 	}

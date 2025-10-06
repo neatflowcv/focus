@@ -36,35 +36,6 @@ func (r *Repository) CreateTask(ctx context.Context, username string, task *doma
 	return nil
 }
 
-func (r *Repository) ListTasks(
-	ctx context.Context,
-	username string,
-	parentID domain.TaskID,
-	recursive bool,
-) ([]*domain.Task, error) {
-	if recursive {
-		var (
-			tasks []*domain.Task
-			stack []domain.TaskID
-		)
-
-		stack = append(stack, parentID)
-		for len(stack) > 0 {
-			parentID = stack[len(stack)-1]
-			stack = stack[:len(stack)-1]
-
-			for _, task := range r.children[username][parentID] {
-				tasks = append(tasks, task)
-				stack = append(stack, task.ID())
-			}
-		}
-
-		return tasks, nil
-	}
-
-	return r.children[username][parentID], nil
-}
-
 func (r *Repository) GetTask(ctx context.Context, username string, id domain.TaskID) (*domain.Task, error) {
 	task, ok := r.tasks[username][id]
 	if !ok {
@@ -76,4 +47,36 @@ func (r *Repository) GetTask(ctx context.Context, username string, id domain.Tas
 
 func (r *Repository) CountSubtasks(ctx context.Context, username string, id domain.TaskID) (int, error) {
 	return len(r.children[username][id]), nil
+}
+
+func (r *Repository) ListDescendantsTasks(
+	ctx context.Context,
+	username string,
+	parentID domain.TaskID,
+) ([]*domain.Task, error) {
+	var (
+		tasks []*domain.Task
+		stack []domain.TaskID
+	)
+
+	stack = append(stack, parentID)
+	for len(stack) > 0 {
+		parentID = stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+
+		for _, task := range r.children[username][parentID] {
+			tasks = append(tasks, task)
+			stack = append(stack, task.ID())
+		}
+	}
+
+	return tasks, nil
+}
+
+func (r *Repository) ListSubTasks(
+	ctx context.Context,
+	username string,
+	parentID domain.TaskID,
+) ([]*domain.Task, error) {
+	return r.children[username][parentID], nil
 }

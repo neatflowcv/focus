@@ -78,11 +78,10 @@ func (r *Repository) GetTask(ctx context.Context, username string, id domain.Tas
 	return task.ToDomain(), nil
 }
 
-func (r *Repository) ListTasks(
+func (r *Repository) ListSubTasks(
 	ctx context.Context,
 	username string,
 	parentID domain.TaskID,
-	recursive bool,
 ) ([]*domain.Task, error) {
 	searchParentID := sql.NullString{String: string(parentID), Valid: parentID != ""}
 
@@ -96,6 +95,39 @@ func (r *Repository) ListTasks(
 	var ret []*domain.Task
 	for _, task := range tasks {
 		ret = append(ret, task.ToDomain())
+	}
+
+	return ret, nil
+}
+
+func (r *Repository) ListDescendantsTasks(
+	ctx context.Context,
+	username string,
+	parentID domain.TaskID,
+) ([]*domain.Task, error) {
+	var stack []string
+
+	var ret []*domain.Task
+
+	stack = append(stack, string(parentID))
+	for len(stack) > 0 {
+		searchParentID := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+
+		tasks, err := gorm.G[Task](r.db).
+			Where(&Task{ //nolint:exhaustruct
+				ParentID: sql.NullString{String: searchParentID, Valid: searchParentID != ""},
+				Username: username,
+			}).
+			Find(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to list tasks: %w", err)
+		}
+
+		for _, task := range tasks {
+			ret = append(ret, task.ToDomain())
+			stack = append(stack, task.ID)
+		}
 	}
 
 	return ret, nil
