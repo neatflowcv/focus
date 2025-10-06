@@ -16,7 +16,7 @@ import (
 	"github.com/neatflowcv/focus/gen/task"
 	"github.com/neatflowcv/focus/internal/app/flow"
 	"github.com/neatflowcv/focus/internal/pkg/idmaker/ulid"
-	"github.com/neatflowcv/focus/internal/pkg/repository/memory"
+	"github.com/neatflowcv/focus/internal/pkg/repository/gorm"
 	"github.com/urfave/cli/v3"
 )
 
@@ -40,7 +40,12 @@ func main() {
 				Action: func(ctx context.Context, c *cli.Command) error {
 					log.Println("running")
 
-					service := flow.NewService(ulid.NewIDMaker(), memory.NewRepository())
+					repo, err := gorm.NewRepository()
+					if err != nil {
+						return fmt.Errorf("failed to create repository: %w", err)
+					}
+
+					service := flow.NewService(ulid.NewIDMaker(), repo)
 
 					mux := goahttp.NewMuxer()
 					requestDecoder := goahttp.RequestDecoder
@@ -53,7 +58,7 @@ func main() {
 
 					server := &http.Server{Addr: ":8080", Handler: mux} //nolint:exhaustruct,gosec
 
-					err := server.ListenAndServe()
+					err = server.ListenAndServe()
 					if err != nil {
 						return fmt.Errorf("failed to listen and serve: %w", err)
 					}
