@@ -19,36 +19,27 @@ type Task struct {
 	status   TaskStatus
 	order    float64
 
-	createdAt     time.Time
-	completedAt   time.Time
-	startedAt     time.Time
-	estimatedTime time.Duration
-	actualTime    time.Duration
+	createdAt   time.Time
+	completedAt time.Time
 }
 
 func NewTask(
 	id TaskID,
 	parentID TaskID,
 	title string,
-	createdAt time.Time,
 	status TaskStatus,
 	order float64,
+	createdAt time.Time,
 	completedAt time.Time,
-	startedAt time.Time,
-	estimatedTime time.Duration,
-	actualTime time.Duration,
 ) *Task {
 	return &Task{
-		id:            id,
-		parentID:      parentID,
-		title:         title,
-		createdAt:     createdAt,
-		status:        status,
-		order:         order,
-		completedAt:   completedAt,
-		startedAt:     startedAt,
-		estimatedTime: estimatedTime,
-		actualTime:    actualTime,
+		id:          id,
+		parentID:    parentID,
+		title:       title,
+		createdAt:   createdAt,
+		status:      status,
+		order:       order,
+		completedAt: completedAt,
 	}
 }
 
@@ -78,16 +69,4 @@ func (t *Task) Order() float64 {
 
 func (t *Task) CompletedAt() time.Time {
 	return t.completedAt
-}
-
-func (t *Task) StartedAt() time.Time {
-	return t.startedAt
-}
-
-func (t *Task) EstimatedTime() time.Duration {
-	return t.estimatedTime
-}
-
-func (t *Task) ActualTime() time.Duration {
-	return t.actualTime
 }

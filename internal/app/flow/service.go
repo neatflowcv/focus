@@ -41,13 +41,10 @@ func (s *Service) CreateTask(ctx context.Context, input *CreateTaskInput) (*doma
 		domain.TaskID(s.idmaker.MakeID()),
 		domain.TaskID(input.ParentID),
 		input.Title,
-		input.Now,
 		domain.TaskStatusTodo,
 		float64(count)*10.0+10.0, //nolint:mnd
+		input.Now,
 		time.Time{},
-		time.Time{},
-		time.Duration(0),
-		time.Duration(0),
 	)
 
 	err = s.repo.CreateTask(ctx, input.Username, task)
