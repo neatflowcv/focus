@@ -37,7 +37,7 @@ func (s *Service) CreateTask(ctx context.Context, input *CreateTaskInput) (*doma
 	}
 
 	task := domain.NewTask(
-		s.idmaker.MakeID(),
+		domain.TaskID(s.idmaker.MakeID()),
 		input.ParentID,
 		input.Title,
 		input.Now,

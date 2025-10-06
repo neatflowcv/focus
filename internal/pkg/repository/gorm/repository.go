@@ -43,8 +43,8 @@ func NewRepository() (*Repository, error) {
 	return &Repository{db: db}, nil
 }
 
-func (r *Repository) CountSubtasks(ctx context.Context, username string, id string) (int, error) {
-	searchParentID := sql.NullString{String: id, Valid: id != ""}
+func (r *Repository) CountSubtasks(ctx context.Context, username string, id domain.TaskID) (int, error) {
+	searchParentID := sql.NullString{String: string(id), Valid: id != ""}
 
 	tasks, err := gorm.G[Task](r.db).
 		Where(&Task{ParentID: searchParentID, Username: username}). //nolint:exhaustruct
@@ -65,8 +65,8 @@ func (r *Repository) CreateTask(ctx context.Context, username string, task *doma
 	return nil
 }
 
-func (r *Repository) GetTask(ctx context.Context, username string, id string) (*domain.Task, error) {
-	task, err := gorm.G[Task](r.db).Where(&Task{ID: id, Username: username}).First(ctx) //nolint:exhaustruct
+func (r *Repository) GetTask(ctx context.Context, username string, id domain.TaskID) (*domain.Task, error) {
+	task, err := gorm.G[Task](r.db).Where(&Task{ID: string(id), Username: username}).First(ctx) //nolint:exhaustruct
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, repository.ErrTaskNotFound
@@ -81,10 +81,10 @@ func (r *Repository) GetTask(ctx context.Context, username string, id string) (*
 func (r *Repository) ListTasks(
 	ctx context.Context,
 	username string,
-	parentID string,
+	parentID domain.TaskID,
 	recursive bool,
 ) ([]*domain.Task, error) {
-	searchParentID := sql.NullString{String: parentID, Valid: parentID != ""}
+	searchParentID := sql.NullString{String: string(parentID), Valid: parentID != ""}
 
 	tasks, err := gorm.G[Task](r.db).
 		Where(&Task{ParentID: searchParentID, Username: username}). //nolint:exhaustruct

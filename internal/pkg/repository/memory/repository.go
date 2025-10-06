@@ -10,24 +10,24 @@ import (
 var _ repository.Repository = (*Repository)(nil)
 
 type Repository struct {
-	tasks    map[string]map[string]*domain.Task
-	children map[string]map[string][]*domain.Task
+	tasks    map[string]map[domain.TaskID]*domain.Task
+	children map[string]map[domain.TaskID][]*domain.Task
 }
 
 func NewRepository() *Repository {
 	return &Repository{
-		tasks:    make(map[string]map[string]*domain.Task),
-		children: make(map[string]map[string][]*domain.Task),
+		tasks:    make(map[string]map[domain.TaskID]*domain.Task),
+		children: make(map[string]map[domain.TaskID][]*domain.Task),
 	}
 }
 
 func (r *Repository) CreateTask(ctx context.Context, username string, task *domain.Task) error {
 	if _, ok := r.tasks[username]; !ok {
-		r.tasks[username] = make(map[string]*domain.Task)
+		r.tasks[username] = make(map[domain.TaskID]*domain.Task)
 	}
 
 	if _, ok := r.children[username]; !ok {
-		r.children[username] = make(map[string][]*domain.Task)
+		r.children[username] = make(map[domain.TaskID][]*domain.Task)
 	}
 
 	r.tasks[username][task.ID()] = task
@@ -39,13 +39,13 @@ func (r *Repository) CreateTask(ctx context.Context, username string, task *doma
 func (r *Repository) ListTasks(
 	ctx context.Context,
 	username string,
-	parentID string,
+	parentID domain.TaskID,
 	recursive bool,
 ) ([]*domain.Task, error) {
 	if recursive {
 		var (
 			tasks []*domain.Task
-			stack []string
+			stack []domain.TaskID
 		)
 
 		stack = append(stack, parentID)
@@ -65,7 +65,7 @@ func (r *Repository) ListTasks(
 	return r.children[username][parentID], nil
 }
 
-func (r *Repository) GetTask(ctx context.Context, username string, id string) (*domain.Task, error) {
+func (r *Repository) GetTask(ctx context.Context, username string, id domain.TaskID) (*domain.Task, error) {
 	task, ok := r.tasks[username][id]
 	if !ok {
 		return nil, repository.ErrTaskNotFound
@@ -74,6 +74,6 @@ func (r *Repository) GetTask(ctx context.Context, username string, id string) (*
 	return task, nil
 }
 
-func (r *Repository) CountSubtasks(ctx context.Context, username string, id string) (int, error) {
+func (r *Repository) CountSubtasks(ctx context.Context, username string, id domain.TaskID) (int, error) {
 	return len(r.children[username][id]), nil
 }

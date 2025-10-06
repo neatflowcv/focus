@@ -19,8 +19,8 @@ type Task struct {
 
 func (t *Task) ToDomain() *domain.Task {
 	return domain.NewTask(
-		t.ID,
-		t.ParentID.String,
+		domain.TaskID(t.ID),
+		domain.TaskID(t.ParentID.String),
 		t.Title,
 		t.CreatedAt,
 		domain.TaskStatus(t.Status),
@@ -30,8 +30,8 @@ func (t *Task) ToDomain() *domain.Task {
 
 func FromDomainTask(domainTask *domain.Task, username string) *Task {
 	return &Task{
-		ID:        domainTask.ID(),
-		ParentID:  sql.NullString{String: domainTask.ParentID(), Valid: domainTask.ParentID() != ""},
+		ID:        string(domainTask.ID()),
+		ParentID:  sql.NullString{String: string(domainTask.ParentID()), Valid: domainTask.ParentID() != ""},
 		Title:     domainTask.Title(),
 		CreatedAt: domainTask.CreatedAt(),
 		Status:    string(domainTask.Status()),

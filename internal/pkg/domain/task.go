@@ -10,16 +10,18 @@ const (
 	TaskStatusDone  TaskStatus = "done"
 )
 
+type TaskID string
+
 type Task struct {
-	id        string
-	parentID  string
+	id        TaskID
+	parentID  TaskID
 	title     string
 	createdAt time.Time
 	status    TaskStatus
 	order     float64
 }
 
-func NewTask(id, parentID, title string, createdAt time.Time, status TaskStatus, order float64) *Task {
+func NewTask(id TaskID, parentID TaskID, title string, createdAt time.Time, status TaskStatus, order float64) *Task {
 	return &Task{
 		id:        id,
 		parentID:  parentID,
@@ -30,11 +32,11 @@ func NewTask(id, parentID, title string, createdAt time.Time, status TaskStatus,
 	}
 }
 
-func (t *Task) ID() string {
+func (t *Task) ID() TaskID {
 	return t.id
 }
 
-func (t *Task) ParentID() string {
+func (t *Task) ParentID() TaskID {
 	return t.parentID
 }
 
