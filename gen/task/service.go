@@ -125,6 +125,11 @@ func MakeInternalServerError(err error) *goa.ServiceError {
 	return goa.NewServiceError(err, "InternalServerError", false, false, false)
 }
 
+// MakeTaskNotFound builds a goa.ServiceError from an error.
+func MakeTaskNotFound(err error) *goa.ServiceError {
+	return goa.NewServiceError(err, "TaskNotFound", false, false, false)
+}
+
 // NewTaskdetail initializes result type Taskdetail from viewed result type
 // Taskdetail.
 func NewTaskdetail(vres *taskviews.Taskdetail) *Taskdetail {

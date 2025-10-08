@@ -17,6 +17,7 @@ var _ = dsl.Service("task", func() {
 
 	dsl.Error("Unauthorized", dsl.ErrorResult, "Unauthorized")
 	dsl.Error("InternalServerError", dsl.ErrorResult, "Internal server error")
+	dsl.Error("TaskNotFound", dsl.ErrorResult, "Task not found")
 
 	dsl.Method("create", func() {
 		dsl.Description("Create a new task.")
@@ -73,6 +74,7 @@ var _ = dsl.Service("task", func() {
 
 			dsl.Response(dsl.StatusOK)
 			dsl.Response("Unauthorized", dsl.StatusUnauthorized)
+			dsl.Response("TaskNotFound", dsl.StatusNotFound)
 			dsl.Response("InternalServerError", dsl.StatusInternalServerError)
 		})
 	})
@@ -89,6 +91,7 @@ var _ = dsl.Service("task", func() {
 
 			dsl.Response(dsl.StatusNoContent)
 			dsl.Response("Unauthorized", dsl.StatusUnauthorized)
+			dsl.Response("TaskNotFound", dsl.StatusNotFound)
 			dsl.Response("InternalServerError", dsl.StatusInternalServerError)
 		})
 	})

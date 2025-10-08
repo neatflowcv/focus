@@ -292,6 +292,7 @@ func EncodeUpdateRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 // restored after having been read.
 // DecodeUpdateResponse may return the following errors:
 //   - "Unauthorized" (type *goa.ServiceError): http.StatusUnauthorized
+//   - "TaskNotFound" (type *goa.ServiceError): http.StatusNotFound
 //   - "InternalServerError" (type *goa.ServiceError): http.StatusInternalServerError
 //   - error: internal error
 func DecodeUpdateResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
@@ -340,6 +341,20 @@ func DecodeUpdateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 				return nil, goahttp.ErrValidationError("task", "update", err)
 			}
 			return nil, NewUpdateUnauthorized(&body)
+		case http.StatusNotFound:
+			var (
+				body UpdateTaskNotFoundResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("task", "update", err)
+			}
+			err = ValidateUpdateTaskNotFoundResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("task", "update", err)
+			}
+			return nil, NewUpdateTaskNotFound(&body)
 		case http.StatusInternalServerError:
 			var (
 				body UpdateInternalServerErrorResponseBody
@@ -407,6 +422,7 @@ func EncodeDeleteRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 // restored after having been read.
 // DecodeDeleteResponse may return the following errors:
 //   - "Unauthorized" (type *goa.ServiceError): http.StatusUnauthorized
+//   - "TaskNotFound" (type *goa.ServiceError): http.StatusNotFound
 //   - "InternalServerError" (type *goa.ServiceError): http.StatusInternalServerError
 //   - error: internal error
 func DecodeDeleteResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
@@ -440,6 +456,20 @@ func DecodeDeleteResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 				return nil, goahttp.ErrValidationError("task", "delete", err)
 			}
 			return nil, NewDeleteUnauthorized(&body)
+		case http.StatusNotFound:
+			var (
+				body DeleteTaskNotFoundResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("task", "delete", err)
+			}
+			err = ValidateDeleteTaskNotFoundResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("task", "delete", err)
+			}
+			return nil, NewDeleteTaskNotFound(&body)
 		case http.StatusInternalServerError:
 			var (
 				body DeleteInternalServerErrorResponseBody

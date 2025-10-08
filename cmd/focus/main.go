@@ -77,6 +77,14 @@ func run(ctx context.Context) error {
 			log.Printf("failed to create child dummy: %v", err)
 		}
 	})
+	bus.TaskDeleted.Subscribe(ctx, func(ctx context.Context, event *eventbus.TaskDeletedEvent) {
+		err := relationService.DeleteChildDummy(ctx, &relation.DeleteChildDummyInput{
+			ID: event.TaskID,
+		})
+		if err != nil {
+			log.Printf("failed to delete child dummy: %v", err)
+		}
+	})
 
 	server := newServer(flowService, relationService)
 

@@ -271,5 +271,5 @@ func taskDeleteUsage() {
 	// Example block: pass example as parameter to avoid format parsing of % characters
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], `task delete --task-id "Deserunt omnis molestiae suscipit atque quo reiciendis." --authorization "Eaque iusto eum dolor quam fugiat."`)
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], `task delete --task-id "Atque quo reiciendis eveniet eaque iusto eum." --authorization "Quam fugiat aut officia ut non modi."`)
 }

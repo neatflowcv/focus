@@ -183,6 +183,24 @@ type UpdateUnauthorizedResponseBody struct {
 	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
 }
 
+// UpdateTaskNotFoundResponseBody is the type of the "task" service "update"
+// endpoint HTTP response body for the "TaskNotFound" error.
+type UpdateTaskNotFoundResponseBody struct {
+	// Name is the name of this class of errors.
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+	// Is the error temporary?
+	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
+	// Is the error a timeout?
+	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
+	// Is the error a server-side fault?
+	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
+}
+
 // UpdateInternalServerErrorResponseBody is the type of the "task" service
 // "update" endpoint HTTP response body for the "InternalServerError" error.
 type UpdateInternalServerErrorResponseBody struct {
@@ -204,6 +222,24 @@ type UpdateInternalServerErrorResponseBody struct {
 // DeleteUnauthorizedResponseBody is the type of the "task" service "delete"
 // endpoint HTTP response body for the "Unauthorized" error.
 type DeleteUnauthorizedResponseBody struct {
+	// Name is the name of this class of errors.
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+	// Is the error temporary?
+	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
+	// Is the error a timeout?
+	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
+	// Is the error a server-side fault?
+	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
+}
+
+// DeleteTaskNotFoundResponseBody is the type of the "task" service "delete"
+// endpoint HTTP response body for the "TaskNotFound" error.
+type DeleteTaskNotFoundResponseBody struct {
 	// Name is the name of this class of errors.
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// ID is a unique identifier for this particular occurrence of the problem.
@@ -410,6 +446,21 @@ func NewUpdateUnauthorized(body *UpdateUnauthorizedResponseBody) *goa.ServiceErr
 	return v
 }
 
+// NewUpdateTaskNotFound builds a task service update endpoint TaskNotFound
+// error.
+func NewUpdateTaskNotFound(body *UpdateTaskNotFoundResponseBody) *goa.ServiceError {
+	v := &goa.ServiceError{
+		Name:      *body.Name,
+		ID:        *body.ID,
+		Message:   *body.Message,
+		Temporary: *body.Temporary,
+		Timeout:   *body.Timeout,
+		Fault:     *body.Fault,
+	}
+
+	return v
+}
+
 // NewUpdateInternalServerError builds a task service update endpoint
 // InternalServerError error.
 func NewUpdateInternalServerError(body *UpdateInternalServerErrorResponseBody) *goa.ServiceError {
@@ -428,6 +479,21 @@ func NewUpdateInternalServerError(body *UpdateInternalServerErrorResponseBody) *
 // NewDeleteUnauthorized builds a task service delete endpoint Unauthorized
 // error.
 func NewDeleteUnauthorized(body *DeleteUnauthorizedResponseBody) *goa.ServiceError {
+	v := &goa.ServiceError{
+		Name:      *body.Name,
+		ID:        *body.ID,
+		Message:   *body.Message,
+		Temporary: *body.Temporary,
+		Timeout:   *body.Timeout,
+		Fault:     *body.Fault,
+	}
+
+	return v
+}
+
+// NewDeleteTaskNotFound builds a task service delete endpoint TaskNotFound
+// error.
+func NewDeleteTaskNotFound(body *DeleteTaskNotFoundResponseBody) *goa.ServiceError {
 	v := &goa.ServiceError{
 		Name:      *body.Name,
 		ID:        *body.ID,
@@ -575,6 +641,30 @@ func ValidateUpdateUnauthorizedResponseBody(body *UpdateUnauthorizedResponseBody
 	return
 }
 
+// ValidateUpdateTaskNotFoundResponseBody runs the validations defined on
+// update_TaskNotFound_response_body
+func ValidateUpdateTaskNotFoundResponseBody(body *UpdateTaskNotFoundResponseBody) (err error) {
+	if body.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
+	}
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.Temporary == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
+	}
+	if body.Timeout == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
+	}
+	if body.Fault == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
+	}
+	return
+}
+
 // ValidateUpdateInternalServerErrorResponseBody runs the validations defined
 // on update_InternalServerError_response_body
 func ValidateUpdateInternalServerErrorResponseBody(body *UpdateInternalServerErrorResponseBody) (err error) {
@@ -602,6 +692,30 @@ func ValidateUpdateInternalServerErrorResponseBody(body *UpdateInternalServerErr
 // ValidateDeleteUnauthorizedResponseBody runs the validations defined on
 // delete_Unauthorized_response_body
 func ValidateDeleteUnauthorizedResponseBody(body *DeleteUnauthorizedResponseBody) (err error) {
+	if body.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
+	}
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.Temporary == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
+	}
+	if body.Timeout == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
+	}
+	if body.Fault == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
+	}
+	return
+}
+
+// ValidateDeleteTaskNotFoundResponseBody runs the validations defined on
+// delete_TaskNotFound_response_body
+func ValidateDeleteTaskNotFoundResponseBody(body *DeleteTaskNotFoundResponseBody) (err error) {
 	if body.Name == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
 	}

@@ -84,7 +84,7 @@ func (s *Service) DeleteTask(ctx context.Context, input *DeleteTaskInput) error 
 	task, err := s.repo.GetTask(ctx, input.Username, domain.TaskID(input.TaskID))
 	if err != nil {
 		if errors.Is(err, repository.ErrTaskNotFound) {
-			return fmt.Errorf("task not found: %w", err)
+			return ErrTaskNotFound
 		}
 
 		return fmt.Errorf("failed to get task: %w", err)
@@ -94,6 +94,10 @@ func (s *Service) DeleteTask(ctx context.Context, input *DeleteTaskInput) error 
 	if err != nil {
 		return fmt.Errorf("failed to delete task: %w", err)
 	}
+
+	s.bus.TaskDeleted.Publish(ctx, &eventbus.TaskDeletedEvent{
+		TaskID: string(task.ID()),
+	})
 
 	return nil
 }

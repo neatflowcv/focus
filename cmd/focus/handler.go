@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"time"
 
@@ -87,8 +88,25 @@ func (h *Handler) List(ctx context.Context, input *task.ListPayload) (task.Taskd
 	return toTaskdetailCollection(ret.Tasks, parentID), nil
 }
 
-func (h *Handler) Delete(context.Context, *task.TaskDeleteInput) error {
-	panic("unimplemented")
+func (h *Handler) Delete(ctx context.Context, input *task.TaskDeleteInput) error {
+	username, _, err := authUser(input.Authorization, h)
+	if err != nil {
+		return err
+	}
+
+	err = h.service.DeleteTask(ctx, &flow.DeleteTaskInput{
+		Username: username,
+		TaskID:   input.TaskID,
+	})
+	if err != nil {
+		if errors.Is(err, flow.ErrTaskNotFound) {
+			return task.MakeTaskNotFound(err)
+		}
+
+		return task.MakeInternalServerError(err)
+	}
+
+	return nil
 }
 
 func (h *Handler) Update(context.Context, *task.TaskUpdateInput) (*task.Taskdetail, error) {

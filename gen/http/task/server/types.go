@@ -183,6 +183,24 @@ type UpdateUnauthorizedResponseBody struct {
 	Fault bool `form:"fault" json:"fault" xml:"fault"`
 }
 
+// UpdateTaskNotFoundResponseBody is the type of the "task" service "update"
+// endpoint HTTP response body for the "TaskNotFound" error.
+type UpdateTaskNotFoundResponseBody struct {
+	// Name is the name of this class of errors.
+	Name string `form:"name" json:"name" xml:"name"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID string `form:"id" json:"id" xml:"id"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message string `form:"message" json:"message" xml:"message"`
+	// Is the error temporary?
+	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
+	// Is the error a timeout?
+	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
+	// Is the error a server-side fault?
+	Fault bool `form:"fault" json:"fault" xml:"fault"`
+}
+
 // UpdateInternalServerErrorResponseBody is the type of the "task" service
 // "update" endpoint HTTP response body for the "InternalServerError" error.
 type UpdateInternalServerErrorResponseBody struct {
@@ -204,6 +222,24 @@ type UpdateInternalServerErrorResponseBody struct {
 // DeleteUnauthorizedResponseBody is the type of the "task" service "delete"
 // endpoint HTTP response body for the "Unauthorized" error.
 type DeleteUnauthorizedResponseBody struct {
+	// Name is the name of this class of errors.
+	Name string `form:"name" json:"name" xml:"name"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID string `form:"id" json:"id" xml:"id"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message string `form:"message" json:"message" xml:"message"`
+	// Is the error temporary?
+	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
+	// Is the error a timeout?
+	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
+	// Is the error a server-side fault?
+	Fault bool `form:"fault" json:"fault" xml:"fault"`
+}
+
+// DeleteTaskNotFoundResponseBody is the type of the "task" service "delete"
+// endpoint HTTP response body for the "TaskNotFound" error.
+type DeleteTaskNotFoundResponseBody struct {
 	// Name is the name of this class of errors.
 	Name string `form:"name" json:"name" xml:"name"`
 	// ID is a unique identifier for this particular occurrence of the problem.
@@ -381,6 +417,20 @@ func NewUpdateUnauthorizedResponseBody(res *goa.ServiceError) *UpdateUnauthorize
 	return body
 }
 
+// NewUpdateTaskNotFoundResponseBody builds the HTTP response body from the
+// result of the "update" endpoint of the "task" service.
+func NewUpdateTaskNotFoundResponseBody(res *goa.ServiceError) *UpdateTaskNotFoundResponseBody {
+	body := &UpdateTaskNotFoundResponseBody{
+		Name:      res.Name,
+		ID:        res.ID,
+		Message:   res.Message,
+		Temporary: res.Temporary,
+		Timeout:   res.Timeout,
+		Fault:     res.Fault,
+	}
+	return body
+}
+
 // NewUpdateInternalServerErrorResponseBody builds the HTTP response body from
 // the result of the "update" endpoint of the "task" service.
 func NewUpdateInternalServerErrorResponseBody(res *goa.ServiceError) *UpdateInternalServerErrorResponseBody {
@@ -399,6 +449,20 @@ func NewUpdateInternalServerErrorResponseBody(res *goa.ServiceError) *UpdateInte
 // result of the "delete" endpoint of the "task" service.
 func NewDeleteUnauthorizedResponseBody(res *goa.ServiceError) *DeleteUnauthorizedResponseBody {
 	body := &DeleteUnauthorizedResponseBody{
+		Name:      res.Name,
+		ID:        res.ID,
+		Message:   res.Message,
+		Temporary: res.Temporary,
+		Timeout:   res.Timeout,
+		Fault:     res.Fault,
+	}
+	return body
+}
+
+// NewDeleteTaskNotFoundResponseBody builds the HTTP response body from the
+// result of the "delete" endpoint of the "task" service.
+func NewDeleteTaskNotFoundResponseBody(res *goa.ServiceError) *DeleteTaskNotFoundResponseBody {
+	body := &DeleteTaskNotFoundResponseBody{
 		Name:      res.Name,
 		ID:        res.ID,
 		Message:   res.Message,
