@@ -37,7 +37,7 @@ func NewRepository() (*Repository, error) {
 		return nil, fmt.Errorf("failed to open database: %w", err)
 	}
 
-	err = db.AutoMigrate(&Task{}) //nolint:exhaustruct
+	err = db.AutoMigrate(&Task{}, &Relation{}) //nolint:exhaustruct
 	if err != nil {
 		return nil, fmt.Errorf("failed to auto migrate: %w", err)
 	}

@@ -7,6 +7,7 @@ import (
 
 	"github.com/neatflowcv/focus/gen/task"
 	"github.com/neatflowcv/focus/internal/app/flow"
+	"github.com/neatflowcv/focus/internal/app/relation"
 	"github.com/neatflowcv/focus/internal/pkg/domain"
 	"github.com/neatflowcv/key-stone/pkg/vault"
 )
@@ -14,12 +15,17 @@ import (
 var _ task.Service = (*Handler)(nil)
 
 type Handler struct {
-	service *flow.Service
-	vault   *vault.Vault
+	service         *flow.Service
+	relationService *relation.Service
+	vault           *vault.Vault
 }
 
-func NewHandler(service *flow.Service) *Handler {
-	return &Handler{service: service, vault: vault.NewVault("key-stone", []byte("asdf"))}
+func NewHandler(service *flow.Service, relationService *relation.Service) *Handler {
+	return &Handler{
+		service:         service,
+		relationService: relationService,
+		vault:           vault.NewVault("key-stone", []byte("asdf")),
+	}
 }
 
 func (h *Handler) Create(ctx context.Context, input *task.TaskInput) (*task.Taskdetail, error) {
@@ -40,17 +46,63 @@ func (h *Handler) Create(ctx context.Context, input *task.TaskInput) (*task.Task
 		return nil, task.MakeInternalServerError(err)
 	}
 
-	return toTaskDetail(ret), nil
+	parentID := ""
+	if input.ParentID != nil {
+		parentID = *input.ParentID
+	}
+
+	err = h.relationService.CreateRelation(ctx, &relation.CreateRelationInput{
+		ID:       string(ret.ID()),
+		ParentID: parentID,
+	})
+	if err != nil {
+		return nil, task.MakeInternalServerError(err)
+	}
+
+	return toTaskDetail(ret, parentID), nil
 }
 
 func (h *Handler) List(ctx context.Context, input *task.ListPayload) (task.TaskdetailCollection, error) {
-	panic("unimplemented")
+	token := strings.TrimPrefix(input.Authorization, "Bearer ")
+	now := time.Now()
+
+	username, err := h.vault.Decrypt(token, now)
+	if err != nil {
+		return nil, task.MakeInternalServerError(err)
+	}
+
+	parentID := ""
+	if input.ParentID != nil {
+		parentID = *input.ParentID
+	}
+
+	children, err := h.relationService.ListChildren(ctx, &relation.ListChildrenInput{
+		ParentID: parentID,
+	})
+	if err != nil {
+		return nil, task.MakeInternalServerError(err)
+	}
+
+	tasks, err := h.service.ListTasks(ctx, &flow.ListTasksInput{
+		Username: username,
+		IDs:      children.IDs,
+	})
+	if err != nil {
+		return nil, task.MakeInternalServerError(err)
+	}
+
+	var ret task.TaskdetailCollection
+	for _, task := range tasks {
+		ret = append(ret, toTaskDetail(task, parentID))
+	}
+
+	return ret, nil
 }
 
-func toTaskDetail(domainTask *domain.Task) *task.Taskdetail {
+func toTaskDetail(domainTask *domain.Task, parentID string) *task.Taskdetail {
 	return &task.Taskdetail{
 		ID:            string(domainTask.ID()),
-		ParentID:      nil,
+		ParentID:      &parentID,
 		Title:         domainTask.Title(),
 		CreatedAt:     domainTask.CreatedAt().Unix(),
 		Status:        string(domainTask.Status()),

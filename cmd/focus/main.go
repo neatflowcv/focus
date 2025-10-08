@@ -15,6 +15,7 @@ import (
 	taskserver "github.com/neatflowcv/focus/gen/http/task/server"
 	"github.com/neatflowcv/focus/gen/task"
 	"github.com/neatflowcv/focus/internal/app/flow"
+	"github.com/neatflowcv/focus/internal/app/relation"
 	"github.com/neatflowcv/focus/internal/pkg/eventbus"
 	"github.com/neatflowcv/focus/internal/pkg/idmaker/ulid"
 	"github.com/neatflowcv/focus/internal/pkg/repository/gorm"
@@ -41,7 +42,7 @@ func main() {
 				Action: func(ctx context.Context, c *cli.Command) error {
 					log.Println("running")
 
-					return run()
+					return run(ctx)
 				},
 			},
 		},
@@ -53,7 +54,7 @@ func main() {
 	}
 }
 
-func run() error {
+func run(ctx context.Context) error {
 	repo, err := gorm.NewRepository()
 	if err != nil {
 		return fmt.Errorf("failed to create repository: %w", err)
@@ -62,8 +63,22 @@ func run() error {
 	bus := eventbus.NewBus()
 
 	flowService := flow.NewService(bus, ulid.NewIDMaker(), repo)
+	relationService := relation.NewService(bus, repo)
 
-	server := newServer(flowService)
+	_ = relationService.CreateChildDummy(ctx, &relation.CreateChildDummyInput{
+		ID: "",
+	})
+
+	bus.TaskCreated.Subscribe(ctx, func(ctx context.Context, event *eventbus.TaskCreatedEvent) {
+		err := relationService.CreateChildDummy(ctx, &relation.CreateChildDummyInput{
+			ID: event.TaskID,
+		})
+		if err != nil {
+			log.Printf("failed to create child dummy: %v", err)
+		}
+	})
+
+	server := newServer(flowService, relationService)
 
 	err = server.ListenAndServe()
 	if err != nil {
@@ -73,12 +88,12 @@ func run() error {
 	return nil
 }
 
-func newServer(service *flow.Service) *http.Server {
+func newServer(service *flow.Service, relationService *relation.Service) *http.Server {
 	mux := goahttp.NewMuxer()
 	requestDecoder := goahttp.RequestDecoder
 	responseEncoder := goahttp.ResponseEncoder
 
-	handler := NewHandler(service)
+	handler := NewHandler(service, relationService)
 	endpoints := task.NewEndpoints(handler)
 	taskServer := taskserver.New(endpoints, mux, requestDecoder, responseEncoder, nil, nil)
 	taskServer.Mount(mux)
