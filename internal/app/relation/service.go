@@ -96,12 +96,6 @@ func (s *Service) ListChildren(ctx context.Context, input *ListChildrenInput) (*
 		ids = append(ids, string(relation.ID()))
 	}
 
-	if len(ids) == 1 {
-		return &ListChildrenOutput{
-			IDs: nil,
-		}, nil
-	}
-
 	return &ListChildrenOutput{
 		IDs: ids[1:],
 	}, nil
