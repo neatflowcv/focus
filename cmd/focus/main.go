@@ -41,32 +41,7 @@ func main() {
 				Action: func(ctx context.Context, c *cli.Command) error {
 					log.Println("running")
 
-					repo, err := gorm.NewRepository()
-					if err != nil {
-						return fmt.Errorf("failed to create repository: %w", err)
-					}
-
-					bus := eventbus.NewBus()
-
-					service := flow.NewService(bus, ulid.NewIDMaker(), repo)
-
-					mux := goahttp.NewMuxer()
-					requestDecoder := goahttp.RequestDecoder
-					responseEncoder := goahttp.ResponseEncoder
-
-					handler := NewHandler(service)
-					endpoints := task.NewEndpoints(handler)
-					taskServer := taskserver.New(endpoints, mux, requestDecoder, responseEncoder, nil, nil)
-					taskServer.Mount(mux)
-
-					server := &http.Server{Addr: ":8080", Handler: mux} //nolint:exhaustruct,gosec
-
-					err = server.ListenAndServe()
-					if err != nil {
-						return fmt.Errorf("failed to listen and serve: %w", err)
-					}
-
-					return nil
+					return run()
 				},
 			},
 		},
@@ -76,4 +51,33 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func run() error {
+	repo, err := gorm.NewRepository()
+	if err != nil {
+		return fmt.Errorf("failed to create repository: %w", err)
+	}
+
+	bus := eventbus.NewBus()
+
+	service := flow.NewService(bus, ulid.NewIDMaker(), repo)
+
+	mux := goahttp.NewMuxer()
+	requestDecoder := goahttp.RequestDecoder
+	responseEncoder := goahttp.ResponseEncoder
+
+	handler := NewHandler(service)
+	endpoints := task.NewEndpoints(handler)
+	taskServer := taskserver.New(endpoints, mux, requestDecoder, responseEncoder, nil, nil)
+	taskServer.Mount(mux)
+
+	server := &http.Server{Addr: ":8080", Handler: mux} //nolint:exhaustruct,gosec
+
+	err = server.ListenAndServe()
+	if err != nil {
+		return fmt.Errorf("failed to listen and serve: %w", err)
+	}
+
+	return nil
 }
