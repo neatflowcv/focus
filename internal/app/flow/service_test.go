@@ -18,7 +18,7 @@ type ServiceData struct {
 	repo    *memory.Repository
 }
 
-func newService(t *testing.T) (*flow.Service, *ServiceData) { //nolint:unparam
+func newService(t *testing.T) (*flow.Service, *ServiceData) {
 	t.Helper()
 
 	data := &ServiceData{
@@ -84,4 +84,36 @@ func TestServiceListTasks(t *testing.T) {
 	require.Equal(t, "test", ret.Tasks[0].Title)
 	require.Equal(t, now, ret.Tasks[0].CreatedAt)
 	require.Equal(t, string(domain.TaskStatusTodo), ret.Tasks[0].Status)
+}
+
+func TestServiceDeleteTask(t *testing.T) {
+	t.Parallel()
+
+	service, data := newService(t)
+	task, _ := service.CreateTask(t.Context(), &flow.CreateTaskInput{
+		Username: "test",
+		Title:    "test",
+		Now:      time.Now(),
+	})
+
+	err := service.DeleteTask(t.Context(), &flow.DeleteTaskInput{
+		Username: "test",
+		TaskID:   task.Task.ID,
+	})
+
+	require.NoError(t, err)
+	require.Empty(t, data.repo.Tasks["test"][domain.TaskID(task.Task.ID)])
+}
+
+func TestServiceDeleteTask_Error(t *testing.T) {
+	t.Parallel()
+
+	service, _ := newService(t)
+
+	err := service.DeleteTask(t.Context(), &flow.DeleteTaskInput{
+		Username: "test",
+		TaskID:   "test",
+	})
+
+	require.Error(t, err)
 }

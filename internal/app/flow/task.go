@@ -29,3 +29,8 @@ type ListTasksInput struct {
 type ListTasksOutput struct {
 	Tasks []Task
 }
+
+type DeleteTaskInput struct {
+	Username string
+	TaskID   string
+}

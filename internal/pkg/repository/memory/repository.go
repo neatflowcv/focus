@@ -94,3 +94,13 @@ func (r *Repository) UpdateRelation(ctx context.Context, relation *domain.Relati
 
 	return nil
 }
+
+func (r *Repository) DeleteTask(ctx context.Context, username string, task *domain.Task) error {
+	if _, ok := r.Tasks[username][task.ID()]; !ok {
+		return repository.ErrTaskNotFound
+	}
+
+	delete(r.Tasks[username], task.ID())
+
+	return nil
+}

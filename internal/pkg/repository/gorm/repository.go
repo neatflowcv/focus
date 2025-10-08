@@ -140,3 +140,18 @@ func (r *Repository) UpdateRelation(ctx context.Context, dRelataion *domain.Rela
 
 	return nil
 }
+
+func (r *Repository) DeleteTask(ctx context.Context, username string, task *domain.Task) error {
+	affected, err := gorm.G[Task](r.db).
+		Where(&Task{ID: string(task.ID()), Username: username}). //nolint:exhaustruct
+		Delete(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to delete task: %w", err)
+	}
+
+	if affected == 0 {
+		return repository.ErrTaskNotFound
+	}
+
+	return nil
+}
