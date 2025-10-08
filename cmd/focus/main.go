@@ -63,6 +63,17 @@ func run() error {
 
 	service := flow.NewService(bus, ulid.NewIDMaker(), repo)
 
+	server := newServer(service)
+
+	err = server.ListenAndServe()
+	if err != nil {
+		return fmt.Errorf("failed to listen and serve: %w", err)
+	}
+
+	return nil
+}
+
+func newServer(service *flow.Service) *http.Server {
 	mux := goahttp.NewMuxer()
 	requestDecoder := goahttp.RequestDecoder
 	responseEncoder := goahttp.ResponseEncoder
@@ -72,12 +83,8 @@ func run() error {
 	taskServer := taskserver.New(endpoints, mux, requestDecoder, responseEncoder, nil, nil)
 	taskServer.Mount(mux)
 
-	server := &http.Server{Addr: ":8080", Handler: mux} //nolint:exhaustruct,gosec
-
-	err = server.ListenAndServe()
-	if err != nil {
-		return fmt.Errorf("failed to listen and serve: %w", err)
+	return &http.Server{ //nolint:exhaustruct,gosec
+		Addr:    ":8080",
+		Handler: mux,
 	}
-
-	return nil
 }
