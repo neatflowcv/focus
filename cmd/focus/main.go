@@ -61,9 +61,9 @@ func run() error {
 
 	bus := eventbus.NewBus()
 
-	service := flow.NewService(bus, ulid.NewIDMaker(), repo)
+	flowService := flow.NewService(bus, ulid.NewIDMaker(), repo)
 
-	server := newServer(service)
+	server := newServer(flowService)
 
 	err = server.ListenAndServe()
 	if err != nil {
