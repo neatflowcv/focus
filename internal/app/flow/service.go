@@ -101,3 +101,23 @@ func (s *Service) ListTasks(ctx context.Context, input *ListTasksInput) (*ListTa
 		Tasks: tasks,
 	}, nil
 }
+
+func (s *Service) GetTask(ctx context.Context, input *GetTaskInput) (*GetTaskOutput, error) {
+	task, err := s.repo.GetTask(ctx, input.Username, domain.TaskID(input.TaskID))
+	if err != nil {
+		if errors.Is(err, repository.ErrTaskNotFound) {
+			return nil, ErrTaskNotFound
+		}
+
+		return nil, fmt.Errorf("failed to get task: %w", err)
+	}
+
+	return &GetTaskOutput{
+		Task: Task{
+			ID:        string(task.ID()),
+			Title:     task.Title(),
+			CreatedAt: task.CreatedAt(),
+			Status:    string(task.Status()),
+		},
+	}, nil
+}

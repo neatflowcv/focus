@@ -34,3 +34,12 @@ type DeleteTaskInput struct {
 	Username string
 	TaskID   string
 }
+
+type GetTaskInput struct {
+	Username string
+	TaskID   string
+}
+
+type GetTaskOutput struct {
+	Task Task
+}
