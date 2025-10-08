@@ -8,7 +8,6 @@ import (
 	"github.com/neatflowcv/focus/gen/task"
 	"github.com/neatflowcv/focus/internal/app/flow"
 	"github.com/neatflowcv/focus/internal/app/relation"
-	"github.com/neatflowcv/focus/internal/pkg/domain"
 	"github.com/neatflowcv/key-stone/pkg/vault"
 )
 
@@ -52,14 +51,14 @@ func (h *Handler) Create(ctx context.Context, input *task.TaskInput) (*task.Task
 	}
 
 	err = h.relationService.CreateRelation(ctx, &relation.CreateRelationInput{
-		ID:       string(ret.ID()),
+		ID:       ret.Task.ID,
 		ParentID: parentID,
 	})
 	if err != nil {
 		return nil, task.MakeInternalServerError(err)
 	}
 
-	return toTaskDetail(ret, parentID), nil
+	return toTaskDetail(&ret.Task, parentID), nil
 }
 
 func (h *Handler) List(ctx context.Context, input *task.ListPayload) (task.TaskdetailCollection, error) {
@@ -83,7 +82,7 @@ func (h *Handler) List(ctx context.Context, input *task.ListPayload) (task.Taskd
 		return nil, task.MakeInternalServerError(err)
 	}
 
-	tasks, err := h.service.ListTasks(ctx, &flow.ListTasksInput{
+	ret, err := h.service.ListTasks(ctx, &flow.ListTasksInput{
 		Username: username,
 		IDs:      children.IDs,
 	})
@@ -91,21 +90,24 @@ func (h *Handler) List(ctx context.Context, input *task.ListPayload) (task.Taskd
 		return nil, task.MakeInternalServerError(err)
 	}
 
-	var ret task.TaskdetailCollection
-	for _, task := range tasks {
-		ret = append(ret, toTaskDetail(task, parentID))
-	}
-
-	return ret, nil
+	return toTaskdetailCollection(ret.Tasks, parentID), nil
 }
 
-func toTaskDetail(domainTask *domain.Task, parentID string) *task.Taskdetail {
+func (h *Handler) Delete(context.Context, *task.TaskDeleteInput) error {
+	panic("unimplemented")
+}
+
+func (h *Handler) Update(context.Context, *task.TaskUpdateInput) (*task.Taskdetail, error) {
+	panic("unimplemented")
+}
+
+func toTaskDetail(domainTask *flow.Task, parentID string) *task.Taskdetail {
 	return &task.Taskdetail{
-		ID:            string(domainTask.ID()),
+		ID:            domainTask.ID,
 		ParentID:      &parentID,
-		Title:         domainTask.Title(),
-		CreatedAt:     domainTask.CreatedAt().Unix(),
-		Status:        string(domainTask.Status()),
+		Title:         domainTask.Title,
+		CreatedAt:     domainTask.CreatedAt.Unix(),
+		Status:        domainTask.Status,
 		IsLeaf:        nil,
 		CompletedAt:   nil,
 		StartedAt:     nil,
@@ -115,10 +117,11 @@ func toTaskDetail(domainTask *domain.Task, parentID string) *task.Taskdetail {
 	}
 }
 
-func (h *Handler) Delete(context.Context, *task.TaskDeleteInput) error {
-	panic("unimplemented")
-}
+func toTaskdetailCollection(domainTask []flow.Task, parentID string) task.TaskdetailCollection {
+	var ret task.TaskdetailCollection
+	for _, task := range domainTask {
+		ret = append(ret, toTaskDetail(&task, parentID))
+	}
 
-func (h *Handler) Update(context.Context, *task.TaskUpdateInput) (*task.Taskdetail, error) {
-	panic("unimplemented")
+	return ret
 }

@@ -43,10 +43,10 @@ func TestServiceCreateTask(t *testing.T) {
 	})
 
 	require.NoError(t, err)
-	require.Equal(t, "test", ret.Title())
-	require.Equal(t, now, ret.CreatedAt())
-	require.NotEmpty(t, ret.ID())
-	require.Equal(t, domain.TaskStatusTodo, ret.Status())
+	require.Equal(t, "test", ret.Task.Title)
+	require.Equal(t, now, ret.Task.CreatedAt)
+	require.NotEmpty(t, ret.Task.ID)
+	require.Equal(t, string(domain.TaskStatusTodo), ret.Task.Status)
 }
 
 func TestServiceListTasksWithNoData(t *testing.T) {
@@ -76,12 +76,12 @@ func TestServiceListTasks(t *testing.T) {
 
 	ret, err := service.ListTasks(t.Context(), &flow.ListTasksInput{
 		Username: "test",
-		IDs:      []string{string(task.ID())},
+		IDs:      []string{task.Task.ID},
 	})
 
 	require.NoError(t, err)
-	require.Len(t, ret, 1)
-	require.Equal(t, "test", ret[0].Title())
-	require.Equal(t, now, ret[0].CreatedAt())
-	require.Equal(t, domain.TaskStatusTodo, ret[0].Status())
+	require.Len(t, ret.Tasks, 1)
+	require.Equal(t, "test", ret.Tasks[0].Title)
+	require.Equal(t, now, ret.Tasks[0].CreatedAt)
+	require.Equal(t, string(domain.TaskStatusTodo), ret.Tasks[0].Status)
 }

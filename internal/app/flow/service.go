@@ -26,7 +26,7 @@ func NewService(bus *eventbus.Bus, idmaker idmaker.IDMaker, repo repository.Repo
 	}
 }
 
-func (s *Service) CreateTask(ctx context.Context, input *CreateTaskInput) (*domain.Task, error) {
+func (s *Service) CreateTask(ctx context.Context, input *CreateTaskInput) (*CreateTaskOutput, error) {
 	task := domain.NewTask(
 		domain.TaskID(s.idmaker.MakeID()),
 		input.Title,
@@ -44,11 +44,18 @@ func (s *Service) CreateTask(ctx context.Context, input *CreateTaskInput) (*doma
 		TaskID: string(task.ID()),
 	})
 
-	return task, nil
+	return &CreateTaskOutput{
+		Task: Task{
+			ID:        string(task.ID()),
+			Title:     task.Title(),
+			CreatedAt: task.CreatedAt(),
+			Status:    string(task.Status()),
+		},
+	}, nil
 }
 
-func (s *Service) ListTasks(ctx context.Context, input *ListTasksInput) ([]*domain.Task, error) {
-	var ret []*domain.Task
+func (s *Service) ListTasks(ctx context.Context, input *ListTasksInput) (*ListTasksOutput, error) {
+	var tasks []Task
 
 	for _, id := range input.IDs {
 		task, err := s.repo.GetTask(ctx, input.Username, domain.TaskID(id))
@@ -60,8 +67,15 @@ func (s *Service) ListTasks(ctx context.Context, input *ListTasksInput) ([]*doma
 			return nil, fmt.Errorf("failed to get task: %w", err)
 		}
 
-		ret = append(ret, task)
+		tasks = append(tasks, Task{
+			ID:        string(task.ID()),
+			Title:     task.Title(),
+			CreatedAt: task.CreatedAt(),
+			Status:    string(task.Status()),
+		})
 	}
 
-	return ret, nil
+	return &ListTasksOutput{
+		Tasks: tasks,
+	}, nil
 }

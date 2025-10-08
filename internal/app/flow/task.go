@@ -10,7 +10,22 @@ type CreateTaskInput struct {
 	Now      time.Time
 }
 
+type Task struct {
+	ID        string
+	Title     string
+	CreatedAt time.Time
+	Status    string
+}
+
+type CreateTaskOutput struct {
+	Task Task
+}
+
 type ListTasksInput struct {
 	Username string
 	IDs      []string
+}
+
+type ListTasksOutput struct {
+	Tasks []Task
 }
