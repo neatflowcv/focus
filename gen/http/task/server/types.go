@@ -31,8 +31,6 @@ type UpdateRequestBody struct {
 	ParentID *string `form:"parent_id,omitempty" json:"parent_id,omitempty" xml:"parent_id,omitempty"`
 	// The status of the task
 	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
-	// The order of the task
-	Order *float64 `form:"order,omitempty" json:"order,omitempty" xml:"order,omitempty"`
 	// The estimated time of the task
 	EstimatedTime *int64 `form:"estimated_time,omitempty" json:"estimated_time,omitempty" xml:"estimated_time,omitempty"`
 }
@@ -50,8 +48,6 @@ type CreateResponseBody struct {
 	Status string `form:"status" json:"status" xml:"status"`
 	// Whether the task is a leaf task
 	IsLeaf *bool `form:"is_leaf,omitempty" json:"is_leaf,omitempty" xml:"is_leaf,omitempty"`
-	// The order of the task
-	Order float64 `form:"order" json:"order" xml:"order"`
 	// The timestamp when the task was created
 	CreatedAt int64 `form:"created_at" json:"created_at" xml:"created_at"`
 	// The timestamp when the task was completed
@@ -83,8 +79,6 @@ type UpdateResponseBody struct {
 	Status string `form:"status" json:"status" xml:"status"`
 	// Whether the task is a leaf task
 	IsLeaf *bool `form:"is_leaf,omitempty" json:"is_leaf,omitempty" xml:"is_leaf,omitempty"`
-	// The order of the task
-	Order float64 `form:"order" json:"order" xml:"order"`
 	// The timestamp when the task was created
 	CreatedAt int64 `form:"created_at" json:"created_at" xml:"created_at"`
 	// The timestamp when the task was completed
@@ -183,8 +177,6 @@ type TaskdetailResponse struct {
 	Status string `form:"status" json:"status" xml:"status"`
 	// Whether the task is a leaf task
 	IsLeaf *bool `form:"is_leaf,omitempty" json:"is_leaf,omitempty" xml:"is_leaf,omitempty"`
-	// The order of the task
-	Order float64 `form:"order" json:"order" xml:"order"`
 	// The timestamp when the task was created
 	CreatedAt int64 `form:"created_at" json:"created_at" xml:"created_at"`
 	// The timestamp when the task was completed
@@ -208,7 +200,6 @@ func NewCreateResponseBody(res *taskviews.TaskdetailView) *CreateResponseBody {
 		Title:         *res.Title,
 		Status:        *res.Status,
 		IsLeaf:        res.IsLeaf,
-		Order:         *res.Order,
 		CreatedAt:     *res.CreatedAt,
 		CompletedAt:   res.CompletedAt,
 		StartedAt:     res.StartedAt,
@@ -238,7 +229,6 @@ func NewUpdateResponseBody(res *taskviews.TaskdetailView) *UpdateResponseBody {
 		Title:         *res.Title,
 		Status:        *res.Status,
 		IsLeaf:        res.IsLeaf,
-		Order:         *res.Order,
 		CreatedAt:     *res.CreatedAt,
 		CompletedAt:   res.CompletedAt,
 		StartedAt:     res.StartedAt,
@@ -332,7 +322,6 @@ func NewUpdateTaskUpdateInput(body *UpdateRequestBody, taskID string, authorizat
 		Title:         body.Title,
 		ParentID:      body.ParentID,
 		Status:        body.Status,
-		Order:         body.Order,
 		EstimatedTime: body.EstimatedTime,
 	}
 	v.TaskID = taskID

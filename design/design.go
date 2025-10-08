@@ -104,7 +104,6 @@ var TaskUpdateInput = dsl.Type("TaskUpdateInput", func() { //nolint:gochecknoglo
 	dsl.Attribute("title", dsl.String, "The title of the task")
 	dsl.Attribute("parent_id", dsl.String, "The parent ID of the task")
 	dsl.Attribute("status", dsl.String, "The status of the task")
-	dsl.Attribute("order", dsl.Float64, "The order of the task")
 	dsl.Attribute("estimated_time", dsl.Int64, "The estimated time of the task")
 
 	dsl.Required("authorization", "task_id")
@@ -119,8 +118,6 @@ var TaskDetail = dsl.ResultType("TaskDetail", func() { //nolint:gochecknoglobals
 
 	dsl.Attribute("is_leaf", dsl.Boolean, "Whether the task is a leaf task")
 
-	dsl.Attribute("order", dsl.Float64, "The order of the task")
-
 	// 시간 관련 속성
 	dsl.Attribute("created_at", dsl.Int64, "The timestamp when the task was created")
 	dsl.Attribute("completed_at", dsl.Int64, "The timestamp when the task was completed")
@@ -129,7 +126,7 @@ var TaskDetail = dsl.ResultType("TaskDetail", func() { //nolint:gochecknoglobals
 	dsl.Attribute("estimated_time", dsl.Int64, "The estimated time of the task")
 	dsl.Attribute("actual_time", dsl.Int64, "The actual time of the task")
 
-	dsl.Required("id", "title", "created_at", "status", "order")
+	dsl.Required("id", "title", "created_at", "status")
 })
 
 var TaskDeleteInput = dsl.Type("TaskDeleteInput", func() { //nolint:gochecknoglobals

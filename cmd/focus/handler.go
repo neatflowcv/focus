@@ -106,7 +106,6 @@ func toTaskDetail(domainTask *domain.Task, parentID string) *task.Taskdetail {
 		Title:         domainTask.Title(),
 		CreatedAt:     domainTask.CreatedAt().Unix(),
 		Status:        string(domainTask.Status()),
-		Order:         0.0,
 		IsLeaf:        nil,
 		CompletedAt:   nil,
 		StartedAt:     nil,

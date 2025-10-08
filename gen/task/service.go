@@ -82,8 +82,6 @@ type TaskUpdateInput struct {
 	ParentID *string
 	// The status of the task
 	Status *string
-	// The order of the task
-	Order *float64
 	// The estimated time of the task
 	EstimatedTime *int64
 }
@@ -100,8 +98,6 @@ type Taskdetail struct {
 	Status string
 	// Whether the task is a leaf task
 	IsLeaf *bool
-	// The order of the task
-	Order float64
 	// The timestamp when the task was created
 	CreatedAt int64
 	// The timestamp when the task was completed
@@ -171,9 +167,6 @@ func newTaskdetail(vres *taskviews.TaskdetailView) *Taskdetail {
 	if vres.Status != nil {
 		res.Status = *vres.Status
 	}
-	if vres.Order != nil {
-		res.Order = *vres.Order
-	}
 	if vres.CreatedAt != nil {
 		res.CreatedAt = *vres.CreatedAt
 	}
@@ -189,7 +182,6 @@ func newTaskdetailView(res *Taskdetail) *taskviews.TaskdetailView {
 		Title:         &res.Title,
 		Status:        &res.Status,
 		IsLeaf:        res.IsLeaf,
-		Order:         &res.Order,
 		CreatedAt:     &res.CreatedAt,
 		CompletedAt:   res.CompletedAt,
 		StartedAt:     res.StartedAt,

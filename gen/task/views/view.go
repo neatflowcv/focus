@@ -40,8 +40,6 @@ type TaskdetailView struct {
 	Status *string
 	// Whether the task is a leaf task
 	IsLeaf *bool
-	// The order of the task
-	Order *float64
 	// The timestamp when the task was created
 	CreatedAt *int64
 	// The timestamp when the task was completed
@@ -69,7 +67,6 @@ var (
 			"title",
 			"status",
 			"is_leaf",
-			"order",
 			"created_at",
 			"completed_at",
 			"started_at",
@@ -87,7 +84,6 @@ var (
 			"title",
 			"status",
 			"is_leaf",
-			"order",
 			"created_at",
 			"completed_at",
 			"started_at",
@@ -136,9 +132,6 @@ func ValidateTaskdetailView(result *TaskdetailView) (err error) {
 	}
 	if result.Status == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("status", "result"))
-	}
-	if result.Order == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("order", "result"))
 	}
 	return
 }

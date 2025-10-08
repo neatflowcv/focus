@@ -31,8 +31,6 @@ type UpdateRequestBody struct {
 	ParentID *string `form:"parent_id,omitempty" json:"parent_id,omitempty" xml:"parent_id,omitempty"`
 	// The status of the task
 	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
-	// The order of the task
-	Order *float64 `form:"order,omitempty" json:"order,omitempty" xml:"order,omitempty"`
 	// The estimated time of the task
 	EstimatedTime *int64 `form:"estimated_time,omitempty" json:"estimated_time,omitempty" xml:"estimated_time,omitempty"`
 }
@@ -50,8 +48,6 @@ type CreateResponseBody struct {
 	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
 	// Whether the task is a leaf task
 	IsLeaf *bool `form:"is_leaf,omitempty" json:"is_leaf,omitempty" xml:"is_leaf,omitempty"`
-	// The order of the task
-	Order *float64 `form:"order,omitempty" json:"order,omitempty" xml:"order,omitempty"`
 	// The timestamp when the task was created
 	CreatedAt *int64 `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
 	// The timestamp when the task was completed
@@ -83,8 +79,6 @@ type UpdateResponseBody struct {
 	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
 	// Whether the task is a leaf task
 	IsLeaf *bool `form:"is_leaf,omitempty" json:"is_leaf,omitempty" xml:"is_leaf,omitempty"`
-	// The order of the task
-	Order *float64 `form:"order,omitempty" json:"order,omitempty" xml:"order,omitempty"`
 	// The timestamp when the task was created
 	CreatedAt *int64 `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
 	// The timestamp when the task was completed
@@ -183,8 +177,6 @@ type TaskdetailResponse struct {
 	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
 	// Whether the task is a leaf task
 	IsLeaf *bool `form:"is_leaf,omitempty" json:"is_leaf,omitempty" xml:"is_leaf,omitempty"`
-	// The order of the task
-	Order *float64 `form:"order,omitempty" json:"order,omitempty" xml:"order,omitempty"`
 	// The timestamp when the task was created
 	CreatedAt *int64 `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
 	// The timestamp when the task was completed
@@ -216,7 +208,6 @@ func NewUpdateRequestBody(p *task.TaskUpdateInput) *UpdateRequestBody {
 		Title:         p.Title,
 		ParentID:      p.ParentID,
 		Status:        p.Status,
-		Order:         p.Order,
 		EstimatedTime: p.EstimatedTime,
 	}
 	return body
@@ -231,7 +222,6 @@ func NewCreateTaskdetailOK(body *CreateResponseBody) *taskviews.TaskdetailView {
 		Title:         body.Title,
 		Status:        body.Status,
 		IsLeaf:        body.IsLeaf,
-		Order:         body.Order,
 		CreatedAt:     body.CreatedAt,
 		CompletedAt:   body.CompletedAt,
 		StartedAt:     body.StartedAt,
@@ -293,7 +283,6 @@ func NewUpdateTaskdetailOK(body *UpdateResponseBody) *taskviews.TaskdetailView {
 		Title:         body.Title,
 		Status:        body.Status,
 		IsLeaf:        body.IsLeaf,
-		Order:         body.Order,
 		CreatedAt:     body.CreatedAt,
 		CompletedAt:   body.CompletedAt,
 		StartedAt:     body.StartedAt,
@@ -444,9 +433,6 @@ func ValidateTaskdetailResponse(body *TaskdetailResponse) (err error) {
 	}
 	if body.Status == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("status", "body"))
-	}
-	if body.Order == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("order", "body"))
 	}
 	return
 }

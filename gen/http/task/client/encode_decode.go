@@ -410,7 +410,6 @@ func unmarshalTaskdetailResponseToTaskviewsTaskdetailView(v *TaskdetailResponse)
 		Title:         v.Title,
 		Status:        v.Status,
 		IsLeaf:        v.IsLeaf,
-		Order:         v.Order,
 		CreatedAt:     v.CreatedAt,
 		CompletedAt:   v.CompletedAt,
 		StartedAt:     v.StartedAt,

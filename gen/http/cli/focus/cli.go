@@ -222,7 +222,7 @@ func taskListUsage() {
 	// Example block: pass example as parameter to avoid format parsing of % characters
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], `task list --parent-id "Tempore ut sit voluptatum unde voluptatem." --recursive true --authorization "Laudantium sunt facilis quia voluptas autem."`)
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], `task list --parent-id "Vel quas dignissimos reiciendis voluptatem tempore ut." --recursive false --authorization "Unde voluptatem laborum odio laudantium sunt."`)
 }
 
 func taskUpdateUsage() {
@@ -246,12 +246,11 @@ func taskUpdateUsage() {
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
 	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], `task update --body '{
-      "estimated_time": 5770555716060993335,
-      "order": 0.02819929842800078,
-      "parent_id": "Dolorum est.",
-      "status": "Ratione consequatur quis ullam quisquam necessitatibus.",
-      "title": "Dolores culpa dolore possimus."
-   }' --task-id "Labore qui qui error eos." --authorization "Ut omnis eum aut."`)
+      "estimated_time": 8168249958595759448,
+      "parent_id": "Qui ratione.",
+      "status": "Quis ullam quisquam.",
+      "title": "Assumenda dolores culpa dolore possimus reiciendis dolorum."
+   }' --task-id "Dolores occaecati." --authorization "Qui qui error eos."`)
 }
 
 func taskDeleteUsage() {
@@ -272,5 +271,5 @@ func taskDeleteUsage() {
 	// Example block: pass example as parameter to avoid format parsing of % characters
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], `task delete --task-id "Atque quo reiciendis eveniet eaque iusto eum." --authorization "Quam fugiat aut officia ut non modi."`)
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], `task delete --task-id "Veritatis labore." --authorization "Odit dolore dolor deserunt omnis molestiae."`)
 }

@@ -80,7 +80,7 @@ func BuildUpdatePayload(taskUpdateBody string, taskUpdateTaskID string, taskUpda
 	{
 		err = json.Unmarshal([]byte(taskUpdateBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"estimated_time\": 5770555716060993335,\n      \"order\": 0.02819929842800078,\n      \"parent_id\": \"Dolorum est.\",\n      \"status\": \"Ratione consequatur quis ullam quisquam necessitatibus.\",\n      \"title\": \"Dolores culpa dolore possimus.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"estimated_time\": 8168249958595759448,\n      \"parent_id\": \"Qui ratione.\",\n      \"status\": \"Quis ullam quisquam.\",\n      \"title\": \"Assumenda dolores culpa dolore possimus reiciendis dolorum.\"\n   }'")
 		}
 	}
 	var taskID string
@@ -95,7 +95,6 @@ func BuildUpdatePayload(taskUpdateBody string, taskUpdateTaskID string, taskUpda
 		Title:         body.Title,
 		ParentID:      body.ParentID,
 		Status:        body.Status,
-		Order:         body.Order,
 		EstimatedTime: body.EstimatedTime,
 	}
 	v.TaskID = taskID
