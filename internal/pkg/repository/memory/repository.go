@@ -10,12 +10,14 @@ import (
 var (
 	_ repository.Repository         = (*Repository)(nil)
 	_ repository.RelationRepository = (*Repository)(nil)
+	_ repository.ExtraRepository    = (*Repository)(nil)
 )
 
 type Repository struct {
 	Tasks     map[string]map[domain.TaskID]*domain.Task
 	Relations map[domain.RelationID]*domain.Relation
 	Children  map[domain.RelationID][]domain.RelationID // parentID -> children
+	Extras    map[domain.ExtraID]*domain.Extra
 }
 
 func NewRepository() *Repository {
@@ -23,6 +25,7 @@ func NewRepository() *Repository {
 		Tasks:     make(map[string]map[domain.TaskID]*domain.Task),
 		Relations: make(map[domain.RelationID]*domain.Relation),
 		Children:  make(map[domain.RelationID][]domain.RelationID),
+		Extras:    make(map[domain.ExtraID]*domain.Extra),
 	}
 }
 
@@ -101,6 +104,60 @@ func (r *Repository) DeleteTask(ctx context.Context, username string, task *doma
 	}
 
 	delete(r.Tasks[username], task.ID())
+
+	return nil
+}
+
+func (r *Repository) CreateExtra(ctx context.Context, extra *domain.Extra) error {
+	if _, ok := r.Extras[extra.ID()]; ok {
+		return repository.ErrExtraAlreadyExists
+	}
+
+	r.Extras[extra.ID()] = extra
+
+	return nil
+}
+
+func (r *Repository) DeleteExtra(ctx context.Context, extra *domain.Extra) error {
+	if _, ok := r.Extras[extra.ID()]; !ok {
+		return repository.ErrExtraNotFound
+	}
+
+	delete(r.Extras, extra.ID())
+
+	return nil
+}
+
+func (r *Repository) GetExtra(ctx context.Context, id domain.ExtraID) (*domain.Extra, error) {
+	extra, ok := r.Extras[id]
+	if !ok {
+		return nil, repository.ErrExtraNotFound
+	}
+
+	return extra, nil
+}
+
+func (r *Repository) ListExtras(ctx context.Context, ids []domain.ExtraID) ([]*domain.Extra, error) {
+	var ret []*domain.Extra
+
+	for _, id := range ids {
+		extra, ok := r.Extras[id]
+		if !ok {
+			continue
+		}
+
+		ret = append(ret, extra)
+	}
+
+	return ret, nil
+}
+
+func (r *Repository) UpdateExtra(ctx context.Context, extra *domain.Extra) error {
+	if _, ok := r.Extras[extra.ID()]; !ok {
+		return repository.ErrExtraNotFound
+	}
+
+	r.Extras[extra.ID()] = extra
 
 	return nil
 }

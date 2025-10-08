@@ -11,3 +11,8 @@ var (
 	ErrRelationBusy          = errors.New("relation busy")
 	ErrRelationAlreadyExists = errors.New("relation already exists")
 )
+
+var (
+	ErrExtraNotFound      = errors.New("extra not found")
+	ErrExtraAlreadyExists = errors.New("extra already exists")
+)

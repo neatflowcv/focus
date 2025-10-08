@@ -148,3 +148,19 @@ func (s *Service) ListChildren(ctx context.Context, input *ListChildrenInput) (*
 		IDs: ids[1:],
 	}, nil
 }
+
+func (s *Service) GetRelation(ctx context.Context, input *GetRelationInput) (*GetRelationOutput, error) {
+	relation, err := s.repo.GetRelation(ctx, domain.RelationID(input.ID))
+	if err != nil {
+		if errors.Is(err, repository.ErrRelationNotFound) {
+			return nil, ErrRelationNotFound
+		}
+
+		return nil, fmt.Errorf("failed to get relation: %w", err)
+	}
+
+	return &GetRelationOutput{
+		ID:       string(relation.ID()),
+		ParentID: string(relation.ParentID()),
+	}, nil
+}
