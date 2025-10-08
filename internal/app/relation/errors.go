@@ -1,13 +1,10 @@
-package repository
+package relation
 
 import "errors"
 
 var (
-	ErrTaskNotFound = errors.New("task not found")
-)
-
-var (
-	ErrRelationNotFound      = errors.New("relation not found")
+	ErrDummyNotFound         = errors.New("dummy not found")
 	ErrRelationBusy          = errors.New("relation busy")
 	ErrRelationAlreadyExists = errors.New("relation already exists")
+	ErrRelationNotFound      = errors.New("relation not found")
 )
