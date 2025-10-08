@@ -82,6 +82,19 @@ func EncodeCreateError(encoder func(context.Context, http.ResponseWriter) goahtt
 			return encodeError(ctx, w, v)
 		}
 		switch en.GoaErrorName() {
+		case "Unauthorized":
+			var res *goa.ServiceError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewCreateUnauthorizedResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusUnauthorized)
+			return enc.Encode(body)
 		case "InternalServerError":
 			var res *goa.ServiceError
 			errors.As(v, &res)
@@ -161,6 +174,19 @@ func EncodeListError(encoder func(context.Context, http.ResponseWriter) goahttp.
 			return encodeError(ctx, w, v)
 		}
 		switch en.GoaErrorName() {
+		case "Unauthorized":
+			var res *goa.ServiceError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewListUnauthorizedResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusUnauthorized)
+			return enc.Encode(body)
 		case "InternalServerError":
 			var res *goa.ServiceError
 			errors.As(v, &res)
@@ -242,6 +268,19 @@ func EncodeUpdateError(encoder func(context.Context, http.ResponseWriter) goahtt
 			return encodeError(ctx, w, v)
 		}
 		switch en.GoaErrorName() {
+		case "Unauthorized":
+			var res *goa.ServiceError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewUpdateUnauthorizedResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusUnauthorized)
+			return enc.Encode(body)
 		case "InternalServerError":
 			var res *goa.ServiceError
 			errors.As(v, &res)
@@ -305,6 +344,19 @@ func EncodeDeleteError(encoder func(context.Context, http.ResponseWriter) goahtt
 			return encodeError(ctx, w, v)
 		}
 		switch en.GoaErrorName() {
+		case "Unauthorized":
+			var res *goa.ServiceError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewDeleteUnauthorizedResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusUnauthorized)
+			return enc.Encode(body)
 		case "InternalServerError":
 			var res *goa.ServiceError
 			errors.As(v, &res)

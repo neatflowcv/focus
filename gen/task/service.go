@@ -115,6 +115,11 @@ type Taskdetail struct {
 // TaskdetailCollection is the result type of the task service list method.
 type TaskdetailCollection []*Taskdetail
 
+// MakeUnauthorized builds a goa.ServiceError from an error.
+func MakeUnauthorized(err error) *goa.ServiceError {
+	return goa.NewServiceError(err, "Unauthorized", false, false, false)
+}
+
 // MakeInternalServerError builds a goa.ServiceError from an error.
 func MakeInternalServerError(err error) *goa.ServiceError {
 	return goa.NewServiceError(err, "InternalServerError", false, false, false)

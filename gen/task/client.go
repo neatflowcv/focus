@@ -33,6 +33,7 @@ func NewClient(create, list, update, delete_ goa.Endpoint) *Client {
 
 // Create calls the "create" endpoint of the "task" service.
 // Create may return the following errors:
+//   - "Unauthorized" (type *goa.ServiceError): Unauthorized
 //   - "InternalServerError" (type *goa.ServiceError): Internal server error
 //   - error: internal error
 func (c *Client) Create(ctx context.Context, p *TaskInput) (res *Taskdetail, err error) {
@@ -46,6 +47,7 @@ func (c *Client) Create(ctx context.Context, p *TaskInput) (res *Taskdetail, err
 
 // List calls the "list" endpoint of the "task" service.
 // List may return the following errors:
+//   - "Unauthorized" (type *goa.ServiceError): Unauthorized
 //   - "InternalServerError" (type *goa.ServiceError): Internal server error
 //   - error: internal error
 func (c *Client) List(ctx context.Context, p *ListPayload) (res TaskdetailCollection, err error) {
@@ -59,6 +61,7 @@ func (c *Client) List(ctx context.Context, p *ListPayload) (res TaskdetailCollec
 
 // Update calls the "update" endpoint of the "task" service.
 // Update may return the following errors:
+//   - "Unauthorized" (type *goa.ServiceError): Unauthorized
 //   - "InternalServerError" (type *goa.ServiceError): Internal server error
 //   - error: internal error
 func (c *Client) Update(ctx context.Context, p *TaskUpdateInput) (res *Taskdetail, err error) {
@@ -72,6 +75,7 @@ func (c *Client) Update(ctx context.Context, p *TaskUpdateInput) (res *Taskdetai
 
 // Delete calls the "delete" endpoint of the "task" service.
 // Delete may return the following errors:
+//   - "Unauthorized" (type *goa.ServiceError): Unauthorized
 //   - "InternalServerError" (type *goa.ServiceError): Internal server error
 //   - error: internal error
 func (c *Client) Delete(ctx context.Context, p *TaskDeleteInput) (err error) {

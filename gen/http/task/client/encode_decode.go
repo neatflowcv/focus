@@ -59,6 +59,7 @@ func EncodeCreateRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 // create endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeCreateResponse may return the following errors:
+//   - "Unauthorized" (type *goa.ServiceError): http.StatusUnauthorized
 //   - "InternalServerError" (type *goa.ServiceError): http.StatusInternalServerError
 //   - error: internal error
 func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
@@ -93,6 +94,20 @@ func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			}
 			res := task.NewTaskdetail(vres)
 			return res, nil
+		case http.StatusUnauthorized:
+			var (
+				body CreateUnauthorizedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("task", "create", err)
+			}
+			err = ValidateCreateUnauthorizedResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("task", "create", err)
+			}
+			return nil, NewCreateUnauthorized(&body)
 		case http.StatusInternalServerError:
 			var (
 				body CreateInternalServerErrorResponseBody
@@ -157,6 +172,7 @@ func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 // endpoint. restoreBody controls whether the response body should be restored
 // after having been read.
 // DecodeListResponse may return the following errors:
+//   - "Unauthorized" (type *goa.ServiceError): http.StatusUnauthorized
 //   - "InternalServerError" (type *goa.ServiceError): http.StatusInternalServerError
 //   - error: internal error
 func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
@@ -191,6 +207,20 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			}
 			res := task.NewTaskdetailCollection(vres)
 			return res, nil
+		case http.StatusUnauthorized:
+			var (
+				body ListUnauthorizedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("task", "list", err)
+			}
+			err = ValidateListUnauthorizedResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("task", "list", err)
+			}
+			return nil, NewListUnauthorized(&body)
 		case http.StatusInternalServerError:
 			var (
 				body ListInternalServerErrorResponseBody
@@ -261,6 +291,7 @@ func EncodeUpdateRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 // update endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeUpdateResponse may return the following errors:
+//   - "Unauthorized" (type *goa.ServiceError): http.StatusUnauthorized
 //   - "InternalServerError" (type *goa.ServiceError): http.StatusInternalServerError
 //   - error: internal error
 func DecodeUpdateResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
@@ -295,6 +326,20 @@ func DecodeUpdateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			}
 			res := task.NewTaskdetail(vres)
 			return res, nil
+		case http.StatusUnauthorized:
+			var (
+				body UpdateUnauthorizedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("task", "update", err)
+			}
+			err = ValidateUpdateUnauthorizedResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("task", "update", err)
+			}
+			return nil, NewUpdateUnauthorized(&body)
 		case http.StatusInternalServerError:
 			var (
 				body UpdateInternalServerErrorResponseBody
@@ -361,6 +406,7 @@ func EncodeDeleteRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 // delete endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeDeleteResponse may return the following errors:
+//   - "Unauthorized" (type *goa.ServiceError): http.StatusUnauthorized
 //   - "InternalServerError" (type *goa.ServiceError): http.StatusInternalServerError
 //   - error: internal error
 func DecodeDeleteResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
@@ -380,6 +426,20 @@ func DecodeDeleteResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 		switch resp.StatusCode {
 		case http.StatusNoContent:
 			return nil, nil
+		case http.StatusUnauthorized:
+			var (
+				body DeleteUnauthorizedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("task", "delete", err)
+			}
+			err = ValidateDeleteUnauthorizedResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("task", "delete", err)
+			}
+			return nil, NewDeleteUnauthorized(&body)
 		case http.StatusInternalServerError:
 			var (
 				body DeleteInternalServerErrorResponseBody

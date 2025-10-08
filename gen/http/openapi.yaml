@@ -41,6 +41,10 @@ paths:
                     description: OK response.
                     schema:
                         $ref: '#/definitions/TaskTaskdetailResponseCollection'
+                "401":
+                    description: Unauthorized response.
+                    schema:
+                        $ref: '#/definitions/TaskListUnauthorizedResponseBody'
                 "500":
                     description: Internal Server Error response.
                     schema:
@@ -71,6 +75,10 @@ paths:
                     description: OK response.
                     schema:
                         $ref: '#/definitions/Taskdetail'
+                "401":
+                    description: Unauthorized response.
+                    schema:
+                        $ref: '#/definitions/TaskCreateUnauthorizedResponseBody'
                 "500":
                     description: Internal Server Error response.
                     schema:
@@ -98,6 +106,10 @@ paths:
             responses:
                 "204":
                     description: No Content response.
+                "401":
+                    description: Unauthorized response.
+                    schema:
+                        $ref: '#/definitions/TaskDeleteUnauthorizedResponseBody'
                 "500":
                     description: Internal Server Error response.
                     schema:
@@ -131,6 +143,10 @@ paths:
                     description: OK response.
                     schema:
                         $ref: '#/definitions/Taskdetail'
+                "401":
+                    description: Unauthorized response.
+                    schema:
+                        $ref: '#/definitions/TaskUpdateUnauthorizedResponseBody'
                 "500":
                     description: Internal Server Error response.
                     schema:
@@ -165,15 +181,58 @@ definitions:
             timeout:
                 type: boolean
                 description: Is the error a timeout?
-                example: false
+                example: true
         description: Internal server error (default view)
+        example:
+            fault: true
+            id: 123abc
+            message: parameter 'p' must be an integer
+            name: bad_request
+            temporary: false
+            timeout: true
+        required:
+            - name
+            - id
+            - message
+            - temporary
+            - timeout
+            - fault
+    TaskCreateUnauthorizedResponseBody:
+        title: 'Mediatype identifier: application/vnd.goa.error; view=default'
+        type: object
+        properties:
+            fault:
+                type: boolean
+                description: Is the error a server-side fault?
+                example: false
+            id:
+                type: string
+                description: ID is a unique identifier for this particular occurrence of the problem.
+                example: 123abc
+            message:
+                type: string
+                description: Message is a human-readable explanation specific to this occurrence of the problem.
+                example: parameter 'p' must be an integer
+            name:
+                type: string
+                description: Name is the name of this class of errors.
+                example: bad_request
+            temporary:
+                type: boolean
+                description: Is the error temporary?
+                example: true
+            timeout:
+                type: boolean
+                description: Is the error a timeout?
+                example: false
+        description: Unauthorized (default view)
         example:
             fault: false
             id: 123abc
             message: parameter 'p' must be an integer
             name: bad_request
-            temporary: false
-            timeout: false
+            temporary: true
+            timeout: true
         required:
             - name
             - id
@@ -188,7 +247,7 @@ definitions:
             fault:
                 type: boolean
                 description: Is the error a server-side fault?
-                example: false
+                example: true
             id:
                 type: string
                 description: ID is a unique identifier for this particular occurrence of the problem.
@@ -208,14 +267,14 @@ definitions:
             timeout:
                 type: boolean
                 description: Is the error a timeout?
-                example: true
+                example: false
         description: Internal server error (default view)
         example:
             fault: false
             id: 123abc
             message: parameter 'p' must be an integer
             name: bad_request
-            temporary: false
+            temporary: true
             timeout: true
         required:
             - name
@@ -224,31 +283,14 @@ definitions:
             - temporary
             - timeout
             - fault
-    TaskInput:
-        title: TaskInput
-        type: object
-        properties:
-            parent_id:
-                type: string
-                description: The parent ID of the task
-                example: Autem assumenda fuga et corporis.
-            title:
-                type: string
-                description: The title of the task
-                example: Unde beatae.
-        example:
-            parent_id: Voluptatem quisquam omnis.
-            title: Minima alias impedit tempore.
-        required:
-            - title
-    TaskListInternalServerErrorResponseBody:
+    TaskDeleteUnauthorizedResponseBody:
         title: 'Mediatype identifier: application/vnd.goa.error; view=default'
         type: object
         properties:
             fault:
                 type: boolean
                 description: Is the error a server-side fault?
-                example: false
+                example: true
             id:
                 type: string
                 description: ID is a unique identifier for this particular occurrence of the problem.
@@ -264,12 +306,12 @@ definitions:
             temporary:
                 type: boolean
                 description: Is the error temporary?
-                example: false
+                example: true
             timeout:
                 type: boolean
                 description: Is the error a timeout?
                 example: false
-        description: Internal server error (default view)
+        description: Unauthorized (default view)
         example:
             fault: true
             id: 123abc
@@ -284,73 +326,24 @@ definitions:
             - temporary
             - timeout
             - fault
-    TaskTaskdetailResponseCollection:
-        title: 'Mediatype identifier: taskdetail; type=collection; view=default'
-        type: array
-        items:
-            $ref: '#/definitions/TaskdetailResponse'
-        description: ListResponseBody is the result type for an array of TaskdetailResponse (default view)
-        example:
-            - actual_time: 2172334268853595857
-              completed_at: 8789354938821462965
-              created_at: 4811524684776275082
-              estimated_time: 644087518531812643
-              id: Corporis animi praesentium quasi occaecati quae.
-              is_leaf: false
-              lead_time: 5649253023867608586
-              parent_id: Nisi qui ut corporis quia numquam.
-              started_at: 8816741484794451297
-              status: Aut omnis laborum eligendi repudiandae ratione quis.
-              title: Beatae nobis.
-            - actual_time: 2172334268853595857
-              completed_at: 8789354938821462965
-              created_at: 4811524684776275082
-              estimated_time: 644087518531812643
-              id: Corporis animi praesentium quasi occaecati quae.
-              is_leaf: false
-              lead_time: 5649253023867608586
-              parent_id: Nisi qui ut corporis quia numquam.
-              started_at: 8816741484794451297
-              status: Aut omnis laborum eligendi repudiandae ratione quis.
-              title: Beatae nobis.
-            - actual_time: 2172334268853595857
-              completed_at: 8789354938821462965
-              created_at: 4811524684776275082
-              estimated_time: 644087518531812643
-              id: Corporis animi praesentium quasi occaecati quae.
-              is_leaf: false
-              lead_time: 5649253023867608586
-              parent_id: Nisi qui ut corporis quia numquam.
-              started_at: 8816741484794451297
-              status: Aut omnis laborum eligendi repudiandae ratione quis.
-              title: Beatae nobis.
-    TaskUpdateInput:
-        title: TaskUpdateInput
+    TaskInput:
+        title: TaskInput
         type: object
         properties:
-            estimated_time:
-                type: integer
-                description: The estimated time of the task
-                example: 8956716131488875451
-                format: int64
             parent_id:
                 type: string
                 description: The parent ID of the task
-                example: Porro accusamus sunt sunt aliquid aliquid non.
-            status:
-                type: string
-                description: The status of the task
-                example: Alias est nulla eveniet earum.
+                example: Molestiae harum aut enim temporibus voluptas minima.
             title:
                 type: string
                 description: The title of the task
-                example: Doloribus modi ex qui ut eveniet.
+                example: Beatae harum.
         example:
-            estimated_time: 2455952353529487638
-            parent_id: Explicabo sed distinctio.
-            status: Adipisci itaque a nisi quaerat rerum qui.
-            title: Ab pariatur.
-    TaskUpdateInternalServerErrorResponseBody:
+            parent_id: Consequuntur similique et.
+            title: Numquam et eligendi accusamus.
+        required:
+            - title
+    TaskListInternalServerErrorResponseBody:
         title: 'Mediatype identifier: application/vnd.goa.error; view=default'
         type: object
         properties:
@@ -393,6 +386,190 @@ definitions:
             - temporary
             - timeout
             - fault
+    TaskListUnauthorizedResponseBody:
+        title: 'Mediatype identifier: application/vnd.goa.error; view=default'
+        type: object
+        properties:
+            fault:
+                type: boolean
+                description: Is the error a server-side fault?
+                example: false
+            id:
+                type: string
+                description: ID is a unique identifier for this particular occurrence of the problem.
+                example: 123abc
+            message:
+                type: string
+                description: Message is a human-readable explanation specific to this occurrence of the problem.
+                example: parameter 'p' must be an integer
+            name:
+                type: string
+                description: Name is the name of this class of errors.
+                example: bad_request
+            temporary:
+                type: boolean
+                description: Is the error temporary?
+                example: false
+            timeout:
+                type: boolean
+                description: Is the error a timeout?
+                example: true
+        description: Unauthorized (default view)
+        example:
+            fault: false
+            id: 123abc
+            message: parameter 'p' must be an integer
+            name: bad_request
+            temporary: false
+            timeout: true
+        required:
+            - name
+            - id
+            - message
+            - temporary
+            - timeout
+            - fault
+    TaskTaskdetailResponseCollection:
+        title: 'Mediatype identifier: taskdetail; type=collection; view=default'
+        type: array
+        items:
+            $ref: '#/definitions/TaskdetailResponse'
+        description: ListResponseBody is the result type for an array of TaskdetailResponse (default view)
+        example:
+            - actual_time: 2172334268853595857
+              completed_at: 8789354938821462965
+              created_at: 4811524684776275082
+              estimated_time: 644087518531812643
+              id: Corporis animi praesentium quasi occaecati quae.
+              is_leaf: false
+              lead_time: 5649253023867608586
+              parent_id: Nisi qui ut corporis quia numquam.
+              started_at: 8816741484794451297
+              status: Aut omnis laborum eligendi repudiandae ratione quis.
+              title: Beatae nobis.
+            - actual_time: 2172334268853595857
+              completed_at: 8789354938821462965
+              created_at: 4811524684776275082
+              estimated_time: 644087518531812643
+              id: Corporis animi praesentium quasi occaecati quae.
+              is_leaf: false
+              lead_time: 5649253023867608586
+              parent_id: Nisi qui ut corporis quia numquam.
+              started_at: 8816741484794451297
+              status: Aut omnis laborum eligendi repudiandae ratione quis.
+              title: Beatae nobis.
+    TaskUpdateInput:
+        title: TaskUpdateInput
+        type: object
+        properties:
+            estimated_time:
+                type: integer
+                description: The estimated time of the task
+                example: 2455952353529487638
+                format: int64
+            parent_id:
+                type: string
+                description: The parent ID of the task
+                example: Non adipisci itaque a.
+            status:
+                type: string
+                description: The status of the task
+                example: Quaerat rerum qui.
+            title:
+                type: string
+                description: The title of the task
+                example: Aut explicabo sed.
+        example:
+            estimated_time: 386567935401208950
+            parent_id: Corrupti suscipit harum impedit laboriosam.
+            status: Dignissimos beatae perspiciatis perferendis.
+            title: Mollitia aspernatur omnis.
+    TaskUpdateInternalServerErrorResponseBody:
+        title: 'Mediatype identifier: application/vnd.goa.error; view=default'
+        type: object
+        properties:
+            fault:
+                type: boolean
+                description: Is the error a server-side fault?
+                example: true
+            id:
+                type: string
+                description: ID is a unique identifier for this particular occurrence of the problem.
+                example: 123abc
+            message:
+                type: string
+                description: Message is a human-readable explanation specific to this occurrence of the problem.
+                example: parameter 'p' must be an integer
+            name:
+                type: string
+                description: Name is the name of this class of errors.
+                example: bad_request
+            temporary:
+                type: boolean
+                description: Is the error temporary?
+                example: true
+            timeout:
+                type: boolean
+                description: Is the error a timeout?
+                example: false
+        description: Internal server error (default view)
+        example:
+            fault: false
+            id: 123abc
+            message: parameter 'p' must be an integer
+            name: bad_request
+            temporary: false
+            timeout: false
+        required:
+            - name
+            - id
+            - message
+            - temporary
+            - timeout
+            - fault
+    TaskUpdateUnauthorizedResponseBody:
+        title: 'Mediatype identifier: application/vnd.goa.error; view=default'
+        type: object
+        properties:
+            fault:
+                type: boolean
+                description: Is the error a server-side fault?
+                example: false
+            id:
+                type: string
+                description: ID is a unique identifier for this particular occurrence of the problem.
+                example: 123abc
+            message:
+                type: string
+                description: Message is a human-readable explanation specific to this occurrence of the problem.
+                example: parameter 'p' must be an integer
+            name:
+                type: string
+                description: Name is the name of this class of errors.
+                example: bad_request
+            temporary:
+                type: boolean
+                description: Is the error temporary?
+                example: false
+            timeout:
+                type: boolean
+                description: Is the error a timeout?
+                example: true
+        description: Unauthorized (default view)
+        example:
+            fault: false
+            id: 123abc
+            message: parameter 'p' must be an integer
+            name: bad_request
+            temporary: true
+            timeout: true
+        required:
+            - name
+            - id
+            - message
+            - temporary
+            - timeout
+            - fault
     Taskdetail:
         title: 'Mediatype identifier: taskdetail; view=default'
         type: object
@@ -400,66 +577,66 @@ definitions:
             actual_time:
                 type: integer
                 description: The actual time of the task
-                example: 3321688028374152550
+                example: 5980684685415599451
                 format: int64
             completed_at:
                 type: integer
                 description: The timestamp when the task was completed
-                example: 3189980389450735329
+                example: 4323046486216470239
                 format: int64
             created_at:
                 type: integer
                 description: The timestamp when the task was created
-                example: 8268824458518814376
+                example: 8892115046765364213
                 format: int64
             estimated_time:
                 type: integer
                 description: The estimated time of the task
-                example: 6764894602263711702
+                example: 769224064042927112
                 format: int64
             id:
                 type: string
                 description: The ID of the task
-                example: Eveniet eaque iusto eum dolor.
+                example: Quae quia repellat deleniti nihil consequatur vel.
             is_leaf:
                 type: boolean
                 description: Whether the task is a leaf task
-                example: true
+                example: false
             lead_time:
                 type: integer
                 description: The lead time of the task
-                example: 1552351292431645962
+                example: 2821615319361599239
                 format: int64
             parent_id:
                 type: string
                 description: The parent ID of the task
-                example: Fugiat aut officia ut non modi aut.
+                example: Odit perferendis aut voluptatem qui eum fugit.
             started_at:
                 type: integer
                 description: The timestamp when the task was started
-                example: 1700675663212872878
+                example: 5686147943572838286
                 format: int64
             status:
                 type: string
                 description: The status of the task
-                example: Odit perferendis aut voluptatem qui eum fugit.
+                example: Natus repellendus.
             title:
                 type: string
                 description: The title of the task
-                example: Quae quia repellat deleniti nihil consequatur vel.
+                example: Commodi beatae deserunt maiores laudantium asperiores omnis.
         description: CreateResponseBody result type (default view)
         example:
-            actual_time: 293339311425426817
-            completed_at: 2835063725048473949
-            created_at: 6063691705544486148
-            estimated_time: 3594687342303680335
-            id: Eius natus repellendus commodi.
-            is_leaf: true
-            lead_time: 6866097796767887653
-            parent_id: Veritatis error deserunt.
-            started_at: 2597680120660980244
-            status: Et vel est nam.
-            title: Et totam natus.
+            actual_time: 3860197192624958126
+            completed_at: 8085912047735610558
+            created_at: 7674835504546760024
+            estimated_time: 2443785852375484901
+            id: Natus quia et vel.
+            is_leaf: false
+            lead_time: 1783317522358967618
+            parent_id: Nam architecto cumque optio fugit.
+            started_at: 227937224797907666
+            status: Ipsa impedit.
+            title: Quas nobis maiores in officiis.
         required:
             - id
             - title
@@ -472,27 +649,27 @@ definitions:
             actual_time:
                 type: integer
                 description: The actual time of the task
-                example: 7261730778451901492
+                example: 3038736976794975442
                 format: int64
             completed_at:
                 type: integer
                 description: The timestamp when the task was completed
-                example: 1577758740305574389
+                example: 3707321435505658767
                 format: int64
             created_at:
                 type: integer
                 description: The timestamp when the task was created
-                example: 3873497710463612547
+                example: 7851324801854454987
                 format: int64
             estimated_time:
                 type: integer
                 description: The estimated time of the task
-                example: 5708883337736862485
+                example: 4280074667404497147
                 format: int64
             id:
                 type: string
                 description: The ID of the task
-                example: Distinctio molestiae harum aut enim temporibus voluptas.
+                example: Accusantium qui quod officiis porro unde unde.
             is_leaf:
                 type: boolean
                 description: Whether the task is a leaf task
@@ -500,38 +677,38 @@ definitions:
             lead_time:
                 type: integer
                 description: The lead time of the task
-                example: 7401243951852795824
+                example: 5645038487346972198
                 format: int64
             parent_id:
                 type: string
                 description: The parent ID of the task
-                example: Praesentium beatae harum expedita consequuntur.
+                example: Officia quas ullam culpa dolorem.
             started_at:
                 type: integer
                 description: The timestamp when the task was started
-                example: 756885559405208355
+                example: 1140812738329248349
                 format: int64
             status:
                 type: string
                 description: The status of the task
-                example: Et eligendi accusamus at accusantium qui quod.
+                example: Cum blanditiis.
             title:
                 type: string
                 description: The title of the task
-                example: Et quasi.
+                example: Magnam laboriosam quam.
         description: TaskdetailResponse result type (default view)
         example:
-            actual_time: 5128894242372850282
-            completed_at: 484763215522757662
-            created_at: 2323846356294475801
-            estimated_time: 2476647117455762088
-            id: Culpa dolorem laudantium magnam.
-            is_leaf: true
-            lead_time: 7103049695158321830
-            parent_id: Quam repellendus cum blanditiis omnis.
-            started_at: 7464895724586063250
-            status: Maiores odit recusandae et et.
-            title: Praesentium qui rerum.
+            actual_time: 3435329221889764974
+            completed_at: 8592677132735821252
+            created_at: 3531551450490652910
+            estimated_time: 5352798065806699126
+            id: Recusandae et et qui.
+            is_leaf: false
+            lead_time: 886280517307206378
+            parent_id: Veritatis quos.
+            started_at: 867276528224863209
+            status: Sapiente voluptas.
+            title: Et nisi quae dolores.
         required:
             - id
             - title

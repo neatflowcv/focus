@@ -28,12 +28,9 @@ func NewHandler(service *flow.Service, relationService *relation.Service) *Handl
 }
 
 func (h *Handler) Create(ctx context.Context, input *task.TaskInput) (*task.Taskdetail, error) {
-	token := strings.TrimPrefix(input.Authorization, "Bearer ")
-	now := time.Now()
-
-	username, err := h.vault.Decrypt(token, now)
+	username, now, err := authUser(input.Authorization, h)
 	if err != nil {
-		return nil, task.MakeInternalServerError(err)
+		return nil, err
 	}
 
 	ret, err := h.service.CreateTask(ctx, &flow.CreateTaskInput{
@@ -62,12 +59,9 @@ func (h *Handler) Create(ctx context.Context, input *task.TaskInput) (*task.Task
 }
 
 func (h *Handler) List(ctx context.Context, input *task.ListPayload) (task.TaskdetailCollection, error) {
-	token := strings.TrimPrefix(input.Authorization, "Bearer ")
-	now := time.Now()
-
-	username, err := h.vault.Decrypt(token, now)
+	username, _, err := authUser(input.Authorization, h)
 	if err != nil {
-		return nil, task.MakeInternalServerError(err)
+		return nil, err
 	}
 
 	parentID := ""
@@ -124,4 +118,16 @@ func toTaskdetailCollection(domainTask []flow.Task, parentID string) task.Taskde
 	}
 
 	return ret
+}
+
+func authUser(authorization string, h *Handler) (string, time.Time, error) {
+	now := time.Now()
+	token := strings.TrimPrefix(authorization, "Bearer ")
+
+	username, err := h.vault.Decrypt(token, now)
+	if err != nil {
+		return "", now, task.MakeUnauthorized(err)
+	}
+
+	return username, now, nil
 }

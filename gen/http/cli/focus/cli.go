@@ -222,7 +222,7 @@ func taskListUsage() {
 	// Example block: pass example as parameter to avoid format parsing of % characters
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], `task list --parent-id "Vel quas dignissimos reiciendis voluptatem tempore ut." --recursive false --authorization "Unde voluptatem laborum odio laudantium sunt."`)
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], `task list --parent-id "Reiciendis voluptatem tempore ut." --recursive false --authorization "Unde voluptatem laborum odio laudantium sunt."`)
 }
 
 func taskUpdateUsage() {
@@ -271,5 +271,5 @@ func taskDeleteUsage() {
 	// Example block: pass example as parameter to avoid format parsing of % characters
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], `task delete --task-id "Veritatis labore." --authorization "Odit dolore dolor deserunt omnis molestiae."`)
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], `task delete --task-id "Deserunt omnis molestiae suscipit atque quo reiciendis." --authorization "Eaque iusto eum dolor quam fugiat."`)
 }
