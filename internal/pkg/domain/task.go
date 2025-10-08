@@ -1,6 +1,8 @@
 package domain
 
-import "time"
+import (
+	"time"
+)
 
 type TaskStatus string
 
@@ -28,6 +30,16 @@ func NewTask(
 	createdAt time.Time,
 	completedAt time.Time,
 ) *Task {
+	if id == "" {
+		panic("id is required")
+	}
+
+	if title == "" {
+		panic("title is required")
+	}
+
+	validateTaskStatus(status)
+
 	return &Task{
 		id:          id,
 		title:       title,
@@ -55,4 +67,13 @@ func (t *Task) CreatedAt() time.Time {
 
 func (t *Task) CompletedAt() time.Time {
 	return t.completedAt
+}
+
+func validateTaskStatus(status TaskStatus) {
+	switch status {
+	case TaskStatusTodo, TaskStatusDoing, TaskStatusDone:
+		return
+	}
+
+	panic("invalid task status: " + string(status))
 }
