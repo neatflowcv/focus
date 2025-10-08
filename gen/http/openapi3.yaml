@@ -21,8 +21,8 @@ paths:
                   schema:
                     type: string
                     description: The ID of the parent task
-                    example: Pariatur dolor alias aliquam et.
-                  example: Sit occaecati.
+                    example: Fugit accusantium voluptas quis.
+                  example: Labore earum libero ab fuga eius voluptatem.
                 - name: recursive
                   in: query
                   description: Whether to include all subtasks recursively
@@ -87,8 +87,8 @@ paths:
                         schema:
                             $ref: '#/components/schemas/TaskInput2'
                         example:
-                            parent_id: Cumque autem quidem quaerat dolore.
-                            title: Magnam ut ullam dolor sint.
+                            parent_id: Odio aut enim saepe voluptatem.
+                            title: Error odio corporis animi praesentium quasi.
             responses:
                 "200":
                     description: OK response.
@@ -97,17 +97,17 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/Taskdetail'
                             example:
-                                actual_time: 2844835421467770901
-                                completed_at: 8248634901627876758
-                                created_at: 2556424913323560832
-                                estimated_time: 1508075521861452504
-                                id: Numquam magni iusto debitis minus minima.
-                                is_leaf: true
-                                lead_time: 4983275453136059997
-                                parent_id: Iste facilis dolorem.
-                                started_at: 7525042665114676003
-                                status: Minus adipisci non.
-                                title: Autem vitae.
+                                actual_time: 637386173158792161
+                                completed_at: 2844835421467770901
+                                created_at: 1508075521861452504
+                                estimated_time: 2807160397741845953
+                                id: Minus minima voluptatem iste.
+                                is_leaf: false
+                                lead_time: 2003372347443036469
+                                parent_id: Dolorem minima autem vitae pariatur minus.
+                                started_at: 3324603896974601000
+                                status: Eos distinctio.
+                                title: Non necessitatibus.
                 "401":
                     description: 'Unauthorized: Unauthorized'
                     content:
@@ -135,8 +135,8 @@ paths:
                   schema:
                     type: string
                     description: The ID of the task
-                    example: Libero sint debitis hic recusandae.
-                  example: Sequi delectus sapiente architecto repudiandae.
+                    example: Minus aut repudiandae quis itaque quam maiores.
+                  example: Perspiciatis ut.
             responses:
                 "204":
                     description: No Content response.
@@ -172,8 +172,8 @@ paths:
                   schema:
                     type: string
                     description: The ID of the task
-                    example: Illum rerum ab et enim nostrum ipsam.
-                  example: Aperiam illum dolore omnis.
+                    example: Earum molestiae culpa explicabo fugit.
+                  example: Repudiandae praesentium consectetur dolorem non.
             requestBody:
                 required: true
                 content:
@@ -181,10 +181,11 @@ paths:
                         schema:
                             $ref: '#/components/schemas/TaskUpdateInput2'
                         example:
-                            estimated_time: 8168249958595759448
-                            parent_id: Qui ratione.
-                            status: Quis ullam quisquam.
-                            title: Assumenda dolores culpa dolore possimus reiciendis dolorum.
+                            estimated_time: 3455221692150320965
+                            next_id: Dolores occaecati.
+                            parent_id: Ratione consequatur quis ullam quisquam necessitatibus.
+                            status: Qui qui error eos.
+                            title: Dolorum est.
             responses:
                 "200":
                     description: OK response.
@@ -193,17 +194,17 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/Taskdetail'
                             example:
-                                actual_time: 5337688393691907374
-                                completed_at: 4524569925747739908
-                                created_at: 4869018107979014396
-                                estimated_time: 2017796596138454366
-                                id: Ut omnis eum aut.
-                                is_leaf: true
-                                lead_time: 4551180775075686305
-                                parent_id: Vitae quo non accusamus explicabo laborum.
-                                started_at: 4495611580785047071
-                                status: Voluptatem nisi.
-                                title: Neque totam ipsa ipsum non corrupti.
+                                actual_time: 4372216069422327909
+                                completed_at: 7399597502966736317
+                                created_at: 8251784134764428059
+                                estimated_time: 1982414907778851039
+                                id: Ipsa ipsum non corrupti est voluptatem nisi.
+                                is_leaf: false
+                                lead_time: 3455250539953181591
+                                parent_id: Fugiat qui ut a officia.
+                                started_at: 5786226096274793682
+                                status: Quibusdam veritatis labore quo odit dolore.
+                                title: Voluptatibus magni facilis beatae cumque placeat.
                 "401":
                     description: 'Unauthorized: Unauthorized'
                     content:
@@ -230,7 +231,7 @@ components:
                 fault:
                     type: boolean
                     description: Is the error a server-side fault?
-                    example: false
+                    example: true
                 id:
                     type: string
                     description: ID is a unique identifier for this particular occurrence of the problem.
@@ -257,8 +258,8 @@ components:
                 id: 123abc
                 message: parameter 'p' must be an integer
                 name: bad_request
-                temporary: true
-                timeout: false
+                temporary: false
+                timeout: true
             required:
                 - name
                 - id
@@ -272,14 +273,14 @@ components:
                 authorization:
                     type: string
                     description: The authorization header
-                    example: Officia commodi consequuntur.
+                    example: Facilis exercitationem itaque autem dolores deserunt sint.
                 task_id:
                     type: string
                     description: The ID of the task
-                    example: Perferendis corporis expedita ut dolor rerum qui.
+                    example: Nihil blanditiis ut eligendi possimus facilis sed.
             example:
-                authorization: Dignissimos error perferendis molestiae.
-                task_id: Numquam molestiae officia quasi neque fugiat aut.
+                authorization: In quam.
+                task_id: Iste provident cumque dolor.
             required:
                 - authorization
                 - task_id
@@ -289,19 +290,19 @@ components:
                 authorization:
                     type: string
                     description: The authorization header
-                    example: Repellendus excepturi possimus.
+                    example: Voluptas voluptas illum eligendi dolore et.
                 parent_id:
                     type: string
                     description: The parent ID of the task
-                    example: Cum dicta.
+                    example: Nihil at iusto non.
                 title:
                     type: string
                     description: The title of the task
-                    example: Laboriosam et quo vel dignissimos.
+                    example: Rerum repellat alias ea excepturi voluptatem quam.
             example:
-                authorization: Corrupti natus aut deleniti a.
-                parent_id: Deserunt odit.
-                title: Quis eum.
+                authorization: Dolores quae excepturi est assumenda ratione quos.
+                parent_id: Ab harum enim soluta labore et eos.
+                title: Autem error omnis.
             required:
                 - authorization
                 - title
@@ -311,14 +312,14 @@ components:
                 parent_id:
                     type: string
                     description: The parent ID of the task
-                    example: Cum modi velit aliquam dolorem.
+                    example: Et eveniet.
                 title:
                     type: string
                     description: The title of the task
-                    example: Ut vitae tenetur itaque.
+                    example: Enim inventore.
             example:
-                parent_id: Necessitatibus magni reiciendis molestiae illum est et.
-                title: Maiores aut velit et sint.
+                parent_id: Iste unde dignissimos ratione eius adipisci quisquam.
+                title: Omnis suscipit.
             required:
                 - title
         TaskUpdateInput:
@@ -327,35 +328,40 @@ components:
                 authorization:
                     type: string
                     description: The authorization header
-                    example: Dolorum voluptas voluptas illum eligendi dolore et.
+                    example: Ratione et.
                 estimated_time:
                     type: integer
                     description: The estimated time of the task
-                    example: 3223415703712812803
+                    example: 7627254184297284142
                     format: int64
+                next_id:
+                    type: string
+                    description: The next ID of the task
+                    example: Fugiat optio cum autem consequatur.
                 parent_id:
                     type: string
                     description: The parent ID of the task
-                    example: Dolores quae excepturi est assumenda ratione quos.
+                    example: Aperiam enim explicabo assumenda repellat ullam laborum.
                 status:
                     type: string
                     description: The status of the task
-                    example: Ab harum enim soluta labore et eos.
+                    example: Odit quisquam sapiente nisi officia commodi consequuntur.
                 task_id:
                     type: string
                     description: The ID of the task
-                    example: Nihil at iusto non.
+                    example: Ipsum illum sit aliquid facere.
                 title:
                     type: string
                     description: The title of the task
-                    example: Rerum repellat alias ea excepturi voluptatem quam.
+                    example: Quidem ex et aut nihil.
             example:
-                authorization: Error omnis dolores ratione et id ipsum.
-                estimated_time: 8209120019216364190
-                parent_id: Ullam laborum quibusdam fugiat optio cum autem.
-                status: Quidem odit quisquam.
-                task_id: Sit aliquid facere est quidem ex et.
-                title: Nihil deleniti aperiam enim explicabo assumenda.
+                authorization: Corporis expedita ut dolor rerum.
+                estimated_time: 5566909707384005942
+                next_id: Nostrum ratione dolor ab.
+                parent_id: Quasi neque fugiat aut ut earum at.
+                status: Incidunt architecto cum et quas tempore.
+                task_id: Et dignissimos error perferendis.
+                title: Totam numquam molestiae.
             required:
                 - authorization
                 - task_id
@@ -365,90 +371,95 @@ components:
                 estimated_time:
                     type: integer
                     description: The estimated time of the task
-                    example: 8535817410945943115
+                    example: 1856590022622426091
                     format: int64
+                next_id:
+                    type: string
+                    description: The next ID of the task
+                    example: Sit occaecati.
                 parent_id:
                     type: string
                     description: The parent ID of the task
-                    example: Vitae asperiores accusamus et eveniet atque.
+                    example: Pariatur dolor alias aliquam et.
                 status:
                     type: string
                     description: The status of the task
-                    example: Inventore error iste.
+                    example: Explicabo non illum rerum ab et.
                 title:
                     type: string
                     description: The title of the task
-                    example: Atque vel eius ut incidunt voluptas.
+                    example: Corrupti minima voluptatem consequatur error.
             example:
-                estimated_time: 2791825843045052450
-                parent_id: Aliquam consequatur laborum omnis in voluptatibus et.
-                status: Minima voluptatem consequatur.
-                title: Ratione eius adipisci quisquam architecto omnis suscipit.
+                estimated_time: 2149120807176398684
+                next_id: Repellendus sequi delectus.
+                parent_id: In libero sint debitis hic.
+                status: Architecto repudiandae aut maxime.
+                title: Ipsam sed aperiam illum dolore.
         Taskdetail:
             type: object
             properties:
                 actual_time:
                     type: integer
                     description: The actual time of the task
-                    example: 1431414106613386281
+                    example: 8710520733013748340
                     format: int64
                 completed_at:
                     type: integer
                     description: The timestamp when the task was completed
-                    example: 8051744504547752866
+                    example: 896846639938475588
                     format: int64
                 created_at:
                     type: integer
                     description: The timestamp when the task was created
-                    example: 208322319145012533
+                    example: 2639872971106001826
                     format: int64
                 estimated_time:
                     type: integer
                     description: The estimated time of the task
-                    example: 3530000930669084233
+                    example: 2635804589614687305
                     format: int64
                 id:
                     type: string
                     description: The ID of the task
-                    example: Earum at ullam nostrum ratione dolor ab.
+                    example: Accusamus in ut corporis dolorem.
                 is_leaf:
                     type: boolean
                     description: Whether the task is a leaf task
-                    example: true
+                    example: false
                 lead_time:
                     type: integer
                     description: The lead time of the task
-                    example: 2135605973155770468
+                    example: 4299083460156681882
                     format: int64
                 parent_id:
                     type: string
                     description: The parent ID of the task
-                    example: Incidunt architecto cum et quas tempore.
+                    example: Ipsum necessitatibus.
                 started_at:
                     type: integer
                     description: The timestamp when the task was started
-                    example: 5304934123305134268
+                    example: 4814518140305255366
                     format: int64
                 status:
                     type: string
                     description: The status of the task
-                    example: Dolores deserunt sint molestiae.
+                    example: Modi velit aliquam dolorem possimus.
                 title:
                     type: string
                     description: The title of the task
-                    example: Autem facilis exercitationem itaque.
+                    example: Et molestiae dolores quo quidem sit perferendis.
             example:
-                actual_time: 4040581099066174671
-                completed_at: 2844951003159532523
-                created_at: 5026725195044610386
-                estimated_time: 4532597724641932244
-                id: In quam.
+                actual_time: 2981034982663018946
+                completed_at: 6965183568194448580
+                created_at: 5380174285776797186
+                estimated_time: 1853034935967988785
+                id: Molestiae illum est et et.
                 is_leaf: true
-                lead_time: 2475960598523537497
-                parent_id: Iste provident cumque dolor.
-                started_at: 7885970109050806925
-                status: Ipsum necessitatibus.
-                title: Accusamus in ut corporis dolorem.
+                lead_time: 83561159287514732
+                parent_id: Aut velit et sint.
+                started_at: 5403357065791948015
+                status: Et sit pariatur atque vel.
+                title: Sit non voluptatem.
             required:
                 - id
                 - title

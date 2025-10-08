@@ -111,6 +111,7 @@ var TaskUpdateInput = dsl.Type("TaskUpdateInput", func() { //nolint:gochecknoglo
 
 	dsl.Attribute("title", dsl.String, "The title of the task")
 	dsl.Attribute("parent_id", dsl.String, "The parent ID of the task")
+	dsl.Attribute("next_id", dsl.String, "The next ID of the task")
 	dsl.Attribute("status", dsl.String, "The status of the task")
 	dsl.Attribute("estimated_time", dsl.Int64, "The estimated time of the task")
 

@@ -23,7 +23,7 @@ func BuildCreatePayload(taskCreateBody string, taskCreateAuthorization string) (
 	{
 		err = json.Unmarshal([]byte(taskCreateBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"parent_id\": \"Cumque autem quidem quaerat dolore.\",\n      \"title\": \"Magnam ut ullam dolor sint.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"parent_id\": \"Odio aut enim saepe voluptatem.\",\n      \"title\": \"Error odio corporis animi praesentium quasi.\"\n   }'")
 		}
 	}
 	var authorization string
@@ -80,7 +80,7 @@ func BuildUpdatePayload(taskUpdateBody string, taskUpdateTaskID string, taskUpda
 	{
 		err = json.Unmarshal([]byte(taskUpdateBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"estimated_time\": 8168249958595759448,\n      \"parent_id\": \"Qui ratione.\",\n      \"status\": \"Quis ullam quisquam.\",\n      \"title\": \"Assumenda dolores culpa dolore possimus reiciendis dolorum.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"estimated_time\": 3455221692150320965,\n      \"next_id\": \"Dolores occaecati.\",\n      \"parent_id\": \"Ratione consequatur quis ullam quisquam necessitatibus.\",\n      \"status\": \"Qui qui error eos.\",\n      \"title\": \"Dolorum est.\"\n   }'")
 		}
 	}
 	var taskID string
@@ -94,6 +94,7 @@ func BuildUpdatePayload(taskUpdateBody string, taskUpdateTaskID string, taskUpda
 	v := &task.TaskUpdateInput{
 		Title:         body.Title,
 		ParentID:      body.ParentID,
+		NextID:        body.NextID,
 		Status:        body.Status,
 		EstimatedTime: body.EstimatedTime,
 	}

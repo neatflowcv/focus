@@ -80,6 +80,8 @@ type TaskUpdateInput struct {
 	Title *string
 	// The parent ID of the task
 	ParentID *string
+	// The next ID of the task
+	NextID *string
 	// The status of the task
 	Status *string
 	// The estimated time of the task

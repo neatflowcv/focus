@@ -29,6 +29,8 @@ type UpdateRequestBody struct {
 	Title *string `form:"title,omitempty" json:"title,omitempty" xml:"title,omitempty"`
 	// The parent ID of the task
 	ParentID *string `form:"parent_id,omitempty" json:"parent_id,omitempty" xml:"parent_id,omitempty"`
+	// The next ID of the task
+	NextID *string `form:"next_id,omitempty" json:"next_id,omitempty" xml:"next_id,omitempty"`
 	// The status of the task
 	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
 	// The estimated time of the task
@@ -513,6 +515,7 @@ func NewUpdateTaskUpdateInput(body *UpdateRequestBody, taskID string, authorizat
 	v := &task.TaskUpdateInput{
 		Title:         body.Title,
 		ParentID:      body.ParentID,
+		NextID:        body.NextID,
 		Status:        body.Status,
 		EstimatedTime: body.EstimatedTime,
 	}
