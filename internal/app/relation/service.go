@@ -36,6 +36,7 @@ func (s *Service) CreateRelation(ctx context.Context, input *CreateRelationInput
 		domain.RelationID(input.ID),
 		domain.RelationID(input.ParentID),
 		dummy.NextID(),
+		1,
 	)
 
 	err = s.repo.CreateRelation(ctx, relation)
@@ -111,6 +112,7 @@ func (s *Service) CreateChildDummy(ctx context.Context, input *CreateChildDummyI
 		domain.RelationID(input.ID+"-dummy"),
 		domain.RelationID(input.ID),
 		domain.RelationID(""),
+		1,
 	)
 
 	err := s.repo.CreateRelation(ctx, relation)
