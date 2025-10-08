@@ -123,19 +123,28 @@ func (r *Repository) ListChildrenRelations(ctx context.Context, id domain.Relati
 	return ToDomainRelations(relations), nil
 }
 
-func (r *Repository) UpdateRelation(ctx context.Context, dRelataion *domain.Relation) error {
-	relation := FromDomainRelation(dRelataion)
-	relation.Version++
+func (r *Repository) UpdateRelations(ctx context.Context, dRelations ...*domain.Relation) error {
+	err := r.db.Transaction(func(tx *gorm.DB) error {
+		for _, dRelation := range dRelations {
+			relation := FromDomainRelation(dRelation)
+			relation.Version++
 
-	affected, err := gorm.G[Relation](r.db).
-		Where(&Relation{ID: string(dRelataion.ID()), Version: dRelataion.Version()}). //nolint:exhaustruct
-		Updates(ctx, *relation)
+			affected, err := gorm.G[Relation](tx).
+				Where(&Relation{ID: string(dRelation.ID()), Version: dRelation.Version()}). //nolint:exhaustruct
+				Updates(ctx, *relation)
+			if err != nil {
+				return fmt.Errorf("failed to update relation: %w", err)
+			}
+
+			if affected == 0 {
+				return repository.ErrRelationBusy
+			}
+		}
+
+		return nil
+	})
 	if err != nil {
-		return fmt.Errorf("failed to update relation: %w", err)
-	}
-
-	if affected == 0 {
-		return repository.ErrRelationBusy
+		return fmt.Errorf("failed to update relations: %w", err)
 	}
 
 	return nil

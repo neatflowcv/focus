@@ -88,12 +88,16 @@ func (r *Repository) DeleteRelation(ctx context.Context, relation *domain.Relati
 	return nil
 }
 
-func (r *Repository) UpdateRelation(ctx context.Context, relation *domain.Relation) error {
-	if _, ok := r.Relations[relation.ID()]; !ok {
-		return repository.ErrRelationNotFound
+func (r *Repository) UpdateRelations(ctx context.Context, relations ...*domain.Relation) error {
+	for _, relation := range relations {
+		if _, ok := r.Relations[relation.ID()]; !ok {
+			return repository.ErrRelationNotFound
+		}
 	}
 
-	r.Relations[relation.ID()] = relation
+	for _, relation := range relations {
+		r.Relations[relation.ID()] = relation
+	}
 
 	return nil
 }

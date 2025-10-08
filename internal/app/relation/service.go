@@ -101,7 +101,7 @@ func (s *Service) CreateRelation(ctx context.Context, input *CreateRelationInput
 
 	nextDummy := dummy.SetNextID(relation.ID())
 
-	err = s.repo.UpdateRelation(ctx, nextDummy)
+	err = s.repo.UpdateRelations(ctx, nextDummy)
 	if err != nil {
 		return fmt.Errorf("failed to update relation: %w", err)
 	}
