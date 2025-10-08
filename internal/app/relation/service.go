@@ -22,6 +22,54 @@ func NewService(bus *eventbus.Bus, repo repository.RelationRepository) *Service 
 	}
 }
 
+func (s *Service) CreateChildDummy(ctx context.Context, input *CreateChildDummyInput) error {
+	relation := domain.NewRelation(
+		domain.RelationID(input.ID+"-dummy"),
+		domain.RelationID(input.ID),
+		domain.RelationID(""),
+		1,
+	)
+
+	err := s.repo.CreateRelation(ctx, relation)
+	if err != nil {
+		switch {
+		case errors.Is(err, repository.ErrRelationBusy):
+			return ErrRelationBusy
+		case errors.Is(err, repository.ErrRelationAlreadyExists):
+			return ErrRelationAlreadyExists
+		default:
+			return fmt.Errorf("failed to create relation: %w", err)
+		}
+	}
+
+	return nil
+}
+
+func (s *Service) DeleteChildDummy(ctx context.Context, input *DeleteChildDummyInput) error {
+	relation, err := s.repo.GetRelation(ctx, domain.DummyRelationID(domain.RelationID(input.ID)))
+	if err != nil {
+		if errors.Is(err, repository.ErrRelationNotFound) {
+			return ErrDummyNotFound
+		}
+
+		return fmt.Errorf("failed to get child dummy: %w", err)
+	}
+
+	err = s.repo.DeleteRelation(ctx, relation)
+	if err != nil {
+		switch {
+		case errors.Is(err, repository.ErrRelationBusy):
+			return ErrRelationBusy
+		case errors.Is(err, repository.ErrRelationAlreadyExists):
+			return ErrRelationAlreadyExists
+		default:
+			return fmt.Errorf("failed to delete child dummy: %w", err)
+		}
+	}
+
+	return nil
+}
+
 func (s *Service) CreateRelation(ctx context.Context, input *CreateRelationInput) error {
 	dummy, err := s.repo.GetRelation(ctx, domain.DummyRelationID(domain.RelationID(input.ParentID)))
 	if err != nil {
@@ -99,52 +147,4 @@ func (s *Service) ListChildren(ctx context.Context, input *ListChildrenInput) (*
 	return &ListChildrenOutput{
 		IDs: ids[1:],
 	}, nil
-}
-
-func (s *Service) CreateChildDummy(ctx context.Context, input *CreateChildDummyInput) error {
-	relation := domain.NewRelation(
-		domain.RelationID(input.ID+"-dummy"),
-		domain.RelationID(input.ID),
-		domain.RelationID(""),
-		1,
-	)
-
-	err := s.repo.CreateRelation(ctx, relation)
-	if err != nil {
-		switch {
-		case errors.Is(err, repository.ErrRelationBusy):
-			return ErrRelationBusy
-		case errors.Is(err, repository.ErrRelationAlreadyExists):
-			return ErrRelationAlreadyExists
-		default:
-			return fmt.Errorf("failed to create relation: %w", err)
-		}
-	}
-
-	return nil
-}
-
-func (s *Service) DeleteChildDummy(ctx context.Context, input *DeleteChildDummyInput) error {
-	relation, err := s.repo.GetRelation(ctx, domain.DummyRelationID(domain.RelationID(input.ID)))
-	if err != nil {
-		if errors.Is(err, repository.ErrRelationNotFound) {
-			return ErrDummyNotFound
-		}
-
-		return fmt.Errorf("failed to get child dummy: %w", err)
-	}
-
-	err = s.repo.DeleteRelation(ctx, relation)
-	if err != nil {
-		switch {
-		case errors.Is(err, repository.ErrRelationBusy):
-			return ErrRelationBusy
-		case errors.Is(err, repository.ErrRelationAlreadyExists):
-			return ErrRelationAlreadyExists
-		default:
-			return fmt.Errorf("failed to delete child dummy: %w", err)
-		}
-	}
-
-	return nil
 }

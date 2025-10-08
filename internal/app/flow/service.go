@@ -54,6 +54,28 @@ func (s *Service) CreateTask(ctx context.Context, input *CreateTaskInput) (*Crea
 	}, nil
 }
 
+func (s *Service) DeleteTask(ctx context.Context, input *DeleteTaskInput) error {
+	task, err := s.repo.GetTask(ctx, input.Username, domain.TaskID(input.TaskID))
+	if err != nil {
+		if errors.Is(err, repository.ErrTaskNotFound) {
+			return ErrTaskNotFound
+		}
+
+		return fmt.Errorf("failed to get task: %w", err)
+	}
+
+	err = s.repo.DeleteTask(ctx, input.Username, task)
+	if err != nil {
+		return fmt.Errorf("failed to delete task: %w", err)
+	}
+
+	s.bus.TaskDeleted.Publish(ctx, &eventbus.TaskDeletedEvent{
+		TaskID: string(task.ID()),
+	})
+
+	return nil
+}
+
 func (s *Service) ListTasks(ctx context.Context, input *ListTasksInput) (*ListTasksOutput, error) {
 	var tasks []Task
 
@@ -78,26 +100,4 @@ func (s *Service) ListTasks(ctx context.Context, input *ListTasksInput) (*ListTa
 	return &ListTasksOutput{
 		Tasks: tasks,
 	}, nil
-}
-
-func (s *Service) DeleteTask(ctx context.Context, input *DeleteTaskInput) error {
-	task, err := s.repo.GetTask(ctx, input.Username, domain.TaskID(input.TaskID))
-	if err != nil {
-		if errors.Is(err, repository.ErrTaskNotFound) {
-			return ErrTaskNotFound
-		}
-
-		return fmt.Errorf("failed to get task: %w", err)
-	}
-
-	err = s.repo.DeleteTask(ctx, input.Username, task)
-	if err != nil {
-		return fmt.Errorf("failed to delete task: %w", err)
-	}
-
-	s.bus.TaskDeleted.Publish(ctx, &eventbus.TaskDeletedEvent{
-		TaskID: string(task.ID()),
-	})
-
-	return nil
 }
