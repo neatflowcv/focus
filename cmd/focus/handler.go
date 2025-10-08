@@ -29,7 +29,7 @@ func NewHandler(service *flow.Service, relationService *relation.Service) *Handl
 }
 
 func (h *Handler) Create(ctx context.Context, input *task.TaskInput) (*task.Taskdetail, error) {
-	username, now, err := authUser(input.Authorization, h)
+	username, now, err := h.authUser(input.Authorization)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +60,7 @@ func (h *Handler) Create(ctx context.Context, input *task.TaskInput) (*task.Task
 }
 
 func (h *Handler) List(ctx context.Context, input *task.ListPayload) (task.TaskdetailCollection, error) {
-	username, _, err := authUser(input.Authorization, h)
+	username, _, err := h.authUser(input.Authorization)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +89,7 @@ func (h *Handler) List(ctx context.Context, input *task.ListPayload) (task.Taskd
 }
 
 func (h *Handler) Delete(ctx context.Context, input *task.TaskDeleteInput) error {
-	username, _, err := authUser(input.Authorization, h)
+	username, _, err := h.authUser(input.Authorization)
 	if err != nil {
 		return err
 	}
@@ -138,7 +138,7 @@ func toTaskdetailCollection(domainTask []flow.Task, parentID string) task.Taskde
 	return ret
 }
 
-func authUser(authorization string, h *Handler) (string, time.Time, error) {
+func (h *Handler) authUser(authorization string) (string, time.Time, error) {
 	now := time.Now()
 	token := strings.TrimPrefix(authorization, "Bearer ")
 
