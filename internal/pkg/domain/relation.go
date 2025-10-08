@@ -49,3 +49,7 @@ func (r *Relation) Version() uint64 {
 func (r *Relation) SetNextID(nextID RelationID) *Relation {
 	return NewRelation(r.id, r.parentID, nextID, r.version)
 }
+
+func (r *Relation) SetParentID(parentID RelationID) *Relation {
+	return NewRelation(r.id, parentID, r.nextID, r.version)
+}

@@ -109,8 +109,44 @@ func (h *Handler) Delete(ctx context.Context, input *task.TaskDeleteInput) error
 	return nil
 }
 
-func (h *Handler) Update(context.Context, *task.TaskUpdateInput) (*task.Taskdetail, error) {
-	panic("unimplemented")
+func (h *Handler) Update(ctx context.Context, input *task.TaskUpdateInput) (*task.Taskdetail, error) {
+	username, _, err := h.authUser(input.Authorization)
+	if err != nil {
+		return nil, err
+	}
+
+	parentID := ""
+	if input.ParentID != nil {
+		parentID = *input.ParentID
+	}
+
+	nextID := ""
+	if input.NextID != nil {
+		nextID = *input.NextID
+	}
+
+	err = h.relationService.UpdateRelation(ctx, &relation.UpdateRelationInput{
+		ID:       input.TaskID,
+		ParentID: parentID,
+		NextID:   nextID,
+	})
+	if err != nil {
+		return nil, task.MakeInternalServerError(err)
+	}
+
+	ret, err := h.service.GetTask(ctx, &flow.GetTaskInput{
+		Username: username,
+		TaskID:   input.TaskID,
+	})
+	if err != nil {
+		if errors.Is(err, flow.ErrTaskNotFound) {
+			return nil, task.MakeTaskNotFound(err)
+		}
+
+		return nil, task.MakeInternalServerError(err)
+	}
+
+	return toTaskDetail(&ret.Task, parentID), nil
 }
 
 func toTaskDetail(domainTask *flow.Task, parentID string) *task.Taskdetail {

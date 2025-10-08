@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 
 	"github.com/neatflowcv/focus/internal/pkg/domain"
 	"github.com/neatflowcv/focus/internal/pkg/eventbus"
@@ -110,7 +111,126 @@ func (s *Service) CreateRelation(ctx context.Context, input *CreateRelationInput
 }
 
 func (s *Service) ListChildren(ctx context.Context, input *ListChildrenInput) (*ListChildrenOutput, error) {
-	relations, err := s.repo.ListChildrenRelations(ctx, domain.RelationID(input.ParentID))
+	if input.ParentID != "" {
+		_, err := s.repo.GetRelation(ctx, domain.RelationID(input.ParentID))
+		if err != nil {
+			if errors.Is(err, repository.ErrRelationNotFound) {
+				return &ListChildrenOutput{
+					IDs: nil,
+				}, nil
+			}
+
+			return nil, fmt.Errorf("failed to get relation: %w", err)
+		}
+	}
+
+	ids, err := s.listChildren(ctx, domain.RelationID(input.ParentID))
+	if err != nil {
+		return nil, err
+	}
+
+	var ret []string
+	for _, id := range ids[1:] {
+		ret = append(ret, string(id))
+	}
+
+	return &ListChildrenOutput{
+		IDs: ret,
+	}, nil
+}
+
+func (s *Service) GetRelation(ctx context.Context, input *GetRelationInput) (*GetRelationOutput, error) {
+	relation, err := s.repo.GetRelation(ctx, domain.RelationID(input.ID))
+	if err != nil {
+		if errors.Is(err, repository.ErrRelationNotFound) {
+			return nil, ErrRelationNotFound
+		}
+
+		return nil, fmt.Errorf("failed to get relation: %w", err)
+	}
+
+	return &GetRelationOutput{
+		ID:       string(relation.ID()),
+		ParentID: string(relation.ParentID()),
+	}, nil
+}
+
+func (s *Service) UpdateRelation(ctx context.Context, input *UpdateRelationInput) error {
+	relation, err := s.repo.GetRelation(ctx, domain.RelationID(input.ID))
+	if err != nil {
+		if errors.Is(err, repository.ErrRelationNotFound) {
+			return ErrRelationNotFound
+		}
+
+		return fmt.Errorf("failed to get relation: %w", err)
+	}
+
+	update := relation.
+		SetNextID(domain.RelationID(input.NextID)).
+		SetParentID(domain.RelationID(input.ParentID))
+
+	oldPrevRelation, err := s.getPrevRelation(ctx, relation.ParentID(), relation.ID())
+	if err != nil {
+		return err
+	}
+
+	oldPrevUpdate := oldPrevRelation.SetNextID(relation.NextID())
+
+	newPrevRelation, err := s.getPrevRelation(ctx, update.ParentID(), update.NextID())
+	if err != nil {
+		return err
+	}
+
+	newPrevUpdate := newPrevRelation.SetNextID(relation.ID())
+
+	err = s.repo.UpdateRelations(ctx, oldPrevUpdate, newPrevUpdate, update)
+	if err != nil {
+		return fmt.Errorf("failed to update relations: %w", err)
+	}
+
+	return nil
+}
+
+func (s *Service) getPrevRelation(ctx context.Context, parentID, nextID domain.RelationID) (*domain.Relation, error) {
+	ids, err := s.listChildren(ctx, parentID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list children: %w", err)
+	}
+
+	prevID, err := extractPrevID(ids, nextID)
+	if err != nil {
+		return nil, err
+	}
+
+	ret, err := s.repo.GetRelation(ctx, prevID)
+	if err != nil {
+		if errors.Is(err, repository.ErrRelationNotFound) {
+			return nil, fmt.Errorf("prev relation not found: %w", ErrRelationNotFound)
+		}
+
+		return nil, fmt.Errorf("failed to get prev relation: %w", err)
+	}
+
+	return ret, nil
+}
+
+func extractPrevID(ids []domain.RelationID, nextID domain.RelationID) (domain.RelationID, error) {
+	if nextID == "" {
+		return ids[len(ids)-1], nil
+	}
+
+	index := slices.IndexFunc(ids, func(id domain.RelationID) bool {
+		return id == nextID
+	})
+	if index == -1 {
+		return "", ErrPreviousRelationNotFound
+	}
+
+	return ids[index-1], nil
+}
+
+func (s *Service) listChildren(ctx context.Context, parentID domain.RelationID) ([]domain.RelationID, error) {
+	relations, err := s.repo.ListChildrenRelations(ctx, parentID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list children relations: %w", err)
 	}
@@ -120,7 +240,7 @@ func (s *Service) ListChildren(ctx context.Context, input *ListChildrenInput) (*
 		idMap[relation.ID()] = relation
 	}
 
-	first := domain.DummyRelationID(domain.RelationID(input.ParentID))
+	first := domain.DummyRelationID(parentID)
 
 	var sortedRelation []*domain.Relation
 
@@ -139,28 +259,10 @@ func (s *Service) ListChildren(ctx context.Context, input *ListChildrenInput) (*
 		panic("logic error: list children")
 	}
 
-	var ids []string
+	var ids []domain.RelationID
 	for _, relation := range sortedRelation {
-		ids = append(ids, string(relation.ID()))
+		ids = append(ids, relation.ID())
 	}
 
-	return &ListChildrenOutput{
-		IDs: ids[1:],
-	}, nil
-}
-
-func (s *Service) GetRelation(ctx context.Context, input *GetRelationInput) (*GetRelationOutput, error) {
-	relation, err := s.repo.GetRelation(ctx, domain.RelationID(input.ID))
-	if err != nil {
-		if errors.Is(err, repository.ErrRelationNotFound) {
-			return nil, ErrRelationNotFound
-		}
-
-		return nil, fmt.Errorf("failed to get relation: %w", err)
-	}
-
-	return &GetRelationOutput{
-		ID:       string(relation.ID()),
-		ParentID: string(relation.ParentID()),
-	}, nil
+	return ids, nil
 }
