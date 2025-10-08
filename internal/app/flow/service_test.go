@@ -35,18 +35,15 @@ func TestServiceCreateTask(t *testing.T) {
 
 	ret, err := service.CreateTask(t.Context(), &flow.CreateTaskInput{
 		Username: "test",
-		ParentID: "",
 		Title:    "test",
 		Now:      now,
 	})
 
 	require.NoError(t, err)
 	require.Equal(t, "test", ret.Title())
-	require.Empty(t, ret.ParentID())
 	require.Equal(t, now, ret.CreatedAt())
 	require.NotEmpty(t, ret.ID())
 	require.Equal(t, domain.TaskStatusTodo, ret.Status())
-	require.InEpsilon(t, 10.0, ret.Order(), 0.05)
 }
 
 func TestServiceListTasksWithNoData(t *testing.T) {
@@ -55,24 +52,8 @@ func TestServiceListTasksWithNoData(t *testing.T) {
 	service, _ := newService(t)
 
 	ret, err := service.ListTasks(t.Context(), &flow.ListTasksInput{
-		Username:  "test",
-		ParentID:  "",
-		Recursive: false,
-	})
-
-	require.NoError(t, err)
-	require.Empty(t, ret)
-}
-
-func TestServiceListTasksWithNoDataRecursive(t *testing.T) {
-	t.Parallel()
-
-	service, _ := newService(t)
-
-	ret, err := service.ListTasks(t.Context(), &flow.ListTasksInput{
-		Username:  "test",
-		ParentID:  "",
-		Recursive: true,
+		Username: "test",
+		IDs:      []string{"unknown"},
 	})
 
 	require.NoError(t, err)
@@ -84,24 +65,20 @@ func TestServiceListTasks(t *testing.T) {
 
 	service, _ := newService(t)
 	now := time.Now()
-	_, _ = service.CreateTask(t.Context(), &flow.CreateTaskInput{
+	task, _ := service.CreateTask(t.Context(), &flow.CreateTaskInput{
 		Username: "test",
-		ParentID: "",
 		Title:    "test",
 		Now:      now,
 	})
 
 	ret, err := service.ListTasks(t.Context(), &flow.ListTasksInput{
-		Username:  "test",
-		ParentID:  "",
-		Recursive: false,
+		Username: "test",
+		IDs:      []string{string(task.ID())},
 	})
 
 	require.NoError(t, err)
 	require.Len(t, ret, 1)
 	require.Equal(t, "test", ret[0].Title())
-	require.Empty(t, ret[0].ParentID())
 	require.Equal(t, now, ret[0].CreatedAt())
 	require.Equal(t, domain.TaskStatusTodo, ret[0].Status())
-	require.InEpsilon(t, 10.0, ret[0].Order(), 0.05)
 }

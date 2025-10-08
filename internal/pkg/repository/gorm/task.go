@@ -12,32 +12,28 @@ type Task struct {
 	Username    string
 	Title       string
 	Status      string
-	Order       float64
 	CreatedAt   time.Time
 	CompletedAt sql.NullTime
 }
 
-func (t *Task) ToDomain(parentID domain.TaskID) *domain.Task {
+func (t *Task) ToDomain() *domain.Task {
 	return domain.NewTask(
 		domain.TaskID(t.ID),
-		parentID,
 		t.Title,
 		domain.TaskStatus(t.Status),
-		t.Order,
 		t.CreatedAt,
 		t.CompletedAt.Time,
 	)
 }
 
-func FromDomainTask(domainTask *domain.Task, username string) *Task {
+func FromDomainTask(task *domain.Task, username string) *Task {
 	return &Task{
-		ID:          string(domainTask.ID()),
+		ID:          string(task.ID()),
 		Username:    username,
-		Title:       domainTask.Title(),
-		Status:      string(domainTask.Status()),
-		Order:       domainTask.Order(),
-		CreatedAt:   domainTask.CreatedAt(),
-		CompletedAt: toNullTime(domainTask.CompletedAt()),
+		Title:       task.Title(),
+		Status:      string(task.Status()),
+		CreatedAt:   task.CreatedAt(),
+		CompletedAt: toNullTime(task.CompletedAt()),
 	}
 }
 

@@ -21,33 +21,15 @@ func NewService(idmaker idmaker.IDMaker, repo repository.Repository) *Service {
 }
 
 func (s *Service) CreateTask(ctx context.Context, input *CreateTaskInput) (*domain.Task, error) {
-	if input.ParentID != "" {
-		_, err := s.repo.GetTask(ctx, input.Username, domain.TaskID(input.ParentID))
-		if err != nil {
-			if errors.Is(err, repository.ErrTaskNotFound) {
-				return nil, ErrParentTaskNotFound
-			}
-
-			return nil, fmt.Errorf("failed to get parent task: %w", err)
-		}
-	}
-
-	count, err := s.repo.CountSubtasks(ctx, input.Username, domain.TaskID(input.ParentID))
-	if err != nil {
-		return nil, fmt.Errorf("failed to count subtasks: %w", err)
-	}
-
 	task := domain.NewTask(
 		domain.TaskID(s.idmaker.MakeID()),
-		domain.TaskID(input.ParentID),
 		input.Title,
 		domain.TaskStatusTodo,
-		float64(count)*10.0+10.0, //nolint:mnd
 		input.Now,
 		time.Time{},
 	)
 
-	err = s.repo.CreateTask(ctx, input.Username, task)
+	err := s.repo.CreateTask(ctx, input.Username, task)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create task: %w", err)
 	}
@@ -56,16 +38,19 @@ func (s *Service) CreateTask(ctx context.Context, input *CreateTaskInput) (*doma
 }
 
 func (s *Service) ListTasks(ctx context.Context, input *ListTasksInput) ([]*domain.Task, error) {
-	var listFn func(ctx context.Context, username string, parentID domain.TaskID) ([]*domain.Task, error)
-	if input.Recursive {
-		listFn = s.repo.ListDescendantsTasks
-	} else {
-		listFn = s.repo.ListSubTasks
-	}
+	var ret []*domain.Task
 
-	ret, err := listFn(ctx, input.Username, domain.TaskID(input.ParentID))
-	if err != nil {
-		return nil, fmt.Errorf("failed to list tasks: %w", err)
+	for _, id := range input.IDs {
+		task, err := s.repo.GetTask(ctx, input.Username, domain.TaskID(id))
+		if err != nil {
+			if errors.Is(err, repository.ErrTaskNotFound) {
+				continue
+			}
+
+			return nil, fmt.Errorf("failed to get task: %w", err)
+		}
+
+		ret = append(ret, task)
 	}
 
 	return ret, nil

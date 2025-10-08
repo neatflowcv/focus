@@ -10,14 +10,12 @@ import (
 var _ repository.Repository = (*Repository)(nil)
 
 type Repository struct {
-	tasks    map[string]map[domain.TaskID]*domain.Task
-	children map[string]map[domain.TaskID][]*domain.Task
+	tasks map[string]map[domain.TaskID]*domain.Task
 }
 
 func NewRepository() *Repository {
 	return &Repository{
-		tasks:    make(map[string]map[domain.TaskID]*domain.Task),
-		children: make(map[string]map[domain.TaskID][]*domain.Task),
+		tasks: make(map[string]map[domain.TaskID]*domain.Task),
 	}
 }
 
@@ -26,12 +24,7 @@ func (r *Repository) CreateTask(ctx context.Context, username string, task *doma
 		r.tasks[username] = make(map[domain.TaskID]*domain.Task)
 	}
 
-	if _, ok := r.children[username]; !ok {
-		r.children[username] = make(map[domain.TaskID][]*domain.Task)
-	}
-
 	r.tasks[username][task.ID()] = task
-	r.children[username][task.ParentID()] = append(r.children[username][task.ParentID()], task)
 
 	return nil
 }
@@ -43,40 +36,4 @@ func (r *Repository) GetTask(ctx context.Context, username string, id domain.Tas
 	}
 
 	return task, nil
-}
-
-func (r *Repository) CountSubtasks(ctx context.Context, username string, id domain.TaskID) (int, error) {
-	return len(r.children[username][id]), nil
-}
-
-func (r *Repository) ListDescendantsTasks(
-	ctx context.Context,
-	username string,
-	parentID domain.TaskID,
-) ([]*domain.Task, error) {
-	var (
-		tasks []*domain.Task
-		stack []domain.TaskID
-	)
-
-	stack = append(stack, parentID)
-	for len(stack) > 0 {
-		parentID = stack[len(stack)-1]
-		stack = stack[:len(stack)-1]
-
-		for _, task := range r.children[username][parentID] {
-			tasks = append(tasks, task)
-			stack = append(stack, task.ID())
-		}
-	}
-
-	return tasks, nil
-}
-
-func (r *Repository) ListSubTasks(
-	ctx context.Context,
-	username string,
-	parentID domain.TaskID,
-) ([]*domain.Task, error) {
-	return r.children[username][parentID], nil
 }

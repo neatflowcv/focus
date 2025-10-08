@@ -31,14 +31,8 @@ func (h *Handler) Create(ctx context.Context, input *task.TaskInput) (*task.Task
 		return nil, task.MakeInternalServerError(err)
 	}
 
-	parentID := ""
-	if input.ParentID != nil {
-		parentID = *input.ParentID
-	}
-
 	ret, err := h.service.CreateTask(ctx, &flow.CreateTaskInput{
 		Username: username,
-		ParentID: parentID,
 		Title:    input.Title,
 		Now:      now,
 	})
@@ -50,55 +44,17 @@ func (h *Handler) Create(ctx context.Context, input *task.TaskInput) (*task.Task
 }
 
 func (h *Handler) List(ctx context.Context, input *task.ListPayload) (task.TaskdetailCollection, error) {
-	token := strings.TrimPrefix(input.Authorization, "Bearer ")
-	now := time.Now()
-
-	username, err := h.vault.Decrypt(token, now)
-	if err != nil {
-		return nil, task.MakeInternalServerError(err)
-	}
-
-	parentID := ""
-	if input.ParentID != nil {
-		parentID = *input.ParentID
-	}
-
-	recursive := false
-	if input.Recursive != nil {
-		recursive = *input.Recursive
-	}
-
-	ret, err := h.service.ListTasks(ctx, &flow.ListTasksInput{
-		Username:  username,
-		ParentID:  parentID,
-		Recursive: recursive,
-	})
-	if err != nil {
-		return nil, task.MakeInternalServerError(err)
-	}
-
-	return toTaskCollection(ret), nil
-}
-
-func toTaskCollection(tasks []*domain.Task) task.TaskdetailCollection {
-	var ret task.TaskdetailCollection
-	for _, task := range tasks {
-		ret = append(ret, toTaskDetail(task))
-	}
-
-	return ret
+	panic("unimplemented")
 }
 
 func toTaskDetail(domainTask *domain.Task) *task.Taskdetail {
-	parentID := string(domainTask.ParentID())
-
 	return &task.Taskdetail{
 		ID:            string(domainTask.ID()),
-		ParentID:      &parentID,
+		ParentID:      nil,
 		Title:         domainTask.Title(),
 		CreatedAt:     domainTask.CreatedAt().Unix(),
 		Status:        string(domainTask.Status()),
-		Order:         domainTask.Order(),
+		Order:         0.0,
 		IsLeaf:        nil,
 		CompletedAt:   nil,
 		StartedAt:     nil,
