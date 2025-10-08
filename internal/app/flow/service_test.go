@@ -6,12 +6,14 @@ import (
 
 	"github.com/neatflowcv/focus/internal/app/flow"
 	"github.com/neatflowcv/focus/internal/pkg/domain"
+	"github.com/neatflowcv/focus/internal/pkg/eventbus"
 	"github.com/neatflowcv/focus/internal/pkg/idmaker/ulid"
 	"github.com/neatflowcv/focus/internal/pkg/repository/memory"
 	"github.com/stretchr/testify/require"
 )
 
 type ServiceData struct {
+	bus     *eventbus.Bus
 	idmaker *ulid.IDMaker
 	repo    *memory.Repository
 }
@@ -20,11 +22,12 @@ func newService(t *testing.T) (*flow.Service, *ServiceData) { //nolint:unparam
 	t.Helper()
 
 	data := &ServiceData{
+		bus:     eventbus.NewBus(),
 		idmaker: ulid.NewIDMaker(),
 		repo:    memory.NewRepository(),
 	}
 
-	return flow.NewService(data.idmaker, data.repo), data
+	return flow.NewService(data.bus, data.idmaker, data.repo), data
 }
 
 func TestServiceCreateTask(t *testing.T) {

@@ -4,11 +4,13 @@ import (
 	"testing"
 
 	"github.com/neatflowcv/focus/internal/app/relation"
+	"github.com/neatflowcv/focus/internal/pkg/eventbus"
 	"github.com/neatflowcv/focus/internal/pkg/repository/memory"
 	"github.com/stretchr/testify/require"
 )
 
 type ServiceData struct {
+	bus  *eventbus.Bus
 	repo *memory.Repository
 }
 
@@ -16,10 +18,11 @@ func newService(t *testing.T) (*relation.Service, *ServiceData) {
 	t.Helper()
 
 	data := &ServiceData{
+		bus:  eventbus.NewBus(),
 		repo: memory.NewRepository(),
 	}
 
-	return relation.NewService(data.repo), data
+	return relation.NewService(data.bus, data.repo), data
 }
 
 func TestServiceCreateChildDummy(t *testing.T) {

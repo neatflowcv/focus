@@ -6,15 +6,18 @@ import (
 	"fmt"
 
 	"github.com/neatflowcv/focus/internal/pkg/domain"
+	"github.com/neatflowcv/focus/internal/pkg/eventbus"
 	"github.com/neatflowcv/focus/internal/pkg/repository"
 )
 
 type Service struct {
+	bus  *eventbus.Bus
 	repo repository.RelationRepository
 }
 
-func NewService(repo repository.RelationRepository) *Service {
+func NewService(bus *eventbus.Bus, repo repository.RelationRepository) *Service {
 	return &Service{
+		bus:  bus,
 		repo: repo,
 	}
 }

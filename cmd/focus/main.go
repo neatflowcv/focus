@@ -15,6 +15,7 @@ import (
 	taskserver "github.com/neatflowcv/focus/gen/http/task/server"
 	"github.com/neatflowcv/focus/gen/task"
 	"github.com/neatflowcv/focus/internal/app/flow"
+	"github.com/neatflowcv/focus/internal/pkg/eventbus"
 	"github.com/neatflowcv/focus/internal/pkg/idmaker/ulid"
 	"github.com/neatflowcv/focus/internal/pkg/repository/gorm"
 	"github.com/urfave/cli/v3"
@@ -45,7 +46,9 @@ func main() {
 						return fmt.Errorf("failed to create repository: %w", err)
 					}
 
-					service := flow.NewService(ulid.NewIDMaker(), repo)
+					bus := eventbus.NewBus()
+
+					service := flow.NewService(bus, ulid.NewIDMaker(), repo)
 
 					mux := goahttp.NewMuxer()
 					requestDecoder := goahttp.RequestDecoder

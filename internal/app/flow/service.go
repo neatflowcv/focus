@@ -7,17 +7,23 @@ import (
 	"time"
 
 	"github.com/neatflowcv/focus/internal/pkg/domain"
+	"github.com/neatflowcv/focus/internal/pkg/eventbus"
 	"github.com/neatflowcv/focus/internal/pkg/idmaker"
 	"github.com/neatflowcv/focus/internal/pkg/repository"
 )
 
 type Service struct {
+	bus     *eventbus.Bus
 	idmaker idmaker.IDMaker
 	repo    repository.Repository
 }
 
-func NewService(idmaker idmaker.IDMaker, repo repository.Repository) *Service {
-	return &Service{idmaker: idmaker, repo: repo}
+func NewService(bus *eventbus.Bus, idmaker idmaker.IDMaker, repo repository.Repository) *Service {
+	return &Service{
+		bus:     bus,
+		idmaker: idmaker,
+		repo:    repo,
+	}
 }
 
 func (s *Service) CreateTask(ctx context.Context, input *CreateTaskInput) (*domain.Task, error) {
@@ -33,6 +39,10 @@ func (s *Service) CreateTask(ctx context.Context, input *CreateTaskInput) (*doma
 	if err != nil {
 		return nil, fmt.Errorf("failed to create task: %w", err)
 	}
+
+	s.bus.TaskCreated.Publish(ctx, &eventbus.TaskCreatedEvent{
+		TaskID: string(task.ID()),
+	})
 
 	return task, nil
 }
