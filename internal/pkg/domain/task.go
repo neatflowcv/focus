@@ -4,14 +4,6 @@ import (
 	"time"
 )
 
-type TaskStatus string
-
-const (
-	TaskStatusTodo  TaskStatus = "todo"
-	TaskStatusDoing TaskStatus = "doing"
-	TaskStatusDone  TaskStatus = "done"
-)
-
 type TaskID string
 
 type Task struct {
@@ -69,11 +61,3 @@ func (t *Task) CompletedAt() time.Time {
 	return t.completedAt
 }
 
-func validateTaskStatus(status TaskStatus) {
-	switch status {
-	case TaskStatusTodo, TaskStatusDoing, TaskStatusDone:
-		return
-	}
-
-	panic("invalid task status: " + string(status))
-}
