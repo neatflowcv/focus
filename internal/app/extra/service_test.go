@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/neatflowcv/focus/internal/app/extra"
+	"github.com/neatflowcv/focus/internal/pkg/domain"
 	"github.com/neatflowcv/focus/internal/pkg/repository/memory"
 	"github.com/stretchr/testify/require"
 )
@@ -40,6 +41,7 @@ func TestServiceCreateExtra(t *testing.T) {
 	require.Equal(t, time.Duration(0), data.repo.Extras["test"].EstimatedTime())
 	require.Equal(t, time.Time{}, data.repo.Extras["test"].StartedAt())
 	require.True(t, data.repo.Extras["test"].Leaf())
+	require.Equal(t, domain.TaskStatusTodo, data.repo.Extras["test"].Status())
 }
 
 func TestServiceDeleteExtra(t *testing.T) {
@@ -182,4 +184,65 @@ func TestServiceCheckLeaf(t *testing.T) {
 
 	require.True(t, data.repo.Extras["child"].Leaf())
 	require.False(t, data.repo.Extras["parent"].Leaf())
+}
+
+func TestServiceCheckStatus1(t *testing.T) {
+	t.Parallel()
+
+	service, data := newService(t)
+	_, _ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
+		ID:       "parent",
+		ParentID: "",
+	})
+	_, _ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
+		ID:       "child",
+		ParentID: "parent",
+	})
+
+	require.Equal(t, domain.TaskStatusTodo, data.repo.Extras["parent"].Status())
+	require.Equal(t, domain.TaskStatusTodo, data.repo.Extras["child"].Status())
+}
+
+func TestServiceCheckStatus2(t *testing.T) {
+	t.Parallel()
+
+	service, data := newService(t)
+	_, _ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
+		ID:       "parent",
+		ParentID: "",
+	})
+	_ = service.SetDone(t.Context(), &extra.SetDoneInput{
+		ID: "parent",
+	})
+	_, _ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
+		ID:       "child",
+		ParentID: "parent",
+	})
+
+	require.Equal(t, domain.TaskStatusTodo, data.repo.Extras["parent"].Status())
+	require.Equal(t, domain.TaskStatusTodo, data.repo.Extras["child"].Status())
+}
+
+func TestServiceCheckStatus3(t *testing.T) {
+	t.Parallel()
+
+	service, data := newService(t)
+	_, _ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
+		ID:       "parent",
+		ParentID: "",
+	})
+	_ = service.SetDone(t.Context(), &extra.SetDoneInput{
+		ID: "parent",
+	})
+	_, _ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
+		ID:       "child",
+		ParentID: "",
+	})
+	_ = service.UpdateParent(t.Context(), &extra.UpdateParentInput{
+		ID:       "child",
+		ParentID: "parent",
+	})
+
+	require.Equal(t, domain.TaskStatusTodo, data.repo.Extras["parent"].Status())
+	require.Equal(t, domain.TaskStatusTodo, data.repo.Extras["child"].Status())
 }

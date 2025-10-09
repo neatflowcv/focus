@@ -59,6 +59,10 @@ func (e *Extra) Status() TaskStatus {
 	return e.status
 }
 
+func (e *Extra) IsCompleted() bool {
+	return e.status == TaskStatusDone
+}
+
 func (e *Extra) SetActualTime(actualTime time.Duration) *Extra {
 	ret := e.clone()
 	ret.durations = ret.durations.SetActual(actualTime)

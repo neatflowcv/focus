@@ -42,12 +42,14 @@ func (s *Service) CreateExtra(ctx context.Context, input *CreateExtraInput) (*Cr
 			return nil, fmt.Errorf("failed to get extra: %w", err)
 		}
 
-		if !searchedExtra.Leaf() {
+		if !searchedExtra.Leaf() && !searchedExtra.IsCompleted() {
 			// parent가 이미 leaf가 아니라면, 위에 있는 모든 extra도 leaf가 아니므로 종료
 			break
 		}
 
-		update := searchedExtra.SetLeaf(false)
+		update := searchedExtra.
+			SetLeaf(false).
+			SetStatus(domain.TaskStatusTodo)
 
 		err = s.repo.UpdateExtra(ctx, update)
 		if err != nil {
@@ -144,6 +146,94 @@ func (s *Service) UpdateActualTime(ctx context.Context, input *UpdateActualTimeI
 		}
 
 		searchID = extra.ParentID()
+	}
+
+	return nil
+}
+
+func (s *Service) SetDone(ctx context.Context, input *SetDoneInput) error {
+	extra, err := s.repo.GetExtra(ctx, domain.ExtraID(input.ID))
+	if err != nil {
+		return fmt.Errorf("failed to get extra: %w", err)
+	}
+
+	update := extra.SetStatus(domain.TaskStatusDone)
+
+	err = s.repo.UpdateExtra(ctx, update)
+	if err != nil {
+		return fmt.Errorf("failed to update extra: %w", err)
+	}
+
+	return nil
+}
+
+func (s *Service) SetDoing(ctx context.Context, input *SetDoingInput) error {
+	extra, err := s.repo.GetExtra(ctx, domain.ExtraID(input.ID))
+	if err != nil {
+		return fmt.Errorf("failed to get extra: %w", err)
+	}
+
+	update := extra.SetStatus(domain.TaskStatusDoing)
+
+	err = s.repo.UpdateExtra(ctx, update)
+	if err != nil {
+		return fmt.Errorf("failed to update extra: %w", err)
+	}
+
+	return nil
+}
+
+func (s *Service) SetTodo(ctx context.Context, input *SetTodoInput) error {
+	extra, err := s.repo.GetExtra(ctx, domain.ExtraID(input.ID))
+	if err != nil {
+		return fmt.Errorf("failed to get extra: %w", err)
+	}
+
+	update := extra.SetStatus(domain.TaskStatusTodo)
+
+	err = s.repo.UpdateExtra(ctx, update)
+	if err != nil {
+		return fmt.Errorf("failed to update extra: %w", err)
+	}
+
+	return nil
+}
+
+func (s *Service) UpdateParent(ctx context.Context, input *UpdateParentInput) error {
+	extra, err := s.repo.GetExtra(ctx, domain.ExtraID(input.ID))
+	if err != nil {
+		return fmt.Errorf("failed to get extra: %w", err)
+	}
+
+	update := extra.SetParentID(domain.ExtraID(input.ParentID))
+
+	err = s.repo.UpdateExtra(ctx, update)
+	if err != nil {
+		return fmt.Errorf("failed to update extra: %w", err)
+	}
+
+	searchID := domain.ExtraID(input.ParentID)
+	for searchID != "" {
+		searchedExtra, err := s.repo.GetExtra(ctx, searchID)
+		if err != nil {
+			return fmt.Errorf("failed to get extra: %w", err)
+		}
+
+		if !searchedExtra.Leaf() && !searchedExtra.IsCompleted() {
+			// parent가 이미 leaf가 아니라면, 위에 있는 모든 extra도 leaf가 아니므로 종료
+			break
+		}
+
+		update := searchedExtra.
+			SetLeaf(false).
+			SetStatus(domain.TaskStatusTodo)
+
+		err = s.repo.UpdateExtra(ctx, update)
+		if err != nil {
+			return fmt.Errorf("failed to update parent extra: %w", err)
+		}
+
+		searchID = searchedExtra.ParentID()
 	}
 
 	return nil
