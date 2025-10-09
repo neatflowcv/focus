@@ -49,13 +49,26 @@ func (e *Extra) Leaf() bool {
 }
 
 func (e *Extra) SetActualTime(actualTime time.Duration) *Extra {
-	return NewExtra(e.id, e.estimatedTime, actualTime, e.startedAt, e.leaf)
+	ret := e.clone()
+	ret.actualTime = actualTime
+
+	return ret
 }
 
 func (e *Extra) SetEstimatedTime(estimatedTime time.Duration) *Extra {
-	return NewExtra(e.id, estimatedTime, e.actualTime, e.startedAt, e.leaf)
+	ret := e.clone()
+	ret.estimatedTime = estimatedTime
+
+	return ret
 }
 
 func (e *Extra) SetLeaf(leaf bool) *Extra {
-	return NewExtra(e.id, e.estimatedTime, e.actualTime, e.startedAt, leaf)
+	ret := e.clone()
+	ret.leaf = leaf
+
+	return ret
+}
+
+func (e *Extra) clone() *Extra {
+	return NewExtra(e.id, e.estimatedTime, e.actualTime, e.startedAt, e.leaf)
 }
