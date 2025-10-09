@@ -59,6 +59,10 @@ func (e *Extra) Status() TaskStatus {
 	return e.status
 }
 
+func (e *Extra) AccActualTime() time.Duration {
+	return e.durations.accActual
+}
+
 func (e *Extra) IsCompleted() bool {
 	return e.status == TaskStatusDone
 }
@@ -98,6 +102,14 @@ func (e *Extra) SetParentID(parentID ExtraID) *Extra {
 func (e *Extra) SetStatus(status TaskStatus) *Extra {
 	ret := e.clone()
 	ret.status = status
+	ret.validate()
+
+	return ret
+}
+
+func (e *Extra) SetAccActualTime(accActualTime time.Duration) *Extra {
+	ret := e.clone()
+	ret.durations = ret.durations.SetAccActual(accActualTime)
 	ret.validate()
 
 	return ret

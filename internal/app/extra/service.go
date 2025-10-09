@@ -24,7 +24,7 @@ func (s *Service) CreateExtra(ctx context.Context, input *CreateExtraInput) (*Cr
 	extra := domain.NewExtra(
 		domain.ExtraID(input.ID),
 		domain.ExtraID(input.ParentID),
-		domain.NewTrace(time.Duration(0), time.Duration(0)),
+		domain.NewTrace(time.Duration(0), time.Duration(0), time.Duration(0)),
 		time.Time{},
 		true,
 		domain.TaskStatusTodo,
@@ -132,13 +132,28 @@ func (s *Service) ListExtras(ctx context.Context, input *ListExtrasInput) (*List
 func (s *Service) UpdateActualTime(ctx context.Context, input *UpdateActualTimeInput) error {
 	searchID := domain.ExtraID(input.ID)
 
+	extra, err := s.repo.GetExtra(ctx, searchID)
+	if err != nil {
+		return fmt.Errorf("failed to get extra: %w", err)
+	}
+
+	update := extra.
+		SetAccActualTime(extra.AccActualTime() + input.ActualTime).
+		SetActualTime(input.ActualTime)
+
+	err = s.repo.UpdateExtra(ctx, update)
+	if err != nil {
+		return fmt.Errorf("failed to update extra: %w", err)
+	}
+
+	searchID = extra.ParentID()
 	for searchID != "" {
 		extra, err := s.repo.GetExtra(ctx, searchID)
 		if err != nil {
 			return fmt.Errorf("failed to get extra: %w", err)
 		}
 
-		update := extra.SetActualTime(extra.ActualTime() + input.ActualTime)
+		update := extra.SetAccActualTime(extra.AccActualTime() + input.ActualTime)
 
 		err = s.repo.UpdateExtra(ctx, update)
 		if err != nil {

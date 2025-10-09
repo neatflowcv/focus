@@ -114,8 +114,8 @@ func TestServiceUpdateActualTime(t *testing.T) {
 	})
 
 	require.NoError(t, err)
-	require.Equal(t, time.Hour, data.repo.Extras["child"].ActualTime())
-	require.Equal(t, time.Hour, data.repo.Extras["parent"].ActualTime())
+	require.Equal(t, time.Hour, data.repo.Extras["child"].AccActualTime())
+	require.Equal(t, time.Hour, data.repo.Extras["parent"].AccActualTime())
 }
 
 func TestServiceListExtras0(t *testing.T) {
