@@ -1,35 +1,26 @@
 package extra_test
 
 import (
-	"errors"
 	"testing"
 	"time"
 
 	"github.com/neatflowcv/focus/internal/app/extra"
-	"github.com/neatflowcv/focus/internal/app/relation"
-	"github.com/neatflowcv/focus/internal/pkg/eventbus"
 	"github.com/neatflowcv/focus/internal/pkg/repository/memory"
 	"github.com/stretchr/testify/require"
 )
 
 type ServiceData struct {
-	repo            *memory.Repository
-	relationService *relation.Service
-	extraService    *extra.Service
+	repo *memory.Repository
 }
 
 func newService(t *testing.T) (*extra.Service, *ServiceData) {
 	t.Helper()
 
-	bus := eventbus.NewBus()
 	repo := memory.NewRepository()
-	relationService := relation.NewService(bus, repo)
-	service := extra.NewService(repo, relationService)
+	service := extra.NewService(repo)
 
 	return service, &ServiceData{
-		repo:            repo,
-		relationService: relationService,
-		extraService:    service,
+		repo: repo,
 	}
 }
 
@@ -37,46 +28,28 @@ func TestServiceCreateExtra(t *testing.T) {
 	t.Parallel()
 
 	service, data := newService(t)
-	_, _ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
-		ID: "",
-	})
-	_ = data.relationService.CreateChildDummy(t.Context(), &relation.CreateChildDummyInput{
-		ID: "",
-	})
-	_ = data.relationService.CreateRelation(t.Context(), &relation.CreateRelationInput{
+
+	_, err := service.CreateExtra(t.Context(), &extra.CreateExtraInput{
 		ID:       "test",
 		ParentID: "",
 	})
 
-	ret, err := service.CreateExtra(t.Context(), &extra.CreateExtraInput{
-		ID: "test",
-	})
-
 	require.NoError(t, err)
-	require.Equal(t, time.Duration(0), ret.Extra.ActualTime)
-	require.Equal(t, time.Duration(0), ret.Extra.EstimatedTime)
-	require.Equal(t, time.Time{}, ret.Extra.StartedAt)
-	require.True(t, ret.Extra.Leaf)
-}
-
-func TestServiceCreateExtra_Error(t *testing.T) {
-	t.Parallel()
-
-	service, _ := newService(t)
-
-	ret, err := service.CreateExtra(t.Context(), &extra.CreateExtraInput{
-		ID: "test",
-	})
-	_ = ret
-
-	require.ErrorIs(t, err, extra.ErrPreconditionFailed)
+	require.Len(t, data.repo.Extras, 1)
+	require.Equal(t, time.Duration(0), data.repo.Extras["test"].ActualTime())
+	require.Equal(t, time.Duration(0), data.repo.Extras["test"].EstimatedTime())
+	require.Equal(t, time.Time{}, data.repo.Extras["test"].StartedAt())
+	require.True(t, data.repo.Extras["test"].Leaf())
 }
 
 func TestServiceDeleteExtra(t *testing.T) {
 	t.Parallel()
 
-	service, data := newService(t)
-	_ = data
+	service, _ := newService(t)
+	_, _ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
+		ID:       "test",
+		ParentID: "",
+	})
 
 	err := service.DeleteExtra(t.Context(), &extra.DeleteExtraInput{
 		ID: "test",
@@ -85,27 +58,53 @@ func TestServiceDeleteExtra(t *testing.T) {
 	require.NoError(t, err)
 }
 
+func TestServiceDeleteExtra_Error(t *testing.T) {
+	t.Parallel()
+
+	service, _ := newService(t)
+
+	err := service.DeleteExtra(t.Context(), &extra.DeleteExtraInput{
+		ID: "test",
+	})
+
+	require.ErrorIs(t, err, extra.ErrExtraNotFound)
+}
+
 func TestServiceUpdateEstimatedTime(t *testing.T) {
 	t.Parallel()
 
 	service, data := newService(t)
-	declareRelation(t, data, "test", "")
+	_, _ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
+		ID:       "parent",
+		ParentID: "",
+	})
+	_, _ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
+		ID:       "child",
+		ParentID: "parent",
+	})
 
 	err := service.UpdateEstimatedTime(t.Context(), &extra.UpdateEstimatedTimeInput{
-		ID:            "test",
+		ID:            "child",
 		EstimatedTime: time.Hour,
 	})
 
 	require.NoError(t, err)
-	require.Equal(t, time.Hour, data.repo.Extras["test"].EstimatedTime())
+	require.Equal(t, time.Hour, data.repo.Extras["child"].EstimatedTime())
+	require.Equal(t, time.Duration(0), data.repo.Extras["parent"].EstimatedTime())
 }
 
 func TestServiceUpdateActualTime(t *testing.T) {
 	t.Parallel()
 
 	service, data := newService(t)
-	declareRelation(t, data, "parent", "")
-	declareRelation(t, data, "child", "parent")
+	_, _ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
+		ID:       "parent",
+		ParentID: "",
+	})
+	_, _ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
+		ID:       "child",
+		ParentID: "parent",
+	})
 
 	err := service.UpdateActualTime(t.Context(), &extra.UpdateActualTimeInput{
 		ID:         "child",
@@ -117,11 +116,10 @@ func TestServiceUpdateActualTime(t *testing.T) {
 	require.Equal(t, time.Hour, data.repo.Extras["parent"].ActualTime())
 }
 
-func TestServiceListExtras(t *testing.T) {
+func TestServiceListExtras0(t *testing.T) {
 	t.Parallel()
 
-	service, data := newService(t)
-	_ = data
+	service, _ := newService(t)
 
 	ret, err := service.ListExtras(t.Context(), &extra.ListExtrasInput{
 		IDs: []string{"test"},
@@ -131,35 +129,57 @@ func TestServiceListExtras(t *testing.T) {
 	require.Empty(t, ret.Extras)
 }
 
+func TestServiceListExtras1(t *testing.T) {
+	t.Parallel()
+
+	service, _ := newService(t)
+	_, _ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
+		ID:       "test",
+		ParentID: "",
+	})
+
+	ret, err := service.ListExtras(t.Context(), &extra.ListExtrasInput{
+		IDs: []string{"test"},
+	})
+
+	require.NoError(t, err)
+	require.Len(t, ret.Extras, 1)
+}
+
+func TestServiceListExtras2(t *testing.T) {
+	t.Parallel()
+
+	service, _ := newService(t)
+	_, _ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
+		ID:       "test1",
+		ParentID: "",
+	})
+	_, _ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
+		ID:       "test2",
+		ParentID: "",
+	})
+
+	ret, err := service.ListExtras(t.Context(), &extra.ListExtrasInput{
+		IDs: []string{"test1", "test2"},
+	})
+
+	require.NoError(t, err)
+	require.Len(t, ret.Extras, 2)
+}
+
 func TestServiceCheckLeaf(t *testing.T) {
 	t.Parallel()
 
-	_, data := newService(t)
-
-	declareRelation(t, data, "parent", "")
-	declareRelation(t, data, "child", "parent")
+	service, data := newService(t)
+	_, _ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
+		ID:       "parent",
+		ParentID: "",
+	})
+	_, _ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
+		ID:       "child",
+		ParentID: "parent",
+	})
 
 	require.True(t, data.repo.Extras["child"].Leaf())
 	require.False(t, data.repo.Extras["parent"].Leaf())
-}
-
-func declareRelation(t *testing.T, data *ServiceData, id string, parentID string) {
-	t.Helper()
-
-	err := data.relationService.CreateChildDummy(t.Context(), &relation.CreateChildDummyInput{
-		ID: parentID,
-	})
-	if err != nil && !errors.Is(err, relation.ErrRelationAlreadyExists) {
-		require.NoError(t, err)
-	}
-
-	err = data.relationService.CreateRelation(t.Context(), &relation.CreateRelationInput{
-		ID:       id,
-		ParentID: parentID,
-	})
-	require.NoError(t, err)
-
-	_, _ = data.extraService.CreateExtra(t.Context(), &extra.CreateExtraInput{
-		ID: id,
-	})
 }

@@ -6,6 +6,7 @@ type ExtraID string
 
 type Extra struct {
 	id            ExtraID
+	parentID      ExtraID
 	estimatedTime time.Duration
 	actualTime    time.Duration
 	startedAt     time.Time
@@ -14,6 +15,7 @@ type Extra struct {
 
 func NewExtra(
 	id ExtraID,
+	parentID ExtraID,
 	estimatedTime time.Duration,
 	actualTime time.Duration,
 	startedAt time.Time,
@@ -21,6 +23,7 @@ func NewExtra(
 ) *Extra {
 	return &Extra{
 		id:            id,
+		parentID:      parentID,
 		estimatedTime: estimatedTime,
 		actualTime:    actualTime,
 		startedAt:     startedAt,
@@ -48,6 +51,10 @@ func (e *Extra) Leaf() bool {
 	return e.leaf
 }
 
+func (e *Extra) ParentID() ExtraID {
+	return e.parentID
+}
+
 func (e *Extra) SetActualTime(actualTime time.Duration) *Extra {
 	ret := e.clone()
 	ret.actualTime = actualTime
@@ -69,6 +76,13 @@ func (e *Extra) SetLeaf(leaf bool) *Extra {
 	return ret
 }
 
+func (e *Extra) SetParentID(parentID ExtraID) *Extra {
+	ret := e.clone()
+	ret.parentID = parentID
+
+	return ret
+}
+
 func (e *Extra) clone() *Extra {
-	return NewExtra(e.id, e.estimatedTime, e.actualTime, e.startedAt, e.leaf)
+	return NewExtra(e.id, e.parentID, e.estimatedTime, e.actualTime, e.startedAt, e.leaf)
 }

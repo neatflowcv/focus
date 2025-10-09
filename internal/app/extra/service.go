@@ -6,26 +6,24 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/neatflowcv/focus/internal/app/relation"
 	"github.com/neatflowcv/focus/internal/pkg/domain"
 	"github.com/neatflowcv/focus/internal/pkg/repository"
 )
 
 type Service struct {
-	repo            repository.ExtraRepository
-	relationService *relation.Service
+	repo repository.ExtraRepository
 }
 
-func NewService(repo repository.ExtraRepository, relationService *relation.Service) *Service {
+func NewService(repo repository.ExtraRepository) *Service {
 	return &Service{
-		repo:            repo,
-		relationService: relationService,
+		repo: repo,
 	}
 }
 
 func (s *Service) CreateExtra(ctx context.Context, input *CreateExtraInput) (*CreateExtraOutput, error) {
 	extra := domain.NewExtra(
 		domain.ExtraID(input.ID),
+		domain.ExtraID(input.ParentID),
 		time.Duration(0),
 		time.Duration(0),
 		time.Time{},
@@ -37,37 +35,26 @@ func (s *Service) CreateExtra(ctx context.Context, input *CreateExtraInput) (*Cr
 		return nil, fmt.Errorf("failed to create extra: %w", err)
 	}
 
-	searchID := input.ID
+	searchID := domain.ExtraID(input.ParentID)
 	for searchID != "" {
-		rel, err := s.relationService.GetRelation(ctx, &relation.GetRelationInput{
-			ID: searchID,
-		})
+		searchedExtra, err := s.repo.GetExtra(ctx, searchID)
 		if err != nil {
-			if errors.Is(err, relation.ErrRelationNotFound) {
-				return nil, ErrPreconditionFailed
-			}
-
-			return nil, fmt.Errorf("failed to get relation: %w", err)
+			return nil, fmt.Errorf("failed to get extra: %w", err)
 		}
 
-		parentExtra, err := s.repo.GetExtra(ctx, domain.ExtraID(rel.ParentID))
-		if err != nil {
-			return nil, fmt.Errorf("failed to get parent extra: %w", err)
-		}
-
-		if !parentExtra.Leaf() {
+		if !searchedExtra.Leaf() {
 			// parent가 이미 leaf가 아니라면, 위에 있는 모든 extra도 leaf가 아니므로 종료
 			break
 		}
 
-		update := parentExtra.SetLeaf(false)
+		update := searchedExtra.SetLeaf(false)
 
 		err = s.repo.UpdateExtra(ctx, update)
 		if err != nil {
 			return nil, fmt.Errorf("failed to update parent extra: %w", err)
 		}
 
-		searchID = rel.ParentID
+		searchID = searchedExtra.ParentID()
 	}
 
 	return &CreateExtraOutput{
@@ -81,6 +68,20 @@ func (s *Service) CreateExtra(ctx context.Context, input *CreateExtraInput) (*Cr
 }
 
 func (s *Service) DeleteExtra(ctx context.Context, input *DeleteExtraInput) error {
+	extra, err := s.repo.GetExtra(ctx, domain.ExtraID(input.ID))
+	if err != nil {
+		if errors.Is(err, repository.ErrExtraNotFound) {
+			return ErrExtraNotFound
+		}
+
+		return fmt.Errorf("failed to get extra: %w", err)
+	}
+
+	err = s.repo.DeleteExtra(ctx, extra)
+	if err != nil {
+		return fmt.Errorf("failed to delete extra: %w", err)
+	}
+
 	return nil
 }
 
@@ -101,16 +102,36 @@ func (s *Service) UpdateEstimatedTime(ctx context.Context, input *UpdateEstimate
 }
 
 func (s *Service) ListExtras(ctx context.Context, input *ListExtrasInput) (*ListExtrasOutput, error) {
+	var ids []domain.ExtraID
+	for _, id := range input.IDs {
+		ids = append(ids, domain.ExtraID(id))
+	}
+
+	extras, err := s.repo.ListExtras(ctx, ids)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list extras: %w", err)
+	}
+
+	var ouputExtras []Extra
+	for _, extra := range extras {
+		ouputExtras = append(ouputExtras, Extra{
+			EstimatedTime: extra.EstimatedTime(),
+			ActualTime:    extra.ActualTime(),
+			StartedAt:     extra.StartedAt(),
+			Leaf:          extra.Leaf(),
+		})
+	}
+
 	return &ListExtrasOutput{
-		Extras: []Extra{},
+		Extras: ouputExtras,
 	}, nil
 }
 
 func (s *Service) UpdateActualTime(ctx context.Context, input *UpdateActualTimeInput) error {
-	searchID := input.ID
+	searchID := domain.ExtraID(input.ID)
 
 	for searchID != "" {
-		extra, err := s.repo.GetExtra(ctx, domain.ExtraID(searchID))
+		extra, err := s.repo.GetExtra(ctx, searchID)
 		if err != nil {
 			return fmt.Errorf("failed to get extra: %w", err)
 		}
@@ -122,18 +143,7 @@ func (s *Service) UpdateActualTime(ctx context.Context, input *UpdateActualTimeI
 			return fmt.Errorf("failed to update extra: %w", err)
 		}
 
-		rel, err := s.relationService.GetRelation(ctx, &relation.GetRelationInput{
-			ID: searchID,
-		})
-		if err != nil {
-			if errors.Is(err, relation.ErrRelationNotFound) {
-				return ErrPreconditionFailed
-			}
-
-			return fmt.Errorf("failed to get relation: %w", err)
-		}
-
-		searchID = rel.ParentID
+		searchID = extra.ParentID()
 	}
 
 	return nil

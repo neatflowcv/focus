@@ -3,7 +3,8 @@ package extra
 import "time"
 
 type CreateExtraInput struct {
-	ID string
+	ID       string
+	ParentID string
 }
 
 type CreateExtraOutput struct {
