@@ -5,29 +5,26 @@ import "time"
 type ExtraID string
 
 type Extra struct {
-	id            ExtraID
-	parentID      ExtraID
-	estimatedTime time.Duration
-	actualTime    time.Duration
-	startedAt     time.Time
-	leaf          bool
+	id        ExtraID
+	parentID  ExtraID
+	durations *Durations
+	startedAt time.Time
+	leaf      bool
 }
 
 func NewExtra(
 	id ExtraID,
 	parentID ExtraID,
-	estimatedTime time.Duration,
-	actualTime time.Duration,
+	durations *Durations,
 	startedAt time.Time,
 	leaf bool,
 ) *Extra {
 	return &Extra{
-		id:            id,
-		parentID:      parentID,
-		estimatedTime: estimatedTime,
-		actualTime:    actualTime,
-		startedAt:     startedAt,
-		leaf:          leaf,
+		id:        id,
+		parentID:  parentID,
+		durations: durations,
+		startedAt: startedAt,
+		leaf:      leaf,
 	}
 }
 
@@ -36,11 +33,11 @@ func (e *Extra) ID() ExtraID {
 }
 
 func (e *Extra) EstimatedTime() time.Duration {
-	return e.estimatedTime
+	return e.durations.estimated
 }
 
 func (e *Extra) ActualTime() time.Duration {
-	return e.actualTime
+	return e.durations.actual
 }
 
 func (e *Extra) StartedAt() time.Time {
@@ -57,14 +54,14 @@ func (e *Extra) ParentID() ExtraID {
 
 func (e *Extra) SetActualTime(actualTime time.Duration) *Extra {
 	ret := e.clone()
-	ret.actualTime = actualTime
+	ret.durations = ret.durations.SetActual(actualTime)
 
 	return ret
 }
 
 func (e *Extra) SetEstimatedTime(estimatedTime time.Duration) *Extra {
 	ret := e.clone()
-	ret.estimatedTime = estimatedTime
+	ret.durations = ret.durations.SetEstimated(estimatedTime)
 
 	return ret
 }
@@ -84,5 +81,5 @@ func (e *Extra) SetParentID(parentID ExtraID) *Extra {
 }
 
 func (e *Extra) clone() *Extra {
-	return NewExtra(e.id, e.parentID, e.estimatedTime, e.actualTime, e.startedAt, e.leaf)
+	return NewExtra(e.id, e.parentID, e.durations, e.startedAt, e.leaf)
 }

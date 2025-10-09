@@ -24,8 +24,7 @@ func (s *Service) CreateExtra(ctx context.Context, input *CreateExtraInput) (*Cr
 	extra := domain.NewExtra(
 		domain.ExtraID(input.ID),
 		domain.ExtraID(input.ParentID),
-		time.Duration(0),
-		time.Duration(0),
+		domain.NewDurations(time.Duration(0), time.Duration(0)),
 		time.Time{},
 		true,
 	)
