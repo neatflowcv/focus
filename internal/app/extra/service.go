@@ -27,6 +27,7 @@ func (s *Service) CreateExtra(ctx context.Context, input *CreateExtraInput) (*Cr
 		domain.NewDurations(time.Duration(0), time.Duration(0)),
 		time.Time{},
 		true,
+		domain.TaskStatusTodo,
 	)
 
 	err := s.repo.CreateExtra(ctx, extra)

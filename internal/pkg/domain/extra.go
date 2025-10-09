@@ -10,6 +10,7 @@ type Extra struct {
 	durations *Durations
 	startedAt time.Time
 	leaf      bool
+	status    TaskStatus
 }
 
 func NewExtra(
@@ -18,6 +19,7 @@ func NewExtra(
 	durations *Durations,
 	startedAt time.Time,
 	leaf bool,
+	status TaskStatus,
 ) *Extra {
 	return &Extra{
 		id:        id,
@@ -25,6 +27,7 @@ func NewExtra(
 		durations: durations,
 		startedAt: startedAt,
 		leaf:      leaf,
+		status:    status,
 	}
 }
 
@@ -52,9 +55,14 @@ func (e *Extra) ParentID() ExtraID {
 	return e.parentID
 }
 
+func (e *Extra) Status() TaskStatus {
+	return e.status
+}
+
 func (e *Extra) SetActualTime(actualTime time.Duration) *Extra {
 	ret := e.clone()
 	ret.durations = ret.durations.SetActual(actualTime)
+	ret.validate()
 
 	return ret
 }
@@ -62,6 +70,7 @@ func (e *Extra) SetActualTime(actualTime time.Duration) *Extra {
 func (e *Extra) SetEstimatedTime(estimatedTime time.Duration) *Extra {
 	ret := e.clone()
 	ret.durations = ret.durations.SetEstimated(estimatedTime)
+	ret.validate()
 
 	return ret
 }
@@ -69,6 +78,7 @@ func (e *Extra) SetEstimatedTime(estimatedTime time.Duration) *Extra {
 func (e *Extra) SetLeaf(leaf bool) *Extra {
 	ret := e.clone()
 	ret.leaf = leaf
+	ret.validate()
 
 	return ret
 }
@@ -76,10 +86,23 @@ func (e *Extra) SetLeaf(leaf bool) *Extra {
 func (e *Extra) SetParentID(parentID ExtraID) *Extra {
 	ret := e.clone()
 	ret.parentID = parentID
+	ret.validate()
+
+	return ret
+}
+
+func (e *Extra) SetStatus(status TaskStatus) *Extra {
+	ret := e.clone()
+	ret.status = status
+	ret.validate()
 
 	return ret
 }
 
 func (e *Extra) clone() *Extra {
-	return NewExtra(e.id, e.parentID, e.durations, e.startedAt, e.leaf)
+	return NewExtra(e.id, e.parentID, e.durations, e.startedAt, e.leaf, e.status)
+}
+
+func (e *Extra) validate() {
+	e.status.validate()
 }

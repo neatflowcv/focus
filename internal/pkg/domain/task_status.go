@@ -8,7 +8,7 @@ const (
 	TaskStatusDone  TaskStatus = "done"
 )
 
-func (s TaskStatus) validate() { //nolint:unused
+func (s TaskStatus) validate() {
 	switch s {
 	case TaskStatusTodo, TaskStatusDoing, TaskStatusDone:
 		return
