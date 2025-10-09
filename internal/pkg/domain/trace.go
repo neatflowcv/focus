@@ -2,14 +2,18 @@ package domain
 
 import "time"
 
+type TraceID string
+
 type Trace struct {
+	id        TraceID
 	estimated time.Duration
 	actual    time.Duration
 	accActual time.Duration
 }
 
-func NewTrace(estimated time.Duration, actual time.Duration, accActual time.Duration) *Trace {
+func NewTrace(id TraceID, estimated time.Duration, actual time.Duration, accActual time.Duration) *Trace {
 	ret := &Trace{
+		id:        id,
 		estimated: estimated,
 		actual:    actual,
 		accActual: accActual,
@@ -20,7 +24,11 @@ func NewTrace(estimated time.Duration, actual time.Duration, accActual time.Dura
 }
 
 func (t *Trace) Clone() *Trace {
-	return NewTrace(t.estimated, t.actual, t.accActual)
+	return NewTrace(t.id, t.estimated, t.actual, t.accActual)
+}
+
+func (t *Trace) ID() TraceID {
+	return t.id
 }
 
 func (t *Trace) Estimated() time.Duration {
