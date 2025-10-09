@@ -46,7 +46,6 @@ func TestServiceCreateTask(t *testing.T) {
 	require.Equal(t, "test", ret.Task.Title)
 	require.Equal(t, now, ret.Task.CreatedAt)
 	require.NotEmpty(t, ret.Task.ID)
-	require.Equal(t, string(domain.TaskStatusTodo), ret.Task.Status)
 }
 
 func TestServiceListTasksWithNoData(t *testing.T) {
@@ -83,7 +82,6 @@ func TestServiceListTasks(t *testing.T) {
 	require.Len(t, ret.Tasks, 1)
 	require.Equal(t, "test", ret.Tasks[0].Title)
 	require.Equal(t, now, ret.Tasks[0].CreatedAt)
-	require.Equal(t, string(domain.TaskStatusTodo), ret.Tasks[0].Status)
 }
 
 func TestServiceDeleteTask(t *testing.T) {

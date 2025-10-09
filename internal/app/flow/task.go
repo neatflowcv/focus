@@ -14,7 +14,6 @@ type Task struct {
 	ID        string
 	Title     string
 	CreatedAt time.Time
-	Status    string
 }
 
 type CreateTaskOutput struct {

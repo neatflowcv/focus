@@ -30,7 +30,6 @@ func (s *Service) CreateTask(ctx context.Context, input *CreateTaskInput) (*Crea
 	task := domain.NewTask(
 		domain.TaskID(s.idmaker.MakeID()),
 		input.Title,
-		domain.TaskStatusTodo,
 		input.Now,
 		time.Time{},
 	)
@@ -49,7 +48,6 @@ func (s *Service) CreateTask(ctx context.Context, input *CreateTaskInput) (*Crea
 			ID:        string(task.ID()),
 			Title:     task.Title(),
 			CreatedAt: task.CreatedAt(),
-			Status:    string(task.Status()),
 		},
 	}, nil
 }
@@ -93,7 +91,6 @@ func (s *Service) ListTasks(ctx context.Context, input *ListTasksInput) (*ListTa
 			ID:        string(task.ID()),
 			Title:     task.Title(),
 			CreatedAt: task.CreatedAt(),
-			Status:    string(task.Status()),
 		})
 	}
 
@@ -117,7 +114,6 @@ func (s *Service) GetTask(ctx context.Context, input *GetTaskInput) (*GetTaskOut
 			ID:        string(task.ID()),
 			Title:     task.Title(),
 			CreatedAt: task.CreatedAt(),
-			Status:    string(task.Status()),
 		},
 	}, nil
 }

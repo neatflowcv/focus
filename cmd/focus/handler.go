@@ -155,7 +155,7 @@ func toTaskDetail(domainTask *flow.Task, parentID string) *task.Taskdetail {
 		ParentID:      &parentID,
 		Title:         domainTask.Title,
 		CreatedAt:     domainTask.CreatedAt.Unix(),
-		Status:        domainTask.Status,
+		Status:        "",
 		IsLeaf:        nil,
 		CompletedAt:   nil,
 		StartedAt:     nil,

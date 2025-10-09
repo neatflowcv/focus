@@ -11,7 +11,6 @@ type Task struct {
 	ID          string `gorm:"primaryKey"`
 	Username    string
 	Title       string
-	Status      string
 	CreatedAt   time.Time
 	CompletedAt sql.NullTime
 }
@@ -20,7 +19,6 @@ func (t *Task) ToDomain() *domain.Task {
 	return domain.NewTask(
 		domain.TaskID(t.ID),
 		t.Title,
-		domain.TaskStatus(t.Status),
 		t.CreatedAt,
 		t.CompletedAt.Time,
 	)
@@ -31,7 +29,6 @@ func FromDomainTask(task *domain.Task, username string) *Task {
 		ID:          string(task.ID()),
 		Username:    username,
 		Title:       task.Title(),
-		Status:      string(task.Status()),
 		CreatedAt:   task.CreatedAt(),
 		CompletedAt: toNullTime(task.CompletedAt()),
 	}
