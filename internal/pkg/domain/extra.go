@@ -7,7 +7,7 @@ type ExtraID string
 type Extra struct {
 	id        ExtraID
 	parentID  ExtraID
-	durations *Durations
+	durations *Trace
 	startedAt time.Time
 	leaf      bool
 	status    TaskStatus
@@ -16,7 +16,7 @@ type Extra struct {
 func NewExtra(
 	id ExtraID,
 	parentID ExtraID,
-	durations *Durations,
+	durations *Trace,
 	startedAt time.Time,
 	leaf bool,
 	status TaskStatus,
