@@ -9,14 +9,22 @@ type Trace struct {
 	estimated time.Duration
 	actual    time.Duration
 	accActual time.Duration
+	startedAt time.Time
 }
 
-func NewTrace(id TraceID, estimated time.Duration, actual time.Duration, accActual time.Duration) *Trace {
+func NewTrace(
+	id TraceID,
+	estimated time.Duration,
+	actual time.Duration,
+	accActual time.Duration,
+	startedAt time.Time,
+) *Trace {
 	ret := &Trace{
 		id:        id,
 		estimated: estimated,
 		actual:    actual,
 		accActual: accActual,
+		startedAt: startedAt,
 	}
 	ret.validate()
 
@@ -24,7 +32,7 @@ func NewTrace(id TraceID, estimated time.Duration, actual time.Duration, accActu
 }
 
 func (t *Trace) Clone() *Trace {
-	return NewTrace(t.id, t.estimated, t.actual, t.accActual)
+	return NewTrace(t.id, t.estimated, t.actual, t.accActual, t.startedAt)
 }
 
 func (t *Trace) ID() TraceID {
