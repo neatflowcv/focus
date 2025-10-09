@@ -2,7 +2,6 @@ package extra_test
 
 import (
 	"testing"
-	"time"
 
 	"github.com/neatflowcv/focus/internal/app/extra"
 	"github.com/neatflowcv/focus/internal/pkg/domain"
@@ -37,9 +36,6 @@ func TestServiceCreateExtra(t *testing.T) {
 
 	require.NoError(t, err)
 	require.Len(t, data.repo.Extras, 1)
-	require.Equal(t, time.Duration(0), data.repo.Extras["test"].ActualTime())
-	require.Equal(t, time.Duration(0), data.repo.Extras["test"].EstimatedTime())
-	require.Equal(t, time.Time{}, data.repo.Extras["test"].StartedAt())
 	require.True(t, data.repo.Extras["test"].Leaf())
 	require.Equal(t, domain.TaskStatusTodo, data.repo.Extras["test"].Status())
 }
@@ -70,52 +66,6 @@ func TestServiceDeleteExtra_Error(t *testing.T) {
 	})
 
 	require.ErrorIs(t, err, extra.ErrExtraNotFound)
-}
-
-func TestServiceUpdateEstimatedTime(t *testing.T) {
-	t.Parallel()
-
-	service, data := newService(t)
-	_, _ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
-		ID:       "parent",
-		ParentID: "",
-	})
-	_, _ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
-		ID:       "child",
-		ParentID: "parent",
-	})
-
-	err := service.UpdateEstimatedTime(t.Context(), &extra.UpdateEstimatedTimeInput{
-		ID:            "child",
-		EstimatedTime: time.Hour,
-	})
-
-	require.NoError(t, err)
-	require.Equal(t, time.Hour, data.repo.Extras["child"].EstimatedTime())
-	require.Equal(t, time.Duration(0), data.repo.Extras["parent"].EstimatedTime())
-}
-
-func TestServiceUpdateActualTime(t *testing.T) {
-	t.Parallel()
-
-	service, data := newService(t)
-	_, _ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
-		ID:       "parent",
-		ParentID: "",
-	})
-	_, _ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
-		ID:       "child",
-		ParentID: "parent",
-	})
-
-	err := service.UpdateActualTime(t.Context(), &extra.UpdateActualTimeInput{
-		ID:         "child",
-		ActualTime: time.Hour,
-	})
-
-	require.NoError(t, err)
-	require.Equal(t, time.Hour, data.repo.Extras["child"].AccActualTime())
-	require.Equal(t, time.Hour, data.repo.Extras["parent"].AccActualTime())
 }
 
 func TestServiceListExtras0(t *testing.T) {

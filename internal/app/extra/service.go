@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/neatflowcv/focus/internal/pkg/domain"
 	"github.com/neatflowcv/focus/internal/pkg/repository"
@@ -24,8 +23,6 @@ func (s *Service) CreateExtra(ctx context.Context, input *CreateExtraInput) (*Cr
 	extra := domain.NewExtra(
 		domain.ExtraID(input.ID),
 		domain.ExtraID(input.ParentID),
-		domain.NewTrace(domain.TraceID(input.ID), time.Duration(0), time.Duration(0), time.Duration(0)),
-		time.Time{},
 		true,
 		domain.TaskStatusTodo,
 	)
@@ -61,10 +58,8 @@ func (s *Service) CreateExtra(ctx context.Context, input *CreateExtraInput) (*Cr
 
 	return &CreateExtraOutput{
 		Extra: Extra{
-			EstimatedTime: extra.EstimatedTime(),
-			ActualTime:    extra.ActualTime(),
-			StartedAt:     extra.StartedAt(),
-			Leaf:          extra.Leaf(),
+			Leaf:   extra.Leaf(),
+			Status: string(extra.Status()),
 		},
 	}, nil
 }
@@ -87,22 +82,6 @@ func (s *Service) DeleteExtra(ctx context.Context, input *DeleteExtraInput) erro
 	return nil
 }
 
-func (s *Service) UpdateEstimatedTime(ctx context.Context, input *UpdateEstimatedTimeInput) error {
-	extra, err := s.repo.GetExtra(ctx, domain.ExtraID(input.ID))
-	if err != nil {
-		return fmt.Errorf("failed to get extra: %w", err)
-	}
-
-	update := extra.SetEstimatedTime(input.EstimatedTime)
-
-	err = s.repo.UpdateExtra(ctx, update)
-	if err != nil {
-		return fmt.Errorf("failed to update extra: %w", err)
-	}
-
-	return nil
-}
-
 func (s *Service) ListExtras(ctx context.Context, input *ListExtrasInput) (*ListExtrasOutput, error) {
 	var ids []domain.ExtraID
 	for _, id := range input.IDs {
@@ -117,53 +96,14 @@ func (s *Service) ListExtras(ctx context.Context, input *ListExtrasInput) (*List
 	var ouputExtras []Extra
 	for _, extra := range extras {
 		ouputExtras = append(ouputExtras, Extra{
-			EstimatedTime: extra.EstimatedTime(),
-			ActualTime:    extra.ActualTime(),
-			StartedAt:     extra.StartedAt(),
-			Leaf:          extra.Leaf(),
+			Leaf:   extra.Leaf(),
+			Status: string(extra.Status()),
 		})
 	}
 
 	return &ListExtrasOutput{
 		Extras: ouputExtras,
 	}, nil
-}
-
-func (s *Service) UpdateActualTime(ctx context.Context, input *UpdateActualTimeInput) error {
-	searchID := domain.ExtraID(input.ID)
-
-	extra, err := s.repo.GetExtra(ctx, searchID)
-	if err != nil {
-		return fmt.Errorf("failed to get extra: %w", err)
-	}
-
-	update := extra.
-		SetAccActualTime(extra.AccActualTime() + input.ActualTime).
-		SetActualTime(input.ActualTime)
-
-	err = s.repo.UpdateExtra(ctx, update)
-	if err != nil {
-		return fmt.Errorf("failed to update extra: %w", err)
-	}
-
-	searchID = extra.ParentID()
-	for searchID != "" {
-		extra, err := s.repo.GetExtra(ctx, searchID)
-		if err != nil {
-			return fmt.Errorf("failed to get extra: %w", err)
-		}
-
-		update := extra.SetAccActualTime(extra.AccActualTime() + input.ActualTime)
-
-		err = s.repo.UpdateExtra(ctx, update)
-		if err != nil {
-			return fmt.Errorf("failed to update extra: %w", err)
-		}
-
-		searchID = extra.ParentID()
-	}
-
-	return nil
 }
 
 func (s *Service) SetDone(ctx context.Context, input *SetDoneInput) error {
