@@ -30,7 +30,7 @@ func NewTask(
 		panic("title is required")
 	}
 
-	validateTaskStatus(status)
+	status.validate()
 
 	return &Task{
 		id:          id,
@@ -60,4 +60,3 @@ func (t *Task) CreatedAt() time.Time {
 func (t *Task) CompletedAt() time.Time {
 	return t.completedAt
 }
-

@@ -8,11 +8,11 @@ const (
 	TaskStatusDone  TaskStatus = "done"
 )
 
-func validateTaskStatus(status TaskStatus) {
-	switch status {
+func (s TaskStatus) validate() {
+	switch s {
 	case TaskStatusTodo, TaskStatusDoing, TaskStatusDone:
 		return
+	default:
+		panic("invalid task status: " + string(s))
 	}
-
-	panic("invalid task status: " + string(status))
 }
