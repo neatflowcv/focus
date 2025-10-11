@@ -306,3 +306,139 @@ func TestServiceDeleteTask_Error(t *testing.T) {
 
 	require.Error(t, err)
 }
+
+func TestServiceUpdateTask(t *testing.T) { //nolint:funlen
+	t.Parallel()
+
+	t.Run("order", func(t *testing.T) {
+		t.Parallel()
+
+		const (
+			username = "test"
+		)
+
+		service, data := newService(t)
+		_ = service.CreateRootDummy(t.Context(), &flow.CreateRootDummyInput{
+			Username: username,
+		})
+		firstTask, _ := service.CreateTask(t.Context(), &flow.CreateTaskInput{
+			Username: username,
+			Title:    "test",
+			Now:      time.Now(),
+			ParentID: "",
+			NextID:   "",
+		})
+		secondTask, _ := service.CreateTask(t.Context(), &flow.CreateTaskInput{
+			Username: username,
+			Title:    "test",
+			Now:      time.Now(),
+			ParentID: "",
+			NextID:   "",
+		})
+
+		err := service.UpdateTask(t.Context(), &flow.UpdateTaskInput{
+			Username: username,
+			TaskID:   firstTask.ID,
+			NextID:   "",
+			ParentID: "",
+			Title:    "test",
+		})
+
+		require.NoError(t, err)
+		require.Equal(
+			t,
+			domain.TaskID(""),
+			data.repo.Tasks[username][domain.TaskID(firstTask.ID)].NextID(),
+		)
+		require.Equal(
+			t,
+			domain.TaskID(firstTask.ID),
+			data.repo.Tasks[username][domain.TaskID(secondTask.ID)].NextID(),
+		)
+	})
+
+	t.Run("parent", func(t *testing.T) {
+		t.Parallel()
+
+		const (
+			username = "test"
+		)
+
+		service, data := newService(t)
+		_ = service.CreateRootDummy(t.Context(), &flow.CreateRootDummyInput{
+			Username: username,
+		})
+		parentTask, _ := service.CreateTask(t.Context(), &flow.CreateTaskInput{
+			Username: username,
+			Title:    "parent",
+			Now:      time.Now(),
+			ParentID: "",
+			NextID:   "",
+		})
+		childTask, _ := service.CreateTask(t.Context(), &flow.CreateTaskInput{
+			Username: username,
+			Title:    "child",
+			Now:      time.Now(),
+			ParentID: parentTask.ID,
+			NextID:   "",
+		})
+
+		err := service.UpdateTask(t.Context(), &flow.UpdateTaskInput{
+			Username: username,
+			TaskID:   childTask.ID,
+			NextID:   "",
+			ParentID: "",
+			Title:    "test",
+		})
+
+		require.NoError(t, err)
+		require.Equal(
+			t,
+			domain.TaskID(childTask.ID),
+			data.repo.Tasks[username][domain.TaskID(parentTask.ID)].NextID(),
+		)
+		require.Equal(
+			t,
+			domain.TaskID(""),
+			data.repo.Tasks[username][domain.TaskID(childTask.ID)].ParentID(),
+		)
+	})
+
+	t.Run("title", func(t *testing.T) {
+		t.Parallel()
+
+		const (
+			username = "test"
+		)
+
+		service, data := newService(t)
+		_ = service.CreateRootDummy(t.Context(), &flow.CreateRootDummyInput{
+			Username: username,
+		})
+		first, _ := service.CreateTask(t.Context(), &flow.CreateTaskInput{
+			Username: username,
+			Title:    "test",
+			Now:      time.Now(),
+			ParentID: "",
+			NextID:   "",
+		})
+		second, _ := service.CreateTask(t.Context(), &flow.CreateTaskInput{
+			Username: username,
+			Title:    "test",
+			Now:      time.Now(),
+			ParentID: "",
+			NextID:   "",
+		})
+
+		err := service.UpdateTask(t.Context(), &flow.UpdateTaskInput{
+			Username: username,
+			TaskID:   first.ID,
+			Title:    "other",
+			ParentID: "",
+			NextID:   second.ID,
+		})
+
+		require.NoError(t, err)
+		require.Equal(t, "other", data.repo.Tasks[username][domain.TaskID(first.ID)].Title())
+	})
+}

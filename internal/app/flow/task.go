@@ -50,3 +50,11 @@ type GetTaskOutput struct {
 type CreateRootDummyInput struct {
 	Username string
 }
+
+type UpdateTaskInput struct {
+	Username string
+	TaskID   string
+	ParentID string
+	NextID   string
+	Title    string
+}

@@ -36,7 +36,7 @@ func (s *Service) CreateRootDummy(ctx context.Context, input *CreateRootDummyInp
 	return nil
 }
 
-func (s *Service) CreateTask( //nolint:cyclop,funlen
+func (s *Service) CreateTask( //nolint:funlen
 	ctx context.Context,
 	input *CreateTaskInput,
 ) (*CreateTaskOutput, error) {
@@ -64,18 +64,9 @@ func (s *Service) CreateTask( //nolint:cyclop,funlen
 
 	id := domain.TaskID(s.idmaker.MakeID())
 
-	children, err := s.repo.ListTasks(ctx, input.Username, domain.TaskID(input.ParentID))
+	previousTask, err := s.getPreviousTask(ctx, input.Username, domain.TaskID(input.ParentID), domain.TaskID(input.NextID))
 	if err != nil {
-		return nil, fmt.Errorf("failed to list tasks: %w", err)
-	}
-
-	var previousTask *domain.Task
-	for _, child := range children {
-		if child.NextID() == domain.TaskID(input.NextID) {
-			previousTask = child
-
-			break
-		}
+		return nil, err
 	}
 
 	previous := previousTask.SetNextID(id)
@@ -205,4 +196,103 @@ func (s *Service) GetTask(ctx context.Context, input *GetTaskInput) (*GetTaskOut
 			CreatedAt: task.CreatedAt(),
 		},
 	}, nil
+}
+
+func (s *Service) UpdateTask(ctx context.Context, input *UpdateTaskInput) error {
+	task, err := s.repo.GetTask(ctx, input.Username, domain.TaskID(input.TaskID))
+	if err != nil {
+		return fmt.Errorf("failed to get task: %w", err)
+	}
+
+	// updateTask := task.
+	// 	SetParentID(domain.TaskID(input.ParentID)).
+	// 	SetNextID(domain.TaskID(input.NextID))
+
+	if task.ParentID() != domain.TaskID(input.ParentID) || task.NextID() != domain.TaskID(input.NextID) {
+		err := s.updateTaskRelation(ctx, input.Username, task, domain.TaskID(input.ParentID), domain.TaskID(input.NextID))
+		if err != nil {
+			return fmt.Errorf("failed to update task relation: %w", err)
+		}
+	}
+
+	if task.Title() != input.Title {
+		err = s.updateTaskTitle(ctx, input.Username, domain.TaskID(input.TaskID), input.Title)
+		if err != nil {
+			return fmt.Errorf("failed to update task title: %w", err)
+		}
+	}
+
+	return nil
+}
+
+func (s *Service) getPreviousTask(
+	ctx context.Context,
+	username string,
+	parentID domain.TaskID,
+	id domain.TaskID,
+) (*domain.Task, error) {
+	children, err := s.repo.ListTasks(ctx, username, parentID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list tasks: %w", err)
+	}
+
+	for _, child := range children {
+		if child.NextID() == id {
+			return child, nil
+		}
+	}
+
+	panic("logic error: previous task not found")
+}
+
+func (s *Service) updateTaskRelation(
+	ctx context.Context,
+	username string,
+	task *domain.Task,
+	parentID domain.TaskID,
+	nextID domain.TaskID,
+) error {
+	oldPreviousTask, err := s.getPreviousTask(ctx, username, task.ParentID(), task.ID())
+	if err != nil {
+		return fmt.Errorf("failed to get old previous task: %w", err)
+	}
+
+	oldPreviousTask = oldPreviousTask.SetNextID(task.NextID())
+
+	newTask := task.SetParentID(parentID).SetNextID(nextID)
+
+	newPreviousTask, err := s.getPreviousTask(ctx, username, newTask.ParentID(), newTask.NextID())
+	if err != nil {
+		return fmt.Errorf("failed to get new previous task: %w", err)
+	}
+
+	newPreviousTask = newPreviousTask.SetNextID(task.ID())
+
+	err = s.repo.UpdateTasks(ctx, username, newTask, oldPreviousTask, newPreviousTask)
+	if err != nil {
+		return fmt.Errorf("failed to update task: %w", err)
+	}
+
+	err = s.repo.UpdateTasks(ctx, username, newTask, oldPreviousTask, newPreviousTask)
+	if err != nil {
+		return fmt.Errorf("failed to update task: %w", err)
+	}
+
+	return nil
+}
+
+func (s *Service) updateTaskTitle(ctx context.Context, username string, id domain.TaskID, title string) error {
+	task, err := s.repo.GetTask(ctx, username, id)
+	if err != nil {
+		return fmt.Errorf("failed to get task: %w", err)
+	}
+
+	task = task.SetTitle(title)
+
+	err = s.repo.UpdateTasks(ctx, username, task)
+	if err != nil {
+		return fmt.Errorf("failed to update task: %w", err)
+	}
+
+	return nil
 }
