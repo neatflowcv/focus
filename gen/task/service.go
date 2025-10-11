@@ -58,6 +58,10 @@ type CreateTaskInput struct {
 type Createtaskoutput struct {
 	// The ID of the task
 	ID string
+	// The parent ID of the task
+	ParentID *string
+	// The title of the task
+	Title string
 	// The timestamp when the task was created
 	CreatedAt int64
 }
@@ -191,9 +195,14 @@ func NewViewedTaskdetail(res *Taskdetail, view string) *taskviews.Taskdetail {
 // newCreatetaskoutput converts projected type Createtaskoutput to service type
 // Createtaskoutput.
 func newCreatetaskoutput(vres *taskviews.CreatetaskoutputView) *Createtaskoutput {
-	res := &Createtaskoutput{}
+	res := &Createtaskoutput{
+		ParentID: vres.ParentID,
+	}
 	if vres.ID != nil {
 		res.ID = *vres.ID
+	}
+	if vres.Title != nil {
+		res.Title = *vres.Title
 	}
 	if vres.CreatedAt != nil {
 		res.CreatedAt = *vres.CreatedAt
@@ -206,6 +215,8 @@ func newCreatetaskoutput(vres *taskviews.CreatetaskoutputView) *Createtaskoutput
 func newCreatetaskoutputView(res *Createtaskoutput) *taskviews.CreatetaskoutputView {
 	vres := &taskviews.CreatetaskoutputView{
 		ID:        &res.ID,
+		ParentID:  res.ParentID,
+		Title:     &res.Title,
 		CreatedAt: &res.CreatedAt,
 	}
 	return vres

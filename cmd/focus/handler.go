@@ -76,7 +76,7 @@ func (h *Handler) Create(ctx context.Context, input *task.CreateTaskInput) (*tas
 		return nil, task.MakeInternalServerError(err)
 	}
 
-	return makeCreateTaskOutput(out), nil
+	return makeCreateTaskOutput(input, out), nil
 }
 
 func (h *Handler) List(ctx context.Context, input *task.ListPayload) (task.TaskdetailCollection, error) {

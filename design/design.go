@@ -123,9 +123,11 @@ var CreateTaskInput = dsl.Type("CreateTaskInput", func() { //nolint:gochecknoglo
 
 var CreateTaskOutput = dsl.ResultType("CreateTaskOutput", func() { //nolint:gochecknoglobals
 	dsl.Attribute("id", dsl.String, "The ID of the task")
+	dsl.Attribute("parent_id", dsl.String, "The parent ID of the task")
+	dsl.Attribute("title", dsl.String, "The title of the task")
 	dsl.Attribute("created_at", dsl.Int64, "The timestamp when the task was created")
 
-	dsl.Required("id", "created_at")
+	dsl.Required("id", "title", "created_at")
 })
 
 var TaskUpdateInput = dsl.Type("TaskUpdateInput", func() { //nolint:gochecknoglobals

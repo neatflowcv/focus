@@ -40,6 +40,10 @@ type Taskdetail struct {
 type CreatetaskoutputView struct {
 	// The ID of the task
 	ID *string
+	// The parent ID of the task
+	ParentID *string
+	// The title of the task
+	Title *string
 	// The timestamp when the task was created
 	CreatedAt *int64
 }
@@ -79,6 +83,8 @@ var (
 	CreatetaskoutputMap = map[string][]string{
 		"default": {
 			"id",
+			"parent_id",
+			"title",
 			"created_at",
 		},
 	}
@@ -159,6 +165,9 @@ func ValidateTaskdetail(result *Taskdetail) (err error) {
 func ValidateCreatetaskoutputView(result *CreatetaskoutputView) (err error) {
 	if result.ID == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("id", "result"))
+	}
+	if result.Title == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("title", "result"))
 	}
 	if result.CreatedAt == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("created_at", "result"))

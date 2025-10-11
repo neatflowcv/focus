@@ -42,6 +42,10 @@ type UpdateRequestBody struct {
 type CreateResponseBody struct {
 	// The ID of the task
 	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// The parent ID of the task
+	ParentID *string `form:"parent_id,omitempty" json:"parent_id,omitempty" xml:"parent_id,omitempty"`
+	// The title of the task
+	Title *string `form:"title,omitempty" json:"title,omitempty" xml:"title,omitempty"`
 	// The timestamp when the task was created
 	CreatedAt *int64 `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
 }
@@ -376,6 +380,8 @@ func NewSetupInternalServerError(body *SetupInternalServerErrorResponseBody) *go
 func NewCreatetaskoutputViewOK(body *CreateResponseBody) *taskviews.CreatetaskoutputView {
 	v := &taskviews.CreatetaskoutputView{
 		ID:        body.ID,
+		ParentID:  body.ParentID,
+		Title:     body.Title,
 		CreatedAt: body.CreatedAt,
 	}
 

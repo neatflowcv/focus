@@ -29,7 +29,7 @@ func UsageCommands() []string {
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + ` task setup --authorization "Ullam dolor sint odio aut enim saepe."` + "\n" +
+	return os.Args[0] + ` task setup --authorization "Aut omnis laborum eligendi repudiandae ratione quis."` + "\n" +
 		""
 }
 
@@ -202,7 +202,7 @@ func taskSetupUsage() {
 	// Example block: pass example as parameter to avoid format parsing of % characters
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], `task setup --authorization "Ullam dolor sint odio aut enim saepe."`)
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], `task setup --authorization "Aut omnis laborum eligendi repudiandae ratione quis."`)
 }
 
 func taskCreateUsage() {
@@ -224,9 +224,9 @@ func taskCreateUsage() {
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
 	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], `task create --body '{
-      "parent_id": "Asperiores nisi qui ut corporis quia numquam.",
-      "title": "Beatae nobis."
-   }' --authorization "Aut omnis laborum eligendi repudiandae ratione quis."`)
+      "parent_id": "Iusto debitis minus minima voluptatem iste facilis.",
+      "title": "Minima autem vitae pariatur minus adipisci."
+   }' --authorization "Necessitatibus et."`)
 }
 
 func taskListUsage() {
@@ -249,7 +249,7 @@ func taskListUsage() {
 	// Example block: pass example as parameter to avoid format parsing of % characters
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], `task list --parent-id "Non necessitatibus." --recursive true --authorization "Distinctio et ea."`)
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], `task list --parent-id "Est qui ratione consequatur quis ullam." --recursive true --authorization "Earum dolores occaecati labore qui qui error."`)
 }
 
 func taskUpdateUsage() {
@@ -273,12 +273,12 @@ func taskUpdateUsage() {
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
 	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], `task update --body '{
-      "estimated_time": 3800609449116017351,
-      "next_id": "Ea ut omnis.",
-      "parent_id": "Earum dolores occaecati labore qui qui error.",
-      "status": "Aut recusandae vitae quo non accusamus explicabo.",
-      "title": "Quis ullam quisquam."
-   }' --task-id "Neque totam ipsa ipsum non corrupti." --authorization "Voluptatem nisi."`)
+      "estimated_time": 2175844144312828151,
+      "next_id": "Atque quo reiciendis eveniet eaque iusto eum.",
+      "parent_id": "Odit dolore dolor deserunt omnis molestiae.",
+      "status": "Quam fugiat aut officia ut non modi.",
+      "title": "Veritatis labore."
+   }' --task-id "Quae quia repellat deleniti nihil consequatur vel." --authorization "Odit perferendis aut voluptatem qui eum fugit."`)
 }
 
 func taskDeleteUsage() {
@@ -299,5 +299,5 @@ func taskDeleteUsage() {
 	// Example block: pass example as parameter to avoid format parsing of % characters
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], `task delete --task-id "Voluptatem qui." --authorization "Fugit repudiandae commodi beatae deserunt maiores laudantium."`)
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], `task delete --task-id "Beatae neque voluptatem." --authorization "Omnis inventore minima alias."`)
 }

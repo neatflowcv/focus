@@ -5,9 +5,11 @@ import (
 	"github.com/neatflowcv/focus/internal/app/flow"
 )
 
-func makeCreateTaskOutput(out *flow.CreateTaskOutput) *task.Createtaskoutput {
+func makeCreateTaskOutput(in *task.CreateTaskInput, out *flow.CreateTaskOutput) *task.Createtaskoutput {
 	return &task.Createtaskoutput{
 		ID:        out.ID,
+		ParentID:  in.ParentID,
+		Title:     in.Title,
 		CreatedAt: out.CreatedAt.Unix(),
 	}
 }

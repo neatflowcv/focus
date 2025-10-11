@@ -42,6 +42,10 @@ type UpdateRequestBody struct {
 type CreateResponseBody struct {
 	// The ID of the task
 	ID string `form:"id" json:"id" xml:"id"`
+	// The parent ID of the task
+	ParentID *string `form:"parent_id,omitempty" json:"parent_id,omitempty" xml:"parent_id,omitempty"`
+	// The title of the task
+	Title string `form:"title" json:"title" xml:"title"`
 	// The timestamp when the task was created
 	CreatedAt int64 `form:"created_at" json:"created_at" xml:"created_at"`
 }
@@ -324,6 +328,8 @@ type TaskdetailResponse struct {
 func NewCreateResponseBody(res *taskviews.CreatetaskoutputView) *CreateResponseBody {
 	body := &CreateResponseBody{
 		ID:        *res.ID,
+		ParentID:  res.ParentID,
+		Title:     *res.Title,
 		CreatedAt: *res.CreatedAt,
 	}
 	return body
