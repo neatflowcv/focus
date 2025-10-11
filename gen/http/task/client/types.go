@@ -26,7 +26,7 @@ type CreateRequestBody struct {
 // request body.
 type UpdateRequestBody struct {
 	// The title of the task
-	Title *string `form:"title,omitempty" json:"title,omitempty" xml:"title,omitempty"`
+	Title string `form:"title" json:"title" xml:"title"`
 	// The parent ID of the task
 	ParentID *string `form:"parent_id,omitempty" json:"parent_id,omitempty" xml:"parent_id,omitempty"`
 	// The next ID of the task
@@ -48,11 +48,21 @@ type CreateResponseBody struct {
 	Title *string `form:"title,omitempty" json:"title,omitempty" xml:"title,omitempty"`
 	// The timestamp when the task was created
 	CreatedAt *int64 `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
+	// The estimated time of the task
+	EstimatedTime *int64 `form:"estimated_time,omitempty" json:"estimated_time,omitempty" xml:"estimated_time,omitempty"`
+	// The actual time of the task
+	ActualTime *int64 `form:"actual_time,omitempty" json:"actual_time,omitempty" xml:"actual_time,omitempty"`
+	// The timestamp when the task was started
+	StartedAt *int64 `form:"started_at,omitempty" json:"started_at,omitempty" xml:"started_at,omitempty"`
+	// Whether the task is a leaf task
+	IsLeaf *bool `form:"is_leaf,omitempty" json:"is_leaf,omitempty" xml:"is_leaf,omitempty"`
+	// The status of the task
+	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
 }
 
 // ListResponseBody is the type of the "task" service "list" endpoint HTTP
 // response body.
-type ListResponseBody []*TaskdetailResponse
+type ListResponseBody []*CreatetaskoutputResponse
 
 // UpdateResponseBody is the type of the "task" service "update" endpoint HTTP
 // response body.
@@ -63,22 +73,18 @@ type UpdateResponseBody struct {
 	ParentID *string `form:"parent_id,omitempty" json:"parent_id,omitempty" xml:"parent_id,omitempty"`
 	// The title of the task
 	Title *string `form:"title,omitempty" json:"title,omitempty" xml:"title,omitempty"`
-	// The status of the task
-	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
-	// Whether the task is a leaf task
-	IsLeaf *bool `form:"is_leaf,omitempty" json:"is_leaf,omitempty" xml:"is_leaf,omitempty"`
 	// The timestamp when the task was created
 	CreatedAt *int64 `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
-	// The timestamp when the task was completed
-	CompletedAt *int64 `form:"completed_at,omitempty" json:"completed_at,omitempty" xml:"completed_at,omitempty"`
-	// The timestamp when the task was started
-	StartedAt *int64 `form:"started_at,omitempty" json:"started_at,omitempty" xml:"started_at,omitempty"`
-	// The lead time of the task
-	LeadTime *int64 `form:"lead_time,omitempty" json:"lead_time,omitempty" xml:"lead_time,omitempty"`
 	// The estimated time of the task
 	EstimatedTime *int64 `form:"estimated_time,omitempty" json:"estimated_time,omitempty" xml:"estimated_time,omitempty"`
 	// The actual time of the task
 	ActualTime *int64 `form:"actual_time,omitempty" json:"actual_time,omitempty" xml:"actual_time,omitempty"`
+	// The timestamp when the task was started
+	StartedAt *int64 `form:"started_at,omitempty" json:"started_at,omitempty" xml:"started_at,omitempty"`
+	// Whether the task is a leaf task
+	IsLeaf *bool `form:"is_leaf,omitempty" json:"is_leaf,omitempty" xml:"is_leaf,omitempty"`
+	// The status of the task
+	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
 }
 
 // SetupUnauthorizedResponseBody is the type of the "task" service "setup"
@@ -297,30 +303,26 @@ type DeleteInternalServerErrorResponseBody struct {
 	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
 }
 
-// TaskdetailResponse is used to define fields on response body types.
-type TaskdetailResponse struct {
+// CreatetaskoutputResponse is used to define fields on response body types.
+type CreatetaskoutputResponse struct {
 	// The ID of the task
 	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
 	// The parent ID of the task
 	ParentID *string `form:"parent_id,omitempty" json:"parent_id,omitempty" xml:"parent_id,omitempty"`
 	// The title of the task
 	Title *string `form:"title,omitempty" json:"title,omitempty" xml:"title,omitempty"`
-	// The status of the task
-	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
-	// Whether the task is a leaf task
-	IsLeaf *bool `form:"is_leaf,omitempty" json:"is_leaf,omitempty" xml:"is_leaf,omitempty"`
 	// The timestamp when the task was created
 	CreatedAt *int64 `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
-	// The timestamp when the task was completed
-	CompletedAt *int64 `form:"completed_at,omitempty" json:"completed_at,omitempty" xml:"completed_at,omitempty"`
-	// The timestamp when the task was started
-	StartedAt *int64 `form:"started_at,omitempty" json:"started_at,omitempty" xml:"started_at,omitempty"`
-	// The lead time of the task
-	LeadTime *int64 `form:"lead_time,omitempty" json:"lead_time,omitempty" xml:"lead_time,omitempty"`
 	// The estimated time of the task
 	EstimatedTime *int64 `form:"estimated_time,omitempty" json:"estimated_time,omitempty" xml:"estimated_time,omitempty"`
 	// The actual time of the task
 	ActualTime *int64 `form:"actual_time,omitempty" json:"actual_time,omitempty" xml:"actual_time,omitempty"`
+	// The timestamp when the task was started
+	StartedAt *int64 `form:"started_at,omitempty" json:"started_at,omitempty" xml:"started_at,omitempty"`
+	// Whether the task is a leaf task
+	IsLeaf *bool `form:"is_leaf,omitempty" json:"is_leaf,omitempty" xml:"is_leaf,omitempty"`
+	// The status of the task
+	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
 }
 
 // NewCreateRequestBody builds the HTTP request body from the payload of the
@@ -379,10 +381,15 @@ func NewSetupInternalServerError(body *SetupInternalServerErrorResponseBody) *go
 // from a HTTP "OK" response.
 func NewCreatetaskoutputViewOK(body *CreateResponseBody) *taskviews.CreatetaskoutputView {
 	v := &taskviews.CreatetaskoutputView{
-		ID:        body.ID,
-		ParentID:  body.ParentID,
-		Title:     body.Title,
-		CreatedAt: body.CreatedAt,
+		ID:            body.ID,
+		ParentID:      body.ParentID,
+		Title:         body.Title,
+		CreatedAt:     body.CreatedAt,
+		EstimatedTime: body.EstimatedTime,
+		ActualTime:    body.ActualTime,
+		StartedAt:     body.StartedAt,
+		IsLeaf:        body.IsLeaf,
+		Status:        body.Status,
 	}
 
 	return v
@@ -418,12 +425,12 @@ func NewCreateInternalServerError(body *CreateInternalServerErrorResponseBody) *
 	return v
 }
 
-// NewListTaskdetailCollectionOK builds a "task" service "list" endpoint result
-// from a HTTP "OK" response.
-func NewListTaskdetailCollectionOK(body ListResponseBody) taskviews.TaskdetailCollectionView {
-	v := make([]*taskviews.TaskdetailView, len(body))
+// NewListCreatetaskoutputCollectionOK builds a "task" service "list" endpoint
+// result from a HTTP "OK" response.
+func NewListCreatetaskoutputCollectionOK(body ListResponseBody) taskviews.CreatetaskoutputCollectionView {
+	v := make([]*taskviews.CreatetaskoutputView, len(body))
 	for i, val := range body {
-		v[i] = unmarshalTaskdetailResponseToTaskviewsTaskdetailView(val)
+		v[i] = unmarshalCreatetaskoutputResponseToTaskviewsCreatetaskoutputView(val)
 	}
 
 	return v
@@ -458,21 +465,19 @@ func NewListInternalServerError(body *ListInternalServerErrorResponseBody) *goa.
 	return v
 }
 
-// NewUpdateTaskdetailOK builds a "task" service "update" endpoint result from
-// a HTTP "OK" response.
-func NewUpdateTaskdetailOK(body *UpdateResponseBody) *taskviews.TaskdetailView {
-	v := &taskviews.TaskdetailView{
+// NewUpdateCreatetaskoutputOK builds a "task" service "update" endpoint result
+// from a HTTP "OK" response.
+func NewUpdateCreatetaskoutputOK(body *UpdateResponseBody) *taskviews.CreatetaskoutputView {
+	v := &taskviews.CreatetaskoutputView{
 		ID:            body.ID,
 		ParentID:      body.ParentID,
 		Title:         body.Title,
-		Status:        body.Status,
-		IsLeaf:        body.IsLeaf,
 		CreatedAt:     body.CreatedAt,
-		CompletedAt:   body.CompletedAt,
-		StartedAt:     body.StartedAt,
-		LeadTime:      body.LeadTime,
 		EstimatedTime: body.EstimatedTime,
 		ActualTime:    body.ActualTime,
+		StartedAt:     body.StartedAt,
+		IsLeaf:        body.IsLeaf,
+		Status:        body.Status,
 	}
 
 	return v
@@ -856,8 +861,9 @@ func ValidateDeleteInternalServerErrorResponseBody(body *DeleteInternalServerErr
 	return
 }
 
-// ValidateTaskdetailResponse runs the validations defined on TaskdetailResponse
-func ValidateTaskdetailResponse(body *TaskdetailResponse) (err error) {
+// ValidateCreatetaskoutputResponse runs the validations defined on
+// CreatetaskoutputResponse
+func ValidateCreatetaskoutputResponse(body *CreatetaskoutputResponse) (err error) {
 	if body.ID == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
 	}
@@ -866,9 +872,6 @@ func ValidateTaskdetailResponse(body *TaskdetailResponse) (err error) {
 	}
 	if body.CreatedAt == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("created_at", "body"))
-	}
-	if body.Status == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("status", "body"))
 	}
 	return
 }

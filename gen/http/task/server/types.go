@@ -48,11 +48,21 @@ type CreateResponseBody struct {
 	Title string `form:"title" json:"title" xml:"title"`
 	// The timestamp when the task was created
 	CreatedAt int64 `form:"created_at" json:"created_at" xml:"created_at"`
+	// The estimated time of the task
+	EstimatedTime *int64 `form:"estimated_time,omitempty" json:"estimated_time,omitempty" xml:"estimated_time,omitempty"`
+	// The actual time of the task
+	ActualTime *int64 `form:"actual_time,omitempty" json:"actual_time,omitempty" xml:"actual_time,omitempty"`
+	// The timestamp when the task was started
+	StartedAt *int64 `form:"started_at,omitempty" json:"started_at,omitempty" xml:"started_at,omitempty"`
+	// Whether the task is a leaf task
+	IsLeaf *bool `form:"is_leaf,omitempty" json:"is_leaf,omitempty" xml:"is_leaf,omitempty"`
+	// The status of the task
+	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
 }
 
-// TaskdetailResponseCollection is the type of the "task" service "list"
+// CreatetaskoutputResponseCollection is the type of the "task" service "list"
 // endpoint HTTP response body.
-type TaskdetailResponseCollection []*TaskdetailResponse
+type CreatetaskoutputResponseCollection []*CreatetaskoutputResponse
 
 // UpdateResponseBody is the type of the "task" service "update" endpoint HTTP
 // response body.
@@ -63,22 +73,18 @@ type UpdateResponseBody struct {
 	ParentID *string `form:"parent_id,omitempty" json:"parent_id,omitempty" xml:"parent_id,omitempty"`
 	// The title of the task
 	Title string `form:"title" json:"title" xml:"title"`
-	// The status of the task
-	Status string `form:"status" json:"status" xml:"status"`
-	// Whether the task is a leaf task
-	IsLeaf *bool `form:"is_leaf,omitempty" json:"is_leaf,omitempty" xml:"is_leaf,omitempty"`
 	// The timestamp when the task was created
 	CreatedAt int64 `form:"created_at" json:"created_at" xml:"created_at"`
-	// The timestamp when the task was completed
-	CompletedAt *int64 `form:"completed_at,omitempty" json:"completed_at,omitempty" xml:"completed_at,omitempty"`
-	// The timestamp when the task was started
-	StartedAt *int64 `form:"started_at,omitempty" json:"started_at,omitempty" xml:"started_at,omitempty"`
-	// The lead time of the task
-	LeadTime *int64 `form:"lead_time,omitempty" json:"lead_time,omitempty" xml:"lead_time,omitempty"`
 	// The estimated time of the task
 	EstimatedTime *int64 `form:"estimated_time,omitempty" json:"estimated_time,omitempty" xml:"estimated_time,omitempty"`
 	// The actual time of the task
 	ActualTime *int64 `form:"actual_time,omitempty" json:"actual_time,omitempty" xml:"actual_time,omitempty"`
+	// The timestamp when the task was started
+	StartedAt *int64 `form:"started_at,omitempty" json:"started_at,omitempty" xml:"started_at,omitempty"`
+	// Whether the task is a leaf task
+	IsLeaf *bool `form:"is_leaf,omitempty" json:"is_leaf,omitempty" xml:"is_leaf,omitempty"`
+	// The status of the task
+	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
 }
 
 // SetupUnauthorizedResponseBody is the type of the "task" service "setup"
@@ -297,69 +303,68 @@ type DeleteInternalServerErrorResponseBody struct {
 	Fault bool `form:"fault" json:"fault" xml:"fault"`
 }
 
-// TaskdetailResponse is used to define fields on response body types.
-type TaskdetailResponse struct {
+// CreatetaskoutputResponse is used to define fields on response body types.
+type CreatetaskoutputResponse struct {
 	// The ID of the task
 	ID string `form:"id" json:"id" xml:"id"`
 	// The parent ID of the task
 	ParentID *string `form:"parent_id,omitempty" json:"parent_id,omitempty" xml:"parent_id,omitempty"`
 	// The title of the task
 	Title string `form:"title" json:"title" xml:"title"`
-	// The status of the task
-	Status string `form:"status" json:"status" xml:"status"`
-	// Whether the task is a leaf task
-	IsLeaf *bool `form:"is_leaf,omitempty" json:"is_leaf,omitempty" xml:"is_leaf,omitempty"`
 	// The timestamp when the task was created
 	CreatedAt int64 `form:"created_at" json:"created_at" xml:"created_at"`
-	// The timestamp when the task was completed
-	CompletedAt *int64 `form:"completed_at,omitempty" json:"completed_at,omitempty" xml:"completed_at,omitempty"`
-	// The timestamp when the task was started
-	StartedAt *int64 `form:"started_at,omitempty" json:"started_at,omitempty" xml:"started_at,omitempty"`
-	// The lead time of the task
-	LeadTime *int64 `form:"lead_time,omitempty" json:"lead_time,omitempty" xml:"lead_time,omitempty"`
 	// The estimated time of the task
 	EstimatedTime *int64 `form:"estimated_time,omitempty" json:"estimated_time,omitempty" xml:"estimated_time,omitempty"`
 	// The actual time of the task
 	ActualTime *int64 `form:"actual_time,omitempty" json:"actual_time,omitempty" xml:"actual_time,omitempty"`
+	// The timestamp when the task was started
+	StartedAt *int64 `form:"started_at,omitempty" json:"started_at,omitempty" xml:"started_at,omitempty"`
+	// Whether the task is a leaf task
+	IsLeaf *bool `form:"is_leaf,omitempty" json:"is_leaf,omitempty" xml:"is_leaf,omitempty"`
+	// The status of the task
+	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
 }
 
 // NewCreateResponseBody builds the HTTP response body from the result of the
 // "create" endpoint of the "task" service.
 func NewCreateResponseBody(res *taskviews.CreatetaskoutputView) *CreateResponseBody {
 	body := &CreateResponseBody{
-		ID:        *res.ID,
-		ParentID:  res.ParentID,
-		Title:     *res.Title,
-		CreatedAt: *res.CreatedAt,
+		ID:            *res.ID,
+		ParentID:      res.ParentID,
+		Title:         *res.Title,
+		CreatedAt:     *res.CreatedAt,
+		EstimatedTime: res.EstimatedTime,
+		ActualTime:    res.ActualTime,
+		StartedAt:     res.StartedAt,
+		IsLeaf:        res.IsLeaf,
+		Status:        res.Status,
 	}
 	return body
 }
 
-// NewTaskdetailResponseCollection builds the HTTP response body from the
+// NewCreatetaskoutputResponseCollection builds the HTTP response body from the
 // result of the "list" endpoint of the "task" service.
-func NewTaskdetailResponseCollection(res taskviews.TaskdetailCollectionView) TaskdetailResponseCollection {
-	body := make([]*TaskdetailResponse, len(res))
+func NewCreatetaskoutputResponseCollection(res taskviews.CreatetaskoutputCollectionView) CreatetaskoutputResponseCollection {
+	body := make([]*CreatetaskoutputResponse, len(res))
 	for i, val := range res {
-		body[i] = marshalTaskviewsTaskdetailViewToTaskdetailResponse(val)
+		body[i] = marshalTaskviewsCreatetaskoutputViewToCreatetaskoutputResponse(val)
 	}
 	return body
 }
 
 // NewUpdateResponseBody builds the HTTP response body from the result of the
 // "update" endpoint of the "task" service.
-func NewUpdateResponseBody(res *taskviews.TaskdetailView) *UpdateResponseBody {
+func NewUpdateResponseBody(res *taskviews.CreatetaskoutputView) *UpdateResponseBody {
 	body := &UpdateResponseBody{
 		ID:            *res.ID,
 		ParentID:      res.ParentID,
 		Title:         *res.Title,
-		Status:        *res.Status,
-		IsLeaf:        res.IsLeaf,
 		CreatedAt:     *res.CreatedAt,
-		CompletedAt:   res.CompletedAt,
-		StartedAt:     res.StartedAt,
-		LeadTime:      res.LeadTime,
 		EstimatedTime: res.EstimatedTime,
 		ActualTime:    res.ActualTime,
+		StartedAt:     res.StartedAt,
+		IsLeaf:        res.IsLeaf,
+		Status:        res.Status,
 	}
 	return body
 }
@@ -564,7 +569,7 @@ func NewListPayload(parentID *string, recursive *bool, authorization string) *ta
 // NewUpdateTaskUpdateInput builds a task service update endpoint payload.
 func NewUpdateTaskUpdateInput(body *UpdateRequestBody, taskID string, authorization string) *task.TaskUpdateInput {
 	v := &task.TaskUpdateInput{
-		Title:         body.Title,
+		Title:         *body.Title,
 		ParentID:      body.ParentID,
 		NextID:        body.NextID,
 		Status:        body.Status,
@@ -587,6 +592,14 @@ func NewDeleteTaskDeleteInput(taskID string, authorization string) *task.TaskDel
 
 // ValidateCreateRequestBody runs the validations defined on CreateRequestBody
 func ValidateCreateRequestBody(body *CreateRequestBody) (err error) {
+	if body.Title == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("title", "body"))
+	}
+	return
+}
+
+// ValidateUpdateRequestBody runs the validations defined on UpdateRequestBody
+func ValidateUpdateRequestBody(body *UpdateRequestBody) (err error) {
 	if body.Title == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("title", "body"))
 	}

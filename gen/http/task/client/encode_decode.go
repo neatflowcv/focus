@@ -289,13 +289,13 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("task", "list", err)
 			}
-			p := NewListTaskdetailCollectionOK(body)
+			p := NewListCreatetaskoutputCollectionOK(body)
 			view := "default"
-			vres := taskviews.TaskdetailCollection{Projected: p, View: view}
-			if err = taskviews.ValidateTaskdetailCollection(vres); err != nil {
+			vres := taskviews.CreatetaskoutputCollection{Projected: p, View: view}
+			if err = taskviews.ValidateCreatetaskoutputCollection(vres); err != nil {
 				return nil, goahttp.ErrValidationError("task", "list", err)
 			}
-			res := task.NewTaskdetailCollection(vres)
+			res := task.NewCreatetaskoutputCollection(vres)
 			return res, nil
 		case http.StatusUnauthorized:
 			var (
@@ -346,7 +346,7 @@ func (c *Client) BuildUpdateRequest(ctx context.Context, v any) (*http.Request, 
 		taskID = p.TaskID
 	}
 	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: UpdateTaskPath(taskID)}
-	req, err := http.NewRequest("PATCH", u.String(), nil)
+	req, err := http.NewRequest("PUT", u.String(), nil)
 	if err != nil {
 		return nil, goahttp.ErrInvalidURL("task", "update", u.String(), err)
 	}
@@ -409,13 +409,13 @@ func DecodeUpdateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("task", "update", err)
 			}
-			p := NewUpdateTaskdetailOK(&body)
+			p := NewUpdateCreatetaskoutputOK(&body)
 			view := "default"
-			vres := &taskviews.Taskdetail{Projected: p, View: view}
-			if err = taskviews.ValidateTaskdetail(vres); err != nil {
+			vres := &taskviews.Createtaskoutput{Projected: p, View: view}
+			if err = taskviews.ValidateCreatetaskoutput(vres); err != nil {
 				return nil, goahttp.ErrValidationError("task", "update", err)
 			}
-			res := task.NewTaskdetail(vres)
+			res := task.NewCreatetaskoutput(vres)
 			return res, nil
 		case http.StatusUnauthorized:
 			var (
@@ -581,21 +581,20 @@ func DecodeDeleteResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 	}
 }
 
-// unmarshalTaskdetailResponseToTaskviewsTaskdetailView builds a value of type
-// *taskviews.TaskdetailView from a value of type *TaskdetailResponse.
-func unmarshalTaskdetailResponseToTaskviewsTaskdetailView(v *TaskdetailResponse) *taskviews.TaskdetailView {
-	res := &taskviews.TaskdetailView{
+// unmarshalCreatetaskoutputResponseToTaskviewsCreatetaskoutputView builds a
+// value of type *taskviews.CreatetaskoutputView from a value of type
+// *CreatetaskoutputResponse.
+func unmarshalCreatetaskoutputResponseToTaskviewsCreatetaskoutputView(v *CreatetaskoutputResponse) *taskviews.CreatetaskoutputView {
+	res := &taskviews.CreatetaskoutputView{
 		ID:            v.ID,
 		ParentID:      v.ParentID,
 		Title:         v.Title,
-		Status:        v.Status,
-		IsLeaf:        v.IsLeaf,
 		CreatedAt:     v.CreatedAt,
-		CompletedAt:   v.CompletedAt,
-		StartedAt:     v.StartedAt,
-		LeadTime:      v.LeadTime,
 		EstimatedTime: v.EstimatedTime,
 		ActualTime:    v.ActualTime,
+		StartedAt:     v.StartedAt,
+		IsLeaf:        v.IsLeaf,
+		Status:        v.Status,
 	}
 
 	return res

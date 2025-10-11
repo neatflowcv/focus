@@ -74,7 +74,7 @@ func NewListEndpoint(s Service) goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		vres := NewViewedTaskdetailCollection(res, "default")
+		vres := NewViewedCreatetaskoutputCollection(res, "default")
 		return vres, nil
 	}
 }
@@ -88,7 +88,7 @@ func NewUpdateEndpoint(s Service) goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		vres := NewViewedTaskdetail(res, "default")
+		vres := NewViewedCreatetaskoutput(res, "default")
 		return vres, nil
 	}
 }

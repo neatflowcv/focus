@@ -56,7 +56,7 @@ func New(
 			{"Setup", "POST", "/focus/tasks/setup"},
 			{"Create", "POST", "/focus/tasks"},
 			{"List", "GET", "/focus/tasks"},
-			{"Update", "PATCH", "/focus/tasks/{task_id}"},
+			{"Update", "PUT", "/focus/tasks/{task_id}"},
 			{"Delete", "DELETE", "/focus/tasks/{task_id}"},
 		},
 		Setup:  NewSetupHandler(e.Setup, mux, decoder, encoder, errhandler, formatter),
@@ -264,7 +264,7 @@ func MountUpdateHandler(mux goahttp.Muxer, h http.Handler) {
 			h.ServeHTTP(w, r)
 		}
 	}
-	mux.Handle("PATCH", "/focus/tasks/{task_id}", f)
+	mux.Handle("PUT", "/focus/tasks/{task_id}", f)
 }
 
 // NewUpdateHandler creates a HTTP handler which loads the HTTP request and

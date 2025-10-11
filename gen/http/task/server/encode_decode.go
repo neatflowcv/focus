@@ -190,9 +190,9 @@ func EncodeCreateError(encoder func(context.Context, http.ResponseWriter) goahtt
 // list endpoint.
 func EncodeListResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
 	return func(ctx context.Context, w http.ResponseWriter, v any) error {
-		res := v.(taskviews.TaskdetailCollection)
+		res := v.(taskviews.CreatetaskoutputCollection)
 		enc := encoder(ctx, w)
-		body := NewTaskdetailResponseCollection(res.Projected)
+		body := NewCreatetaskoutputResponseCollection(res.Projected)
 		w.WriteHeader(http.StatusOK)
 		return enc.Encode(body)
 	}
@@ -282,7 +282,7 @@ func EncodeListError(encoder func(context.Context, http.ResponseWriter) goahttp.
 // update endpoint.
 func EncodeUpdateResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
 	return func(ctx context.Context, w http.ResponseWriter, v any) error {
-		res := v.(*taskviews.Taskdetail)
+		res := v.(*taskviews.Createtaskoutput)
 		enc := encoder(ctx, w)
 		body := NewUpdateResponseBody(res.Projected)
 		w.WriteHeader(http.StatusOK)
@@ -308,6 +308,10 @@ func DecodeUpdateRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.
 				return nil, gerr
 			}
 			return nil, goa.DecodePayloadError(err.Error())
+		}
+		err = ValidateUpdateRequestBody(&body)
+		if err != nil {
+			return nil, err
 		}
 
 		var (
@@ -474,21 +478,20 @@ func EncodeDeleteError(encoder func(context.Context, http.ResponseWriter) goahtt
 	}
 }
 
-// marshalTaskviewsTaskdetailViewToTaskdetailResponse builds a value of type
-// *TaskdetailResponse from a value of type *taskviews.TaskdetailView.
-func marshalTaskviewsTaskdetailViewToTaskdetailResponse(v *taskviews.TaskdetailView) *TaskdetailResponse {
-	res := &TaskdetailResponse{
+// marshalTaskviewsCreatetaskoutputViewToCreatetaskoutputResponse builds a
+// value of type *CreatetaskoutputResponse from a value of type
+// *taskviews.CreatetaskoutputView.
+func marshalTaskviewsCreatetaskoutputViewToCreatetaskoutputResponse(v *taskviews.CreatetaskoutputView) *CreatetaskoutputResponse {
+	res := &CreatetaskoutputResponse{
 		ID:            *v.ID,
 		ParentID:      v.ParentID,
 		Title:         *v.Title,
-		Status:        *v.Status,
-		IsLeaf:        v.IsLeaf,
 		CreatedAt:     *v.CreatedAt,
-		CompletedAt:   v.CompletedAt,
-		StartedAt:     v.StartedAt,
-		LeadTime:      v.LeadTime,
 		EstimatedTime: v.EstimatedTime,
 		ActualTime:    v.ActualTime,
+		StartedAt:     v.StartedAt,
+		IsLeaf:        v.IsLeaf,
+		Status:        v.Status,
 	}
 
 	return res

@@ -18,7 +18,7 @@ type ListExtrasInput struct {
 }
 
 type ListExtrasOutput struct {
-	Extras []Extra
+	Extras []*Extra
 }
 
 type Extra struct {

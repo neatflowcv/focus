@@ -65,7 +65,7 @@ func (h *Handler) Create(ctx context.Context, input *task.CreateTaskInput) (*tas
 		parentID = *input.ParentID
 	}
 
-	out, err := h.flowService.CreateTask(ctx, &flow.CreateTaskInput{
+	flowOut, err := h.flowService.CreateTask(ctx, &flow.CreateTaskInput{
 		Username: username,
 		Title:    input.Title,
 		ParentID: parentID,
@@ -76,10 +76,24 @@ func (h *Handler) Create(ctx context.Context, input *task.CreateTaskInput) (*tas
 		return nil, task.MakeInternalServerError(err)
 	}
 
-	return makeCreateTaskOutput(input, out), nil
+	extraOut, err := h.extraService.ListExtras(ctx, &extra.ListExtrasInput{
+		IDs: []string{flowOut.ID},
+	})
+	if err != nil {
+		return nil, task.MakeInternalServerError(err)
+	}
+
+	traceOut, err := h.traceService.ListTraces(ctx, &trace.ListTracesInput{
+		IDs: []string{flowOut.ID},
+	})
+	if err != nil {
+		return nil, task.MakeInternalServerError(err)
+	}
+
+	return makeCreateTaskOutput(input, flowOut, extraOut, traceOut), nil
 }
 
-func (h *Handler) List(ctx context.Context, input *task.ListPayload) (task.TaskdetailCollection, error) {
+func (h *Handler) List(ctx context.Context, input *task.ListPayload) (task.CreatetaskoutputCollection, error) {
 	log.Println("call list tasks")
 	defer log.Println("end list tasks")
 
@@ -93,7 +107,7 @@ func (h *Handler) List(ctx context.Context, input *task.ListPayload) (task.Taskd
 		parentID = *input.ParentID
 	}
 
-	ret, err := h.flowService.ListTasks(ctx, &flow.ListTasksInput{
+	flowOut, err := h.flowService.ListTasks(ctx, &flow.ListTasksInput{
 		Username: username,
 		ParentID: parentID,
 	})
@@ -101,7 +115,26 @@ func (h *Handler) List(ctx context.Context, input *task.ListPayload) (task.Taskd
 		return nil, task.MakeInternalServerError(err)
 	}
 
-	return makeTaskdetailCollection(ret.Tasks, parentID), nil
+	var ids []string
+	for _, task := range flowOut.Tasks {
+		ids = append(ids, task.ID)
+	}
+
+	extraOut, err := h.extraService.ListExtras(ctx, &extra.ListExtrasInput{
+		IDs: ids,
+	})
+	if err != nil {
+		return nil, task.MakeInternalServerError(err)
+	}
+
+	traceOut, err := h.traceService.ListTraces(ctx, &trace.ListTracesInput{
+		IDs: ids,
+	})
+	if err != nil {
+		return nil, task.MakeInternalServerError(err)
+	}
+
+	return makeCreatetaskoutputCollection(input, flowOut, extraOut, traceOut), nil
 }
 
 func (h *Handler) Delete(ctx context.Context, input *task.TaskDeleteInput) error {
@@ -128,11 +161,59 @@ func (h *Handler) Delete(ctx context.Context, input *task.TaskDeleteInput) error
 	return nil
 }
 
-func (h *Handler) Update(ctx context.Context, input *task.TaskUpdateInput) (*task.Taskdetail, error) {
+func (h *Handler) Update(ctx context.Context, input *task.TaskUpdateInput) (*task.Createtaskoutput, error) {
 	log.Println("call update task")
 	defer log.Println("end update task")
 
-	panic("not implemented")
+	username, _, err := h.authUser(input.Authorization)
+	if err != nil {
+		return nil, err
+	}
+
+	parentID := ""
+	if input.ParentID != nil {
+		parentID = *input.ParentID
+	}
+
+	nextID := ""
+	if input.NextID != nil {
+		nextID = *input.NextID
+	}
+
+	err = h.flowService.UpdateTask(ctx, &flow.UpdateTaskInput{
+		Username: username,
+		TaskID:   input.TaskID,
+		ParentID: parentID,
+		NextID:   nextID,
+		Title:    input.Title,
+	})
+	if err != nil {
+		return nil, task.MakeInternalServerError(err)
+	}
+
+	flowOut, err := h.flowService.GetTask(ctx, &flow.GetTaskInput{
+		Username: username,
+		TaskID:   input.TaskID,
+	})
+	if err != nil {
+		return nil, task.MakeInternalServerError(err)
+	}
+
+	extraOut, err := h.extraService.ListExtras(ctx, &extra.ListExtrasInput{
+		IDs: []string{input.TaskID},
+	})
+	if err != nil {
+		return nil, task.MakeInternalServerError(err)
+	}
+
+	traceOut, err := h.traceService.ListTraces(ctx, &trace.ListTracesInput{
+		IDs: []string{input.TaskID},
+	})
+	if err != nil {
+		return nil, task.MakeInternalServerError(err)
+	}
+
+	return makeUpdateTaskOutput(input, flowOut, extraOut, traceOut), nil
 }
 
 func (h *Handler) authUser(authorization string) (string, time.Time, error) {

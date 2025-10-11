@@ -88,9 +88,9 @@ func (s *Service) ListExtras(ctx context.Context, input *ListExtrasInput) (*List
 		return nil, fmt.Errorf("failed to list extras: %w", err)
 	}
 
-	var ouputExtras []Extra
+	var ouputExtras []*Extra
 	for _, extra := range extras {
-		ouputExtras = append(ouputExtras, Extra{
+		ouputExtras = append(ouputExtras, &Extra{
 			Leaf:   extra.Leaf(),
 			Status: string(extra.Status()),
 		})

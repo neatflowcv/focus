@@ -65,13 +65,13 @@ func (c *Client) Create(ctx context.Context, p *CreateTaskInput) (res *Createtas
 //   - "InternalServerError" (type *goa.ServiceError): Internal server error
 //   - "TaskNotFound" (type *goa.ServiceError): Task not found
 //   - error: internal error
-func (c *Client) List(ctx context.Context, p *ListPayload) (res TaskdetailCollection, err error) {
+func (c *Client) List(ctx context.Context, p *ListPayload) (res CreatetaskoutputCollection, err error) {
 	var ires any
 	ires, err = c.ListEndpoint(ctx, p)
 	if err != nil {
 		return
 	}
-	return ires.(TaskdetailCollection), nil
+	return ires.(CreatetaskoutputCollection), nil
 }
 
 // Update calls the "update" endpoint of the "task" service.
@@ -80,13 +80,13 @@ func (c *Client) List(ctx context.Context, p *ListPayload) (res TaskdetailCollec
 //   - "InternalServerError" (type *goa.ServiceError): Internal server error
 //   - "TaskNotFound" (type *goa.ServiceError): Task not found
 //   - error: internal error
-func (c *Client) Update(ctx context.Context, p *TaskUpdateInput) (res *Taskdetail, err error) {
+func (c *Client) Update(ctx context.Context, p *TaskUpdateInput) (res *Createtaskoutput, err error) {
 	var ires any
 	ires, err = c.UpdateEndpoint(ctx, p)
 	if err != nil {
 		return
 	}
-	return ires.(*Taskdetail), nil
+	return ires.(*Createtaskoutput), nil
 }
 
 // Delete calls the "delete" endpoint of the "task" service.
