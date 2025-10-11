@@ -182,3 +182,18 @@ func (r *Repository) UpdateTasks(ctx context.Context, username string, tasks ...
 
 	return nil
 }
+
+func (r *Repository) ListTraces(ctx context.Context, ids []domain.TraceID) ([]*domain.Trace, error) {
+	var ret []*domain.Trace
+
+	for _, id := range ids {
+		trace, ok := r.Traces[id]
+		if !ok {
+			continue
+		}
+
+		ret = append(ret, trace)
+	}
+
+	return ret, nil
+}

@@ -1,6 +1,8 @@
 package trace
 
-import "time"
+import (
+	"time"
+)
 
 type CreateTraceInput struct {
 	ID       string
@@ -19,4 +21,18 @@ type SetActualInput struct {
 type UpdateParentInput struct {
 	ID       string
 	ParentID string
+}
+
+type ListTracesInput struct {
+	IDs []string
+}
+
+type Trace struct {
+	Estimated time.Duration
+	Actual    time.Duration
+	StartedAt time.Time
+}
+
+type ListTracesOutput struct {
+	Traces []*Trace
 }

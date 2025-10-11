@@ -303,3 +303,19 @@ func (r *Repository) UpdateTraces(ctx context.Context, dTraces ...*domain.Trace)
 
 	return nil
 }
+
+func (r *Repository) ListTraces(ctx context.Context, ids []domain.TraceID) ([]*domain.Trace, error) {
+	traces, err := gorm.G[Trace](r.db).
+		Where("id IN ?", ids).
+		Find(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list traces: %w", err)
+	}
+
+	var ret []*domain.Trace
+	for _, trace := range traces {
+		ret = append(ret, trace.ToDomain())
+	}
+
+	return ret, nil
+}

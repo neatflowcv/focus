@@ -11,4 +11,5 @@ type TraceRepository interface {
 	DeleteTrace(ctx context.Context, trace *domain.Trace) error
 	GetTrace(ctx context.Context, id domain.TraceID) (*domain.Trace, error)
 	UpdateTraces(ctx context.Context, traces ...*domain.Trace) error
+	ListTraces(ctx context.Context, ids []domain.TraceID) ([]*domain.Trace, error)
 }

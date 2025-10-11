@@ -155,3 +155,58 @@ func TestService_Actual(t *testing.T) {
 	require.Equal(t, 15*time.Second, data.repo.Traces["2"].Actual())
 	require.Equal(t, 15*time.Second, data.repo.Traces["3"].Actual())
 }
+
+func TestServiceListTraces(t *testing.T) {
+	t.Parallel()
+
+	t.Run("empty", func(t *testing.T) {
+		t.Parallel()
+
+		service, _ := newService(t)
+
+		out, err := service.ListTraces(t.Context(), &trace.ListTracesInput{
+			IDs: nil,
+		})
+
+		require.NoError(t, err)
+		require.Empty(t, out.Traces)
+	})
+
+	t.Run("one", func(t *testing.T) {
+		t.Parallel()
+
+		service, _ := newService(t)
+		_ = service.CreateTrace(t.Context(), &trace.CreateTraceInput{
+			ID:       "1",
+			ParentID: "",
+		})
+
+		out, err := service.ListTraces(t.Context(), &trace.ListTracesInput{
+			IDs: []string{"1"},
+		})
+
+		require.NoError(t, err)
+		require.Len(t, out.Traces, 1)
+	})
+
+	t.Run("two", func(t *testing.T) {
+		t.Parallel()
+
+		service, _ := newService(t)
+		_ = service.CreateTrace(t.Context(), &trace.CreateTraceInput{
+			ID:       "1",
+			ParentID: "",
+		})
+		_ = service.CreateTrace(t.Context(), &trace.CreateTraceInput{
+			ID:       "2",
+			ParentID: "",
+		})
+
+		out, err := service.ListTraces(t.Context(), &trace.ListTracesInput{
+			IDs: []string{"1", "2"},
+		})
+
+		require.NoError(t, err)
+		require.Len(t, out.Traces, 2)
+	})
+}

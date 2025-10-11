@@ -112,3 +112,28 @@ func (s *Service) SetActual(ctx context.Context, input *SetActualInput) error {
 func (s *Service) UpdateParent(ctx context.Context, input *UpdateParentInput) error {
 	panic("not implemented")
 }
+
+func (s *Service) ListTraces(ctx context.Context, input *ListTracesInput) (*ListTracesOutput, error) {
+	var ids []domain.TraceID
+	for _, id := range input.IDs {
+		ids = append(ids, domain.TraceID(id))
+	}
+
+	traces, err := s.repo.ListTraces(ctx, ids)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list traces: %w", err)
+	}
+
+	var items []*Trace
+	for _, trace := range traces {
+		items = append(items, &Trace{
+			Estimated: trace.Estimated(),
+			Actual:    trace.Actual(),
+			StartedAt: trace.StartedAt(),
+		})
+	}
+
+	return &ListTracesOutput{
+		Traces: items,
+	}, nil
+}
