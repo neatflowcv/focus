@@ -27,7 +27,7 @@ lint:
 	golangci-lint run --allow-parallel-runners
 
 .PHONY: validate
-validate: fix lint
+validate: lint test
 
 .PHONY: test
 test:
