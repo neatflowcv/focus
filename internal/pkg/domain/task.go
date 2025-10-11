@@ -6,6 +6,10 @@ import (
 
 type TaskID string
 
+func TaskDummyID(id TaskID) TaskID {
+	return id + "-dummy"
+}
+
 type Task struct {
 	id       TaskID
 	parentID TaskID
@@ -37,15 +41,26 @@ func NewTask(
 	return ret
 }
 
+func NewRootDummyTask() *Task {
+	return NewTask(
+		TaskDummyID(""),
+		"",
+		"",
+		"root-dummy",
+		time.Now(),
+		1,
+	)
+}
+
 func (t *Task) Dummy() *Task {
-	return &Task{
-		id:        t.id + "-dummy",
-		parentID:  t.id,
-		nextID:    "",
-		title:     "",
-		createdAt: t.createdAt,
-		version:   t.version,
-	}
+	return NewTask(
+		TaskDummyID(t.id),
+		t.id,
+		"",
+		string(TaskDummyID(t.id)),
+		t.createdAt,
+		1,
+	)
 }
 
 func (t *Task) Equals(other *Task) bool {
@@ -100,6 +115,14 @@ func (t *Task) SetNextID(nextID TaskID) *Task {
 func (t *Task) SetTitle(title string) *Task {
 	ret := t.clone()
 	ret.title = title
+	ret.validate()
+
+	return ret
+}
+
+func (t *Task) UpdateVersion() *Task {
+	ret := t.clone()
+	ret.version++
 	ret.validate()
 
 	return ret

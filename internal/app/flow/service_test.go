@@ -34,7 +34,7 @@ func TestServiceCreateTask(t *testing.T) {
 	t.Parallel()
 
 	const (
-		userName = "test"
+		username = "test"
 		title    = "test"
 		parentID = ""
 		nextID   = ""
@@ -42,9 +42,12 @@ func TestServiceCreateTask(t *testing.T) {
 
 	service, data := newService(t)
 	now := time.Now()
+	_ = service.CreateRootDummy(t.Context(), &flow.CreateRootDummyInput{
+		Username: username,
+	})
 
 	ret, err := service.CreateTask(t.Context(), &flow.CreateTaskInput{
-		Username: userName,
+		Username: username,
 		Title:    title,
 		Now:      now,
 		ParentID: parentID,
@@ -53,13 +56,13 @@ func TestServiceCreateTask(t *testing.T) {
 
 	require.NoError(t, err)
 	require.NotEmpty(t, ret.ID)
-	require.Equal(t, domain.TaskID(parentID), data.repo.Tasks[userName][domain.TaskID(ret.ID)].ParentID())
-	require.Equal(t, domain.TaskID(nextID), data.repo.Tasks[userName][domain.TaskID(ret.ID)].NextID())
-	require.Equal(t, title, data.repo.Tasks[userName][domain.TaskID(ret.ID)].Title())
+	require.Equal(t, domain.TaskID(parentID), data.repo.Tasks[username][domain.TaskID(ret.ID)].ParentID())
+	require.Equal(t, domain.TaskID(nextID), data.repo.Tasks[username][domain.TaskID(ret.ID)].NextID())
+	require.Equal(t, title, data.repo.Tasks[username][domain.TaskID(ret.ID)].Title())
 	require.Equal(t, now, ret.CreatedAt)
-	require.Equal(t, now, data.repo.Tasks[userName][domain.TaskID(ret.ID)].CreatedAt())
+	require.Equal(t, now, data.repo.Tasks[username][domain.TaskID(ret.ID)].CreatedAt())
 	require.Equal(t, uint64(1), ret.Version)
-	require.Equal(t, uint64(1), data.repo.Tasks[userName][domain.TaskID(ret.ID)].Version())
+	require.Equal(t, uint64(1), data.repo.Tasks[username][domain.TaskID(ret.ID)].Version())
 }
 
 func TestServiceCreateTask_Error(t *testing.T) {
@@ -69,6 +72,10 @@ func TestServiceCreateTask_Error(t *testing.T) {
 		t.Parallel()
 
 		service, _ := newService(t)
+		_ = service.CreateRootDummy(t.Context(), &flow.CreateRootDummyInput{
+			Username: "test",
+		})
+
 		_, err := service.CreateTask(t.Context(), &flow.CreateTaskInput{
 			Username: "test",
 			Title:    "test",
@@ -84,6 +91,10 @@ func TestServiceCreateTask_Error(t *testing.T) {
 		t.Parallel()
 
 		service, _ := newService(t)
+		_ = service.CreateRootDummy(t.Context(), &flow.CreateRootDummyInput{
+			Username: "test",
+		})
+
 		_, err := service.CreateTask(t.Context(), &flow.CreateTaskInput{
 			Username: "test",
 			Title:    "test",
@@ -96,34 +107,96 @@ func TestServiceCreateTask_Error(t *testing.T) {
 	})
 }
 
-func TestServiceListTasks(t *testing.T) {
+func TestServiceListTasks(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
-	service, _ := newService(t)
-	now := time.Now()
-	_, _ = service.CreateTask(t.Context(), &flow.CreateTaskInput{
-		Username: "test",
-		Title:    "test",
-		Now:      now,
-		ParentID: "",
-		NextID:   "",
+	t.Run("empty", func(t *testing.T) {
+		t.Parallel()
+
+		service, _ := newService(t)
+		_ = service.CreateRootDummy(t.Context(), &flow.CreateRootDummyInput{
+			Username: "test",
+		})
+
+		ret, err := service.ListTasks(t.Context(), &flow.ListTasksInput{
+			Username: "test",
+			ParentID: "",
+		})
+
+		require.NoError(t, err)
+		require.Empty(t, ret.Tasks)
 	})
 
-	ret, err := service.ListTasks(t.Context(), &flow.ListTasksInput{
-		Username: "test",
-		ParentID: "",
+	t.Run("one", func(t *testing.T) {
+		t.Parallel()
+
+		service, _ := newService(t)
+		_ = service.CreateRootDummy(t.Context(), &flow.CreateRootDummyInput{
+			Username: "test",
+		})
+		_, _ = service.CreateTask(t.Context(), &flow.CreateTaskInput{
+			Username: "test",
+			Title:    "test",
+			Now:      time.Now(),
+			ParentID: "",
+			NextID:   "",
+		})
+
+		ret, err := service.ListTasks(t.Context(), &flow.ListTasksInput{
+			Username: "test",
+			ParentID: "",
+		})
+
+		require.NoError(t, err)
+		require.Len(t, ret.Tasks, 1)
 	})
 
-	require.NoError(t, err)
-	require.Len(t, ret.Tasks, 1)
-	require.Equal(t, "test", ret.Tasks[0].Title)
-	require.Equal(t, now, ret.Tasks[0].CreatedAt)
+	t.Run("two", func(t *testing.T) {
+		t.Parallel()
+
+		const (
+			firstTitle  = "first"
+			secondTitle = "second"
+		)
+
+		service, _ := newService(t)
+		_ = service.CreateRootDummy(t.Context(), &flow.CreateRootDummyInput{
+			Username: "test",
+		})
+		_, _ = service.CreateTask(t.Context(), &flow.CreateTaskInput{
+			Username: "test",
+			Title:    firstTitle,
+			Now:      time.Now(),
+			ParentID: "",
+			NextID:   "",
+		})
+		_, _ = service.CreateTask(t.Context(), &flow.CreateTaskInput{
+			Username: "test",
+			Title:    secondTitle,
+			Now:      time.Now(),
+			ParentID: "",
+			NextID:   "",
+		})
+
+		ret, err := service.ListTasks(t.Context(), &flow.ListTasksInput{
+			Username: "test",
+			ParentID: "",
+		})
+
+		require.NoError(t, err)
+		require.Len(t, ret.Tasks, 2)
+		require.Equal(t, firstTitle, ret.Tasks[0].Title)
+		require.Equal(t, secondTitle, ret.Tasks[1].Title)
+	})
 }
 
 func TestServiceDeleteTask(t *testing.T) {
 	t.Parallel()
 
 	service, data := newService(t)
+	_ = service.CreateRootDummy(t.Context(), &flow.CreateRootDummyInput{
+		Username: "test",
+	})
 	task, _ := service.CreateTask(t.Context(), &flow.CreateTaskInput{
 		Username: "test",
 		Title:    "test",
@@ -145,6 +218,9 @@ func TestServiceDeleteTask_Error(t *testing.T) {
 	t.Parallel()
 
 	service, _ := newService(t)
+	_ = service.CreateRootDummy(t.Context(), &flow.CreateRootDummyInput{
+		Username: "test",
+	})
 
 	err := service.DeleteTask(t.Context(), &flow.DeleteTaskInput{
 		Username: "test",

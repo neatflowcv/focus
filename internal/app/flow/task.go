@@ -46,3 +46,7 @@ type GetTaskInput struct {
 type GetTaskOutput struct {
 	Task Task
 }
+
+type CreateRootDummyInput struct {
+	Username string
+}

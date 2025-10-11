@@ -25,7 +25,21 @@ func NewService(bus *eventbus.Bus, idmaker idmaker.IDMaker, repo repository.Repo
 	}
 }
 
-func (s *Service) CreateTask(ctx context.Context, input *CreateTaskInput) (*CreateTaskOutput, error) {
+func (s *Service) CreateRootDummy(ctx context.Context, input *CreateRootDummyInput) error {
+	dummy := domain.NewRootDummyTask()
+
+	err := s.repo.CreateTasks(ctx, input.Username, dummy)
+	if err != nil {
+		return fmt.Errorf("failed to create root dummy: %w", err)
+	}
+
+	return nil
+}
+
+func (s *Service) CreateTask( //nolint:cyclop,funlen
+	ctx context.Context,
+	input *CreateTaskInput,
+) (*CreateTaskOutput, error) {
 	if input.ParentID != "" {
 		_, err := s.repo.GetTask(ctx, input.Username, domain.TaskID(input.ParentID))
 		if err != nil {
@@ -48,8 +62,25 @@ func (s *Service) CreateTask(ctx context.Context, input *CreateTaskInput) (*Crea
 		}
 	}
 
+	id := domain.TaskID(s.idmaker.MakeID())
+
+	children, err := s.repo.ListTasks(ctx, input.Username, domain.TaskID(input.ParentID))
+	if err != nil {
+		return nil, fmt.Errorf("failed to list tasks: %w", err)
+	}
+
+	var previousTask *domain.Task
+	for _, child := range children {
+		if child.NextID() == domain.TaskID(input.NextID) {
+			previousTask = child
+
+			break
+		}
+	}
+
+	previous := previousTask.SetNextID(id)
 	task := domain.NewTask(
-		domain.TaskID(s.idmaker.MakeID()),
+		id,
 		domain.TaskID(input.ParentID),
 		domain.TaskID(input.NextID),
 		input.Title,
@@ -58,9 +89,14 @@ func (s *Service) CreateTask(ctx context.Context, input *CreateTaskInput) (*Crea
 	)
 	dummy := task.Dummy()
 
-	err := s.repo.CreateTasks(ctx, input.Username, task, dummy)
+	err = s.repo.CreateTasks(ctx, input.Username, task, dummy)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create task: %w", err)
+	}
+
+	err = s.repo.UpdateTasks(ctx, input.Username, previous)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update previous task: %w", err)
 	}
 
 	s.bus.TaskCreated.Publish(ctx, &eventbus.TaskCreatedEvent{
@@ -102,8 +138,15 @@ func (s *Service) ListTasks(ctx context.Context, input *ListTasksInput) (*ListTa
 		return nil, fmt.Errorf("failed to list tasks: %w", err)
 	}
 
-	var items []*Task
+	taskMap := make(map[domain.TaskID]*domain.Task)
 	for _, task := range tasks {
+		taskMap[task.ID()] = task
+	}
+
+	sortedTasks := domain.SortTasks(tasks, domain.TaskID(input.ParentID))
+
+	var items []*Task
+	for _, task := range sortedTasks {
 		items = append(items, &Task{
 			ID:        string(task.ID()),
 			Title:     task.Title(),

@@ -172,3 +172,11 @@ func (r *Repository) DeleteTrace(ctx context.Context, trace *domain.Trace) error
 
 	return nil
 }
+
+func (r *Repository) UpdateTasks(ctx context.Context, username string, tasks ...*domain.Task) error {
+	for _, task := range tasks {
+		r.Tasks[username][task.ID()] = task
+	}
+
+	return nil
+}

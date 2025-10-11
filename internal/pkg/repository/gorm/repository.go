@@ -114,3 +114,41 @@ func (r *Repository) ListTasks(ctx context.Context, username string, parentID do
 
 	return ToDomainTasks(tasks), nil
 }
+
+func (r *Repository) UpdateTasks(ctx context.Context, username string, dTasks ...*domain.Task) error {
+	var tasks []*Task
+	for _, task := range dTasks {
+		tasks = append(tasks, FromDomainTask(task, username))
+	}
+
+	err := r.db.Transaction(func(tx *gorm.DB) error {
+		for _, task := range tasks {
+			oldVersion := task.Version
+			task.Version++
+
+			affected, err := gorm.G[Task](tx).
+				Where(
+					&Task{ //nolint:exhaustruct
+						ID:       task.ID,
+						Username: username,
+						Version:  oldVersion,
+					},
+				).
+				Updates(ctx, *task)
+			if err != nil {
+				return fmt.Errorf("failed to update task: %w", err)
+			}
+
+			if affected == 0 {
+				return repository.ErrTaskNotFound
+			}
+		}
+
+		return nil
+	})
+	if err != nil {
+		return fmt.Errorf("failed to update tasks: %w", err)
+	}
+
+	return nil
+}
