@@ -36,3 +36,9 @@ type Trace struct {
 type ListTracesOutput struct {
 	Traces []*Trace
 }
+
+type UpdateStatusInput struct {
+	ID     string
+	Status string
+	Now    time.Time
+}

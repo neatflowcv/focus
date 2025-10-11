@@ -75,6 +75,14 @@ func (t *Trace) SetParentID(parentID TraceID) *Trace {
 	return ret
 }
 
+func (t *Trace) SetStartedAt(startedAt time.Time) *Trace {
+	ret := t.clone()
+	ret.startedAt = startedAt
+	ret.validate()
+
+	return ret
+}
+
 func (t *Trace) validate() {
 	if t.estimated < 0 {
 		panic("estimated is required")

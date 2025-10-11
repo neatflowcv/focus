@@ -131,6 +131,17 @@ func run() error { //nolint:cyclop,funlen
 		}
 	})
 
+	bus.ExtraStatusUpdated.Subscribe(func(ctx context.Context, event *eventbus.ExtraStatusUpdatedEvent) {
+		err := traceService.UpdateStatus(ctx, &trace.UpdateStatusInput{
+			ID:     event.ExtraID,
+			Status: event.Status,
+			Now:    event.Now,
+		})
+		if err != nil {
+			log.Printf("failed to start trace: %v", err)
+		}
+	})
+
 	err = server.ListenAndServe()
 	if err != nil {
 		return fmt.Errorf("failed to listen and serve: %w", err)

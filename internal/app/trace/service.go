@@ -180,6 +180,29 @@ func (s *Service) UpdateParent(ctx context.Context, input *UpdateParentInput) er
 	return nil
 }
 
+func (s *Service) UpdateStatus(ctx context.Context, input *UpdateStatusInput) error {
+	trace, err := s.repo.GetTrace(ctx, domain.TraceID(input.ID))
+	if err != nil {
+		return fmt.Errorf("failed to get trace: %w", err)
+	}
+
+	switch domain.TaskStatus(input.Status) {
+	case domain.TaskStatusDoing:
+		err := s.startTrace(ctx, trace, input.Now)
+		if err != nil {
+			return err
+		}
+
+	case domain.TaskStatusDone, domain.TaskStatusTodo:
+		err := s.stopTrace(ctx, trace, input.Now)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (s *Service) ListTraces(ctx context.Context, input *ListTracesInput) (*ListTracesOutput, error) {
 	var ids []domain.TraceID
 	for _, id := range input.IDs {
@@ -203,6 +226,54 @@ func (s *Service) ListTraces(ctx context.Context, input *ListTracesInput) (*List
 	return &ListTracesOutput{
 		Traces: items,
 	}, nil
+}
+
+func (s *Service) startTrace(ctx context.Context, trace *domain.Trace, now time.Time) error {
+	if !trace.StartedAt().IsZero() {
+		// already started
+		return nil
+	}
+
+	update := trace.SetStartedAt(now)
+
+	err := s.repo.UpdateTraces(ctx, update)
+	if err != nil {
+		return fmt.Errorf("failed to update trace: %w", err)
+	}
+
+	return nil
+}
+
+func (s *Service) stopTrace(ctx context.Context, trace *domain.Trace, now time.Time) error {
+	if trace.StartedAt().IsZero() {
+		// already stopped
+		return nil
+	}
+
+	diff := now.Sub(trace.StartedAt())
+
+	ancestors, err := s.findAncestors(ctx, trace.ParentID())
+	if err != nil {
+		return err
+	}
+
+	ancestors = append(ancestors, trace)
+
+	var updates []*domain.Trace
+
+	for _, ancestor := range ancestors {
+		update := ancestor.
+			SetStartedAt(time.Time{}).
+			SetActual(ancestor.Actual() + diff)
+		updates = append(updates, update)
+	}
+
+	err = s.repo.UpdateTraces(ctx, updates...)
+	if err != nil {
+		return fmt.Errorf("failed to update trace: %w", err)
+	}
+
+	return nil
 }
 
 func (s *Service) taskScore(ctx context.Context, trace *domain.Trace) time.Duration {
