@@ -11,6 +11,7 @@ var (
 	_ repository.Repository         = (*Repository)(nil)
 	_ repository.RelationRepository = (*Repository)(nil)
 	_ repository.ExtraRepository    = (*Repository)(nil)
+	_ repository.TraceRepository    = (*Repository)(nil)
 )
 
 type Repository struct {
@@ -18,6 +19,7 @@ type Repository struct {
 	Relations map[domain.RelationID]*domain.Relation
 	Children  map[domain.RelationID][]domain.RelationID // parentID -> children
 	Extras    map[domain.ExtraID]*domain.Extra
+	Traces    map[domain.TraceID]*domain.Trace
 }
 
 func NewRepository() *Repository {
@@ -26,6 +28,7 @@ func NewRepository() *Repository {
 		Relations: make(map[domain.RelationID]*domain.Relation),
 		Children:  make(map[domain.RelationID][]domain.RelationID),
 		Extras:    make(map[domain.ExtraID]*domain.Extra),
+		Traces:    make(map[domain.TraceID]*domain.Trace),
 	}
 }
 
@@ -162,6 +165,49 @@ func (r *Repository) UpdateExtra(ctx context.Context, extra *domain.Extra) error
 	}
 
 	r.Extras[extra.ID()] = extra
+
+	return nil
+}
+
+func (r *Repository) CreateTrace(ctx context.Context, trace *domain.Trace) error {
+	if _, ok := r.Traces[trace.ID()]; ok {
+		return repository.ErrTraceAlreadyExists
+	}
+
+	r.Traces[trace.ID()] = trace
+
+	return nil
+}
+
+func (r *Repository) GetTrace(ctx context.Context, id domain.TraceID) (*domain.Trace, error) {
+	trace, ok := r.Traces[id]
+	if !ok {
+		return nil, repository.ErrTraceNotFound
+	}
+
+	return trace, nil
+}
+
+func (r *Repository) UpdateTraces(ctx context.Context, traces ...*domain.Trace) error {
+	for _, trace := range traces {
+		if _, ok := r.Traces[trace.ID()]; !ok {
+			return repository.ErrTraceNotFound
+		}
+	}
+
+	for _, trace := range traces {
+		r.Traces[trace.ID()] = trace
+	}
+
+	return nil
+}
+
+func (r *Repository) DeleteTrace(ctx context.Context, trace *domain.Trace) error {
+	if _, ok := r.Traces[trace.ID()]; !ok {
+		return repository.ErrTraceNotFound
+	}
+
+	delete(r.Traces, trace.ID())
 
 	return nil
 }
