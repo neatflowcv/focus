@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/neatflowcv/focus/internal/pkg/domain"
 	"github.com/neatflowcv/focus/internal/pkg/eventbus"
@@ -31,7 +30,6 @@ func (s *Service) CreateTask(ctx context.Context, input *CreateTaskInput) (*Crea
 		domain.TaskID(s.idmaker.MakeID()),
 		input.Title,
 		input.Now,
-		time.Time{},
 	)
 
 	err := s.repo.CreateTask(ctx, input.Username, task)

@@ -7,17 +7,15 @@ import (
 type TaskID string
 
 type Task struct {
-	id          TaskID
-	title       string
-	createdAt   time.Time
-	completedAt time.Time
+	id        TaskID
+	title     string
+	createdAt time.Time
 }
 
 func NewTask(
 	id TaskID,
 	title string,
 	createdAt time.Time,
-	completedAt time.Time,
 ) *Task {
 	if id == "" {
 		panic("id is required")
@@ -28,10 +26,9 @@ func NewTask(
 	}
 
 	return &Task{
-		id:          id,
-		title:       title,
-		createdAt:   createdAt,
-		completedAt: completedAt,
+		id:        id,
+		title:     title,
+		createdAt: createdAt,
 	}
 }
 
@@ -45,8 +42,4 @@ func (t *Task) Title() string {
 
 func (t *Task) CreatedAt() time.Time {
 	return t.createdAt
-}
-
-func (t *Task) CompletedAt() time.Time {
-	return t.completedAt
 }
