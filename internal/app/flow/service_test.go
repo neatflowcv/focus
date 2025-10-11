@@ -49,18 +49,23 @@ func TestServiceCreateTask(t *testing.T) {
 	require.Equal(t, now, ret.CreatedAt)
 }
 
-func TestServiceListTasksWithNoData(t *testing.T) {
+func TestServiceCreateTask_Error(t *testing.T) {
 	t.Parallel()
 
-	service, _ := newService(t)
+	t.Run("not found parent", func(t *testing.T) {
+		t.Parallel()
 
-	ret, err := service.ListTasks(t.Context(), &flow.ListTasksInput{
-		Username: "test",
-		ParentID: "unknown",
+		service, _ := newService(t)
+		_, err := service.CreateTask(t.Context(), &flow.CreateTaskInput{
+			Username: "test",
+			Title:    "test",
+			Now:      time.Now(),
+			ParentID: "unknown",
+			NextID:   "",
+		})
+
+		require.ErrorIs(t, err, flow.ErrParentTaskNotFound)
 	})
-
-	require.NoError(t, err)
-	require.Empty(t, ret)
 }
 
 func TestServiceListTasks(t *testing.T) {

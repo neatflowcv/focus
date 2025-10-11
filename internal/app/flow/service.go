@@ -26,6 +26,17 @@ func NewService(bus *eventbus.Bus, idmaker idmaker.IDMaker, repo repository.Repo
 }
 
 func (s *Service) CreateTask(ctx context.Context, input *CreateTaskInput) (*CreateTaskOutput, error) {
+	if input.ParentID != "" {
+		_, err := s.repo.GetTask(ctx, input.Username, domain.TaskID(input.ParentID))
+		if err != nil {
+			if errors.Is(err, repository.ErrTaskNotFound) {
+				return nil, ErrParentTaskNotFound
+			}
+
+			return nil, fmt.Errorf("failed to get parent task: %w", err)
+		}
+	}
+
 	task := domain.NewTask(
 		domain.TaskID(s.idmaker.MakeID()),
 		domain.TaskID(input.ParentID),
