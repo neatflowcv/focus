@@ -8,18 +8,10 @@ type TaskDeletedEvent struct {
 	TaskID string
 }
 
-type RelationCreatedEvent struct {
-	RelationID string
-	ParentID   string
-}
-
-type RelationDeletedEvent struct {
-	RelationID string
-	ParentID   string
-}
-
-type RelationUpdatedEvent struct {
-	RelationID  string
+type TaskRelationUpdatedEvent struct {
+	TaskID      string
 	OldParentID string
 	NewParentID string
+	OldNextID   string
+	NewNextID   string
 }
