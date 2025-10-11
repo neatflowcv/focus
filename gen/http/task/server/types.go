@@ -42,26 +42,8 @@ type UpdateRequestBody struct {
 type CreateResponseBody struct {
 	// The ID of the task
 	ID string `form:"id" json:"id" xml:"id"`
-	// The parent ID of the task
-	ParentID *string `form:"parent_id,omitempty" json:"parent_id,omitempty" xml:"parent_id,omitempty"`
-	// The title of the task
-	Title string `form:"title" json:"title" xml:"title"`
-	// The status of the task
-	Status string `form:"status" json:"status" xml:"status"`
-	// Whether the task is a leaf task
-	IsLeaf *bool `form:"is_leaf,omitempty" json:"is_leaf,omitempty" xml:"is_leaf,omitempty"`
 	// The timestamp when the task was created
 	CreatedAt int64 `form:"created_at" json:"created_at" xml:"created_at"`
-	// The timestamp when the task was completed
-	CompletedAt *int64 `form:"completed_at,omitempty" json:"completed_at,omitempty" xml:"completed_at,omitempty"`
-	// The timestamp when the task was started
-	StartedAt *int64 `form:"started_at,omitempty" json:"started_at,omitempty" xml:"started_at,omitempty"`
-	// The lead time of the task
-	LeadTime *int64 `form:"lead_time,omitempty" json:"lead_time,omitempty" xml:"lead_time,omitempty"`
-	// The estimated time of the task
-	EstimatedTime *int64 `form:"estimated_time,omitempty" json:"estimated_time,omitempty" xml:"estimated_time,omitempty"`
-	// The actual time of the task
-	ActualTime *int64 `form:"actual_time,omitempty" json:"actual_time,omitempty" xml:"actual_time,omitempty"`
 }
 
 // TaskdetailResponseCollection is the type of the "task" service "list"
@@ -303,19 +285,10 @@ type TaskdetailResponse struct {
 
 // NewCreateResponseBody builds the HTTP response body from the result of the
 // "create" endpoint of the "task" service.
-func NewCreateResponseBody(res *taskviews.TaskdetailView) *CreateResponseBody {
+func NewCreateResponseBody(res *taskviews.CreatetaskoutputView) *CreateResponseBody {
 	body := &CreateResponseBody{
-		ID:            *res.ID,
-		ParentID:      res.ParentID,
-		Title:         *res.Title,
-		Status:        *res.Status,
-		IsLeaf:        res.IsLeaf,
-		CreatedAt:     *res.CreatedAt,
-		CompletedAt:   res.CompletedAt,
-		StartedAt:     res.StartedAt,
-		LeadTime:      res.LeadTime,
-		EstimatedTime: res.EstimatedTime,
-		ActualTime:    res.ActualTime,
+		ID:        *res.ID,
+		CreatedAt: *res.CreatedAt,
 	}
 	return body
 }
@@ -490,8 +463,8 @@ func NewDeleteInternalServerErrorResponseBody(res *goa.ServiceError) *DeleteInte
 }
 
 // NewCreateTaskInput builds a task service create endpoint payload.
-func NewCreateTaskInput(body *CreateRequestBody, authorization string) *task.TaskInput {
-	v := &task.TaskInput{
+func NewCreateTaskInput(body *CreateRequestBody, authorization string) *task.CreateTaskInput {
+	v := &task.CreateTaskInput{
 		ParentID: body.ParentID,
 		Title:    *body.Title,
 	}

@@ -10,4 +10,5 @@ type Repository interface {
 	CreateTask(ctx context.Context, username string, task *domain.Task) error
 	DeleteTask(ctx context.Context, username string, task *domain.Task) error
 	GetTask(ctx context.Context, username string, id domain.TaskID) (*domain.Task, error)
+	ListTasks(ctx context.Context, username string, parentID domain.TaskID) ([]*domain.Task, error)
 }

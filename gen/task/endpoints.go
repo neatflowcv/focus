@@ -43,12 +43,12 @@ func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 // "create" of service "task".
 func NewCreateEndpoint(s Service) goa.Endpoint {
 	return func(ctx context.Context, req any) (any, error) {
-		p := req.(*TaskInput)
+		p := req.(*CreateTaskInput)
 		res, err := s.Create(ctx, p)
 		if err != nil {
 			return nil, err
 		}
-		vres := NewViewedTaskdetail(res, "default")
+		vres := NewViewedCreatetaskoutput(res, "default")
 		return vres, nil
 	}
 }

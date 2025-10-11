@@ -42,26 +42,8 @@ type UpdateRequestBody struct {
 type CreateResponseBody struct {
 	// The ID of the task
 	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// The parent ID of the task
-	ParentID *string `form:"parent_id,omitempty" json:"parent_id,omitempty" xml:"parent_id,omitempty"`
-	// The title of the task
-	Title *string `form:"title,omitempty" json:"title,omitempty" xml:"title,omitempty"`
-	// The status of the task
-	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
-	// Whether the task is a leaf task
-	IsLeaf *bool `form:"is_leaf,omitempty" json:"is_leaf,omitempty" xml:"is_leaf,omitempty"`
 	// The timestamp when the task was created
 	CreatedAt *int64 `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
-	// The timestamp when the task was completed
-	CompletedAt *int64 `form:"completed_at,omitempty" json:"completed_at,omitempty" xml:"completed_at,omitempty"`
-	// The timestamp when the task was started
-	StartedAt *int64 `form:"started_at,omitempty" json:"started_at,omitempty" xml:"started_at,omitempty"`
-	// The lead time of the task
-	LeadTime *int64 `form:"lead_time,omitempty" json:"lead_time,omitempty" xml:"lead_time,omitempty"`
-	// The estimated time of the task
-	EstimatedTime *int64 `form:"estimated_time,omitempty" json:"estimated_time,omitempty" xml:"estimated_time,omitempty"`
-	// The actual time of the task
-	ActualTime *int64 `form:"actual_time,omitempty" json:"actual_time,omitempty" xml:"actual_time,omitempty"`
 }
 
 // ListResponseBody is the type of the "task" service "list" endpoint HTTP
@@ -303,7 +285,7 @@ type TaskdetailResponse struct {
 
 // NewCreateRequestBody builds the HTTP request body from the payload of the
 // "create" endpoint of the "task" service.
-func NewCreateRequestBody(p *task.TaskInput) *CreateRequestBody {
+func NewCreateRequestBody(p *task.CreateTaskInput) *CreateRequestBody {
 	body := &CreateRequestBody{
 		ParentID: p.ParentID,
 		Title:    p.Title,
@@ -324,21 +306,12 @@ func NewUpdateRequestBody(p *task.TaskUpdateInput) *UpdateRequestBody {
 	return body
 }
 
-// NewCreateTaskdetailOK builds a "task" service "create" endpoint result from
-// a HTTP "OK" response.
-func NewCreateTaskdetailOK(body *CreateResponseBody) *taskviews.TaskdetailView {
-	v := &taskviews.TaskdetailView{
-		ID:            body.ID,
-		ParentID:      body.ParentID,
-		Title:         body.Title,
-		Status:        body.Status,
-		IsLeaf:        body.IsLeaf,
-		CreatedAt:     body.CreatedAt,
-		CompletedAt:   body.CompletedAt,
-		StartedAt:     body.StartedAt,
-		LeadTime:      body.LeadTime,
-		EstimatedTime: body.EstimatedTime,
-		ActualTime:    body.ActualTime,
+// NewCreatetaskoutputViewOK builds a "task" service "create" endpoint result
+// from a HTTP "OK" response.
+func NewCreatetaskoutputViewOK(body *CreateResponseBody) *taskviews.CreatetaskoutputView {
+	v := &taskviews.CreatetaskoutputView{
+		ID:        body.ID,
+		CreatedAt: body.CreatedAt,
 	}
 
 	return v

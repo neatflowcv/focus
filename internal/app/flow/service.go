@@ -28,8 +28,11 @@ func NewService(bus *eventbus.Bus, idmaker idmaker.IDMaker, repo repository.Repo
 func (s *Service) CreateTask(ctx context.Context, input *CreateTaskInput) (*CreateTaskOutput, error) {
 	task := domain.NewTask(
 		domain.TaskID(s.idmaker.MakeID()),
+		domain.TaskID(input.ParentID),
+		domain.TaskID(input.NextID),
 		input.Title,
 		input.Now,
+		1,
 	)
 
 	err := s.repo.CreateTask(ctx, input.Username, task)
@@ -37,16 +40,20 @@ func (s *Service) CreateTask(ctx context.Context, input *CreateTaskInput) (*Crea
 		return nil, fmt.Errorf("failed to create task: %w", err)
 	}
 
+	dummy := task.Dummy()
+
+	err = s.repo.CreateTask(ctx, input.Username, dummy)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create dummy task: %w", err)
+	}
+
 	s.bus.TaskCreated.Publish(ctx, &eventbus.TaskCreatedEvent{
 		TaskID: string(task.ID()),
 	})
 
 	return &CreateTaskOutput{
-		Task: Task{
-			ID:        string(task.ID()),
-			Title:     task.Title(),
-			CreatedAt: task.CreatedAt(),
-		},
+		ID:        string(task.ID()),
+		CreatedAt: task.CreatedAt(),
 	}, nil
 }
 
@@ -73,19 +80,14 @@ func (s *Service) DeleteTask(ctx context.Context, input *DeleteTaskInput) error 
 }
 
 func (s *Service) ListTasks(ctx context.Context, input *ListTasksInput) (*ListTasksOutput, error) {
-	var tasks []Task
+	tasks, err := s.repo.ListTasks(ctx, input.Username, domain.TaskID(input.ParentID))
+	if err != nil {
+		return nil, fmt.Errorf("failed to list tasks: %w", err)
+	}
 
-	for _, id := range input.IDs {
-		task, err := s.repo.GetTask(ctx, input.Username, domain.TaskID(id))
-		if err != nil {
-			if errors.Is(err, repository.ErrTaskNotFound) {
-				continue
-			}
-
-			return nil, fmt.Errorf("failed to get task: %w", err)
-		}
-
-		tasks = append(tasks, Task{
+	var items []*Task
+	for _, task := range tasks {
+		items = append(items, &Task{
 			ID:        string(task.ID()),
 			Title:     task.Title(),
 			CreatedAt: task.CreatedAt(),
@@ -93,7 +95,7 @@ func (s *Service) ListTasks(ctx context.Context, input *ListTasksInput) (*ListTa
 	}
 
 	return &ListTasksOutput{
-		Tasks: tasks,
+		Tasks: items,
 	}, nil
 }
 

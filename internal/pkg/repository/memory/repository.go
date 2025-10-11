@@ -8,27 +8,24 @@ import (
 )
 
 var (
-	_ repository.Repository         = (*Repository)(nil)
-	_ repository.RelationRepository = (*Repository)(nil)
-	_ repository.ExtraRepository    = (*Repository)(nil)
-	_ repository.TraceRepository    = (*Repository)(nil)
+	_ repository.Repository      = (*Repository)(nil)
+	_ repository.ExtraRepository = (*Repository)(nil)
+	_ repository.TraceRepository = (*Repository)(nil)
 )
 
 type Repository struct {
-	Tasks     map[string]map[domain.TaskID]*domain.Task
-	Relations map[domain.RelationID]*domain.Relation
-	Children  map[domain.RelationID][]domain.RelationID // parentID -> children
-	Extras    map[domain.ExtraID]*domain.Extra
-	Traces    map[domain.TraceID]*domain.Trace
+	Tasks    map[string]map[domain.TaskID]*domain.Task
+	Children map[domain.TaskID][]domain.TaskID
+	Extras   map[domain.ExtraID]*domain.Extra
+	Traces   map[domain.TraceID]*domain.Trace
 }
 
 func NewRepository() *Repository {
 	return &Repository{
-		Tasks:     make(map[string]map[domain.TaskID]*domain.Task),
-		Relations: make(map[domain.RelationID]*domain.Relation),
-		Children:  make(map[domain.RelationID][]domain.RelationID),
-		Extras:    make(map[domain.ExtraID]*domain.Extra),
-		Traces:    make(map[domain.TraceID]*domain.Trace),
+		Tasks:    make(map[string]map[domain.TaskID]*domain.Task),
+		Children: make(map[domain.TaskID][]domain.TaskID),
+		Extras:   make(map[domain.ExtraID]*domain.Extra),
+		Traces:   make(map[domain.TraceID]*domain.Trace),
 	}
 }
 
@@ -38,6 +35,7 @@ func (r *Repository) CreateTask(ctx context.Context, username string, task *doma
 	}
 
 	r.Tasks[username][task.ID()] = task
+	r.Children[task.ParentID()] = append(r.Children[task.ParentID()], task.ID())
 
 	return nil
 }
@@ -51,58 +49,19 @@ func (r *Repository) GetTask(ctx context.Context, username string, id domain.Tas
 	return task, nil
 }
 
-func (r *Repository) CreateRelation(ctx context.Context, relation *domain.Relation) error {
-	if _, ok := r.Relations[relation.ID()]; ok {
-		return repository.ErrRelationAlreadyExists
-	}
+func (r *Repository) ListTasks(ctx context.Context, username string, parentID domain.TaskID) ([]*domain.Task, error) {
+	var ret []*domain.Task
 
-	r.Relations[relation.ID()] = relation
-	r.Children[relation.ParentID()] = append(r.Children[relation.ParentID()], relation.ID())
+	for _, id := range r.Children[parentID] {
+		task, ok := r.Tasks[username][id]
+		if !ok {
+			panic("task not found")
+		}
 
-	return nil
-}
-
-func (r *Repository) GetRelation(ctx context.Context, id domain.RelationID) (*domain.Relation, error) {
-	relation, ok := r.Relations[id]
-	if !ok {
-		return nil, repository.ErrRelationNotFound
-	}
-
-	return relation, nil
-}
-
-func (r *Repository) ListChildrenRelations(ctx context.Context, id domain.RelationID) ([]*domain.Relation, error) {
-	var ret []*domain.Relation
-	for _, childID := range r.Children[id] {
-		ret = append(ret, r.Relations[childID])
+		ret = append(ret, task)
 	}
 
 	return ret, nil
-}
-
-func (r *Repository) DeleteRelation(ctx context.Context, relation *domain.Relation) error {
-	if _, ok := r.Relations[relation.ID()]; !ok {
-		return repository.ErrRelationNotFound
-	}
-
-	delete(r.Relations, relation.ID())
-	delete(r.Children, relation.ParentID())
-
-	return nil
-}
-
-func (r *Repository) UpdateRelations(ctx context.Context, relations ...*domain.Relation) error {
-	for _, relation := range relations {
-		if _, ok := r.Relations[relation.ID()]; !ok {
-			return repository.ErrRelationNotFound
-		}
-	}
-
-	for _, relation := range relations {
-		r.Relations[relation.ID()] = relation
-	}
-
-	return nil
 }
 
 func (r *Repository) DeleteTask(ctx context.Context, username string, task *domain.Task) error {

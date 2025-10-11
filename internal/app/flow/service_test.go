@@ -40,12 +40,13 @@ func TestServiceCreateTask(t *testing.T) {
 		Username: "test",
 		Title:    "test",
 		Now:      now,
+		ParentID: "",
+		NextID:   "",
 	})
 
 	require.NoError(t, err)
-	require.Equal(t, "test", ret.Task.Title)
-	require.Equal(t, now, ret.Task.CreatedAt)
-	require.NotEmpty(t, ret.Task.ID)
+	require.NotEmpty(t, ret.ID)
+	require.Equal(t, now, ret.CreatedAt)
 }
 
 func TestServiceListTasksWithNoData(t *testing.T) {
@@ -55,7 +56,7 @@ func TestServiceListTasksWithNoData(t *testing.T) {
 
 	ret, err := service.ListTasks(t.Context(), &flow.ListTasksInput{
 		Username: "test",
-		IDs:      []string{"unknown"},
+		ParentID: "unknown",
 	})
 
 	require.NoError(t, err)
@@ -67,15 +68,17 @@ func TestServiceListTasks(t *testing.T) {
 
 	service, _ := newService(t)
 	now := time.Now()
-	task, _ := service.CreateTask(t.Context(), &flow.CreateTaskInput{
+	_, _ = service.CreateTask(t.Context(), &flow.CreateTaskInput{
 		Username: "test",
 		Title:    "test",
 		Now:      now,
+		ParentID: "",
+		NextID:   "",
 	})
 
 	ret, err := service.ListTasks(t.Context(), &flow.ListTasksInput{
 		Username: "test",
-		IDs:      []string{task.Task.ID},
+		ParentID: "",
 	})
 
 	require.NoError(t, err)
@@ -92,15 +95,17 @@ func TestServiceDeleteTask(t *testing.T) {
 		Username: "test",
 		Title:    "test",
 		Now:      time.Now(),
+		ParentID: "",
+		NextID:   "",
 	})
 
 	err := service.DeleteTask(t.Context(), &flow.DeleteTaskInput{
 		Username: "test",
-		TaskID:   task.Task.ID,
+		TaskID:   task.ID,
 	})
 
 	require.NoError(t, err)
-	require.Empty(t, data.repo.Tasks["test"][domain.TaskID(task.Task.ID)])
+	require.Empty(t, data.repo.Tasks["test"][domain.TaskID(task.ID)])
 }
 
 func TestServiceDeleteTask_Error(t *testing.T) {

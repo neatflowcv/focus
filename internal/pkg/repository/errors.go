@@ -3,13 +3,9 @@ package repository
 import "errors"
 
 var (
-	ErrTaskNotFound = errors.New("task not found")
-)
-
-var (
-	ErrRelationNotFound      = errors.New("relation not found")
-	ErrRelationBusy          = errors.New("relation busy")
-	ErrRelationAlreadyExists = errors.New("relation already exists")
+	ErrTaskNotFound      = errors.New("task not found")
+	ErrTaskAlreadyExists = errors.New("task already exists")
+	ErrTaskBusy          = errors.New("task busy")
 )
 
 var (

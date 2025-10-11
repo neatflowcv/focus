@@ -13,8 +13,7 @@ import (
 )
 
 var (
-	_ repository.Repository         = (*Repository)(nil)
-	_ repository.RelationRepository = (*Repository)(nil)
+	_ repository.Repository = (*Repository)(nil)
 )
 
 type Repository struct {
@@ -37,7 +36,7 @@ func NewRepository() (*Repository, error) {
 		return nil, fmt.Errorf("failed to open database: %w", err)
 	}
 
-	err = db.AutoMigrate(&Task{}, &Relation{}) //nolint:exhaustruct
+	err = db.AutoMigrate(&Task{}) //nolint:exhaustruct
 	if err != nil {
 		return nil, fmt.Errorf("failed to auto migrate: %w", err)
 	}
@@ -69,87 +68,6 @@ func (r *Repository) GetTask(ctx context.Context, username string, id domain.Tas
 	return task.ToDomain(), nil
 }
 
-func (r *Repository) CreateRelation(ctx context.Context, relation *domain.Relation) error {
-	err := gorm.G[Relation](r.db).Create(ctx, FromDomainRelation(relation))
-	if err != nil {
-		if errors.Is(err, gorm.ErrDuplicatedKey) {
-			return repository.ErrRelationAlreadyExists
-		}
-
-		return fmt.Errorf("failed to create relation: %w", err)
-	}
-
-	return nil
-}
-
-func (r *Repository) DeleteRelation(ctx context.Context, relation *domain.Relation) error {
-	affected, err := gorm.G[Relation](r.db).
-		Where(&Relation{ID: string(relation.ID())}). //nolint:exhaustruct
-		Delete(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to delete relation: %w", err)
-	}
-
-	if affected == 0 {
-		return repository.ErrRelationNotFound
-	}
-
-	return nil
-}
-
-func (r *Repository) GetRelation(ctx context.Context, id domain.RelationID) (*domain.Relation, error) {
-	relation, err := gorm.G[Relation](r.db).
-		Where(&Relation{ID: string(id)}). //nolint:exhaustruct
-		Take(ctx)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, repository.ErrRelationNotFound
-		}
-
-		return nil, fmt.Errorf("failed to get relation: %w", err)
-	}
-
-	return relation.ToDomain(), nil
-}
-
-func (r *Repository) ListChildrenRelations(ctx context.Context, id domain.RelationID) ([]*domain.Relation, error) {
-	relations, err := gorm.G[Relation](r.db).
-		Where(&Relation{ParentID: sql.NullString{String: string(id), Valid: true}}). //nolint:exhaustruct
-		Find(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to list children relations: %w", err)
-	}
-
-	return ToDomainRelations(relations), nil
-}
-
-func (r *Repository) UpdateRelations(ctx context.Context, dRelations ...*domain.Relation) error {
-	err := r.db.Transaction(func(tx *gorm.DB) error {
-		for _, dRelation := range dRelations {
-			relation := FromDomainRelation(dRelation)
-			relation.Version++
-
-			affected, err := gorm.G[Relation](tx).
-				Where(&Relation{ID: string(dRelation.ID()), Version: dRelation.Version()}). //nolint:exhaustruct
-				Updates(ctx, *relation)
-			if err != nil {
-				return fmt.Errorf("failed to update relation: %w", err)
-			}
-
-			if affected == 0 {
-				return repository.ErrRelationBusy
-			}
-		}
-
-		return nil
-	})
-	if err != nil {
-		return fmt.Errorf("failed to update relations: %w", err)
-	}
-
-	return nil
-}
-
 func (r *Repository) DeleteTask(ctx context.Context, username string, task *domain.Task) error {
 	affected, err := gorm.G[Task](r.db).
 		Where(&Task{ID: string(task.ID()), Username: username}). //nolint:exhaustruct
@@ -163,4 +81,22 @@ func (r *Repository) DeleteTask(ctx context.Context, username string, task *doma
 	}
 
 	return nil
+}
+
+func (r *Repository) ListTasks(ctx context.Context, username string, parentID domain.TaskID) ([]*domain.Task, error) {
+	var tasks []Task
+
+	tasks, err := gorm.G[Task](r.db).
+		Where(
+			&Task{ //nolint:exhaustruct
+				Username: username,
+				ParentID: sql.NullString{String: string(parentID), Valid: true},
+			},
+		).
+		Find(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list tasks: %w", err)
+	}
+
+	return ToDomainTasks(tasks), nil
 }

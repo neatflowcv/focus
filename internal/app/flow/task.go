@@ -7,7 +7,19 @@ import (
 type CreateTaskInput struct {
 	Username string
 	Title    string
+	ParentID string
+	NextID   string
 	Now      time.Time
+}
+
+type CreateTaskOutput struct {
+	ID        string
+	CreatedAt time.Time
+}
+
+type ListTasksInput struct {
+	Username string
+	ParentID string
 }
 
 type Task struct {
@@ -16,17 +28,8 @@ type Task struct {
 	CreatedAt time.Time
 }
 
-type CreateTaskOutput struct {
-	Task Task
-}
-
-type ListTasksInput struct {
-	Username string
-	IDs      []string
-}
-
 type ListTasksOutput struct {
-	Tasks []Task
+	Tasks []*Task
 }
 
 type DeleteTaskInput struct {

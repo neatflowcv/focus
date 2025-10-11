@@ -22,8 +22,8 @@ var _ = dsl.Service("task", func() {
 	dsl.Method("create", func() {
 		dsl.Description("Create a new task.")
 
-		dsl.Payload(TaskInput)
-		dsl.Result(TaskDetail)
+		dsl.Payload(CreateTaskInput)
+		dsl.Result(CreateTaskOutput)
 
 		dsl.HTTP(func() {
 			dsl.POST("/")
@@ -97,12 +97,19 @@ var _ = dsl.Service("task", func() {
 	})
 })
 
-var TaskInput = dsl.Type("TaskInput", func() { //nolint:gochecknoglobals
+var CreateTaskInput = dsl.Type("CreateTaskInput", func() { //nolint:gochecknoglobals
 	dsl.Attribute("authorization", dsl.String, "The authorization header")
 	dsl.Attribute("parent_id", dsl.String, "The parent ID of the task")
 	dsl.Attribute("title", dsl.String, "The title of the task")
 
 	dsl.Required("authorization", "title")
+})
+
+var CreateTaskOutput = dsl.ResultType("CreateTaskOutput", func() { //nolint:gochecknoglobals
+	dsl.Attribute("id", dsl.String, "The ID of the task")
+	dsl.Attribute("created_at", dsl.Int64, "The timestamp when the task was created")
+
+	dsl.Required("id", "created_at")
 })
 
 var TaskUpdateInput = dsl.Type("TaskUpdateInput", func() { //nolint:gochecknoglobals

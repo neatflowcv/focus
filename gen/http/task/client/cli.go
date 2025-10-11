@@ -17,20 +17,20 @@ import (
 
 // BuildCreatePayload builds the payload for the task create endpoint from CLI
 // flags.
-func BuildCreatePayload(taskCreateBody string, taskCreateAuthorization string) (*task.TaskInput, error) {
+func BuildCreatePayload(taskCreateBody string, taskCreateAuthorization string) (*task.CreateTaskInput, error) {
 	var err error
 	var body CreateRequestBody
 	{
 		err = json.Unmarshal([]byte(taskCreateBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"parent_id\": \"Odio aut enim saepe voluptatem.\",\n      \"title\": \"Error odio corporis animi praesentium quasi.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"parent_id\": \"Ullam dolor sint odio aut enim saepe.\",\n      \"title\": \"Vel error odio corporis animi praesentium quasi.\"\n   }'")
 		}
 	}
 	var authorization string
 	{
 		authorization = taskCreateAuthorization
 	}
-	v := &task.TaskInput{
+	v := &task.CreateTaskInput{
 		ParentID: body.ParentID,
 		Title:    body.Title,
 	}
@@ -80,7 +80,7 @@ func BuildUpdatePayload(taskUpdateBody string, taskUpdateTaskID string, taskUpda
 	{
 		err = json.Unmarshal([]byte(taskUpdateBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"estimated_time\": 3455221692150320965,\n      \"next_id\": \"Dolores occaecati.\",\n      \"parent_id\": \"Ratione consequatur quis ullam quisquam necessitatibus.\",\n      \"status\": \"Qui qui error eos.\",\n      \"title\": \"Dolorum est.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"estimated_time\": 7275710883003218401,\n      \"next_id\": \"Quisquam necessitatibus earum dolores occaecati labore qui.\",\n      \"parent_id\": \"Reiciendis dolorum est qui ratione consequatur quis.\",\n      \"status\": \"Error eos ea ut.\",\n      \"title\": \"Assumenda assumenda dolores culpa dolore.\"\n   }'")
 		}
 	}
 	var taskID string

@@ -17,7 +17,7 @@ import (
 // Service is the task service interface.
 type Service interface {
 	// Create a new task.
-	Create(context.Context, *TaskInput) (res *Taskdetail, err error)
+	Create(context.Context, *CreateTaskInput) (res *Createtaskoutput, err error)
 	// List all tasks.
 	List(context.Context, *ListPayload) (res TaskdetailCollection, err error)
 	// Update a task.
@@ -42,6 +42,24 @@ const ServiceName = "task"
 // MethodKey key.
 var MethodNames = [4]string{"create", "list", "update", "delete"}
 
+// CreateTaskInput is the payload type of the task service create method.
+type CreateTaskInput struct {
+	// The authorization header
+	Authorization string
+	// The parent ID of the task
+	ParentID *string
+	// The title of the task
+	Title string
+}
+
+// Createtaskoutput is the result type of the task service create method.
+type Createtaskoutput struct {
+	// The ID of the task
+	ID string
+	// The timestamp when the task was created
+	CreatedAt int64
+}
+
 // ListPayload is the payload type of the task service list method.
 type ListPayload struct {
 	// The authorization header
@@ -58,16 +76,6 @@ type TaskDeleteInput struct {
 	Authorization string
 	// The ID of the task
 	TaskID string
-}
-
-// TaskInput is the payload type of the task service create method.
-type TaskInput struct {
-	// The authorization header
-	Authorization string
-	// The parent ID of the task
-	ParentID *string
-	// The title of the task
-	Title string
 }
 
 // TaskUpdateInput is the payload type of the task service update method.
@@ -88,7 +96,7 @@ type TaskUpdateInput struct {
 	EstimatedTime *int64
 }
 
-// Taskdetail is the result type of the task service create method.
+// Taskdetail is the result type of the task service update method.
 type Taskdetail struct {
 	// The ID of the task
 	ID string
@@ -132,17 +140,17 @@ func MakeTaskNotFound(err error) *goa.ServiceError {
 	return goa.NewServiceError(err, "TaskNotFound", false, false, false)
 }
 
-// NewTaskdetail initializes result type Taskdetail from viewed result type
-// Taskdetail.
-func NewTaskdetail(vres *taskviews.Taskdetail) *Taskdetail {
-	return newTaskdetail(vres.Projected)
+// NewCreatetaskoutput initializes result type Createtaskoutput from viewed
+// result type Createtaskoutput.
+func NewCreatetaskoutput(vres *taskviews.Createtaskoutput) *Createtaskoutput {
+	return newCreatetaskoutput(vres.Projected)
 }
 
-// NewViewedTaskdetail initializes viewed result type Taskdetail from result
-// type Taskdetail using the given view.
-func NewViewedTaskdetail(res *Taskdetail, view string) *taskviews.Taskdetail {
-	p := newTaskdetailView(res)
-	return &taskviews.Taskdetail{Projected: p, View: "default"}
+// NewViewedCreatetaskoutput initializes viewed result type Createtaskoutput
+// from result type Createtaskoutput using the given view.
+func NewViewedCreatetaskoutput(res *Createtaskoutput, view string) *taskviews.Createtaskoutput {
+	p := newCreatetaskoutputView(res)
+	return &taskviews.Createtaskoutput{Projected: p, View: "default"}
 }
 
 // NewTaskdetailCollection initializes result type TaskdetailCollection from
@@ -157,6 +165,62 @@ func NewTaskdetailCollection(vres taskviews.TaskdetailCollection) TaskdetailColl
 func NewViewedTaskdetailCollection(res TaskdetailCollection, view string) taskviews.TaskdetailCollection {
 	p := newTaskdetailCollectionView(res)
 	return taskviews.TaskdetailCollection{Projected: p, View: "default"}
+}
+
+// NewTaskdetail initializes result type Taskdetail from viewed result type
+// Taskdetail.
+func NewTaskdetail(vres *taskviews.Taskdetail) *Taskdetail {
+	return newTaskdetail(vres.Projected)
+}
+
+// NewViewedTaskdetail initializes viewed result type Taskdetail from result
+// type Taskdetail using the given view.
+func NewViewedTaskdetail(res *Taskdetail, view string) *taskviews.Taskdetail {
+	p := newTaskdetailView(res)
+	return &taskviews.Taskdetail{Projected: p, View: "default"}
+}
+
+// newCreatetaskoutput converts projected type Createtaskoutput to service type
+// Createtaskoutput.
+func newCreatetaskoutput(vres *taskviews.CreatetaskoutputView) *Createtaskoutput {
+	res := &Createtaskoutput{}
+	if vres.ID != nil {
+		res.ID = *vres.ID
+	}
+	if vres.CreatedAt != nil {
+		res.CreatedAt = *vres.CreatedAt
+	}
+	return res
+}
+
+// newCreatetaskoutputView projects result type Createtaskoutput to projected
+// type CreatetaskoutputView using the "default" view.
+func newCreatetaskoutputView(res *Createtaskoutput) *taskviews.CreatetaskoutputView {
+	vres := &taskviews.CreatetaskoutputView{
+		ID:        &res.ID,
+		CreatedAt: &res.CreatedAt,
+	}
+	return vres
+}
+
+// newTaskdetailCollection converts projected type TaskdetailCollection to
+// service type TaskdetailCollection.
+func newTaskdetailCollection(vres taskviews.TaskdetailCollectionView) TaskdetailCollection {
+	res := make(TaskdetailCollection, len(vres))
+	for i, n := range vres {
+		res[i] = newTaskdetail(n)
+	}
+	return res
+}
+
+// newTaskdetailCollectionView projects result type TaskdetailCollection to
+// projected type TaskdetailCollectionView using the "default" view.
+func newTaskdetailCollectionView(res TaskdetailCollection) taskviews.TaskdetailCollectionView {
+	vres := make(taskviews.TaskdetailCollectionView, len(res))
+	for i, n := range res {
+		vres[i] = newTaskdetailView(n)
+	}
+	return vres
 }
 
 // newTaskdetail converts projected type Taskdetail to service type Taskdetail.
@@ -200,26 +264,6 @@ func newTaskdetailView(res *Taskdetail) *taskviews.TaskdetailView {
 		LeadTime:      res.LeadTime,
 		EstimatedTime: res.EstimatedTime,
 		ActualTime:    res.ActualTime,
-	}
-	return vres
-}
-
-// newTaskdetailCollection converts projected type TaskdetailCollection to
-// service type TaskdetailCollection.
-func newTaskdetailCollection(vres taskviews.TaskdetailCollectionView) TaskdetailCollection {
-	res := make(TaskdetailCollection, len(vres))
-	for i, n := range vres {
-		res[i] = newTaskdetail(n)
-	}
-	return res
-}
-
-// newTaskdetailCollectionView projects result type TaskdetailCollection to
-// projected type TaskdetailCollectionView using the "default" view.
-func newTaskdetailCollectionView(res TaskdetailCollection) taskviews.TaskdetailCollectionView {
-	vres := make(taskviews.TaskdetailCollectionView, len(res))
-	for i, n := range res {
-		vres[i] = newTaskdetailView(n)
 	}
 	return vres
 }

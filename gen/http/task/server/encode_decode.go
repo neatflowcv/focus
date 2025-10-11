@@ -24,7 +24,7 @@ import (
 // create endpoint.
 func EncodeCreateResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
 	return func(ctx context.Context, w http.ResponseWriter, v any) error {
-		res := v.(*taskviews.Taskdetail)
+		res := v.(*taskviews.Createtaskoutput)
 		enc := encoder(ctx, w)
 		body := NewCreateResponseBody(res.Projected)
 		w.WriteHeader(http.StatusOK)
@@ -34,8 +34,8 @@ func EncodeCreateResponse(encoder func(context.Context, http.ResponseWriter) goa
 
 // DecodeCreateRequest returns a decoder for requests sent to the task create
 // endpoint.
-func DecodeCreateRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (*task.TaskInput, error) {
-	return func(r *http.Request) (*task.TaskInput, error) {
+func DecodeCreateRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (*task.CreateTaskInput, error) {
+	return func(r *http.Request) (*task.CreateTaskInput, error) {
 		var (
 			body CreateRequestBody
 			err  error

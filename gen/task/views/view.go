@@ -11,10 +11,10 @@ import (
 	goa "goa.design/goa/v3/pkg"
 )
 
-// Taskdetail is the viewed result type that is projected based on a view.
-type Taskdetail struct {
+// Createtaskoutput is the viewed result type that is projected based on a view.
+type Createtaskoutput struct {
 	// Type to project
-	Projected *TaskdetailView
+	Projected *CreatetaskoutputView
 	// View to render
 	View string
 }
@@ -27,6 +27,25 @@ type TaskdetailCollection struct {
 	// View to render
 	View string
 }
+
+// Taskdetail is the viewed result type that is projected based on a view.
+type Taskdetail struct {
+	// Type to project
+	Projected *TaskdetailView
+	// View to render
+	View string
+}
+
+// CreatetaskoutputView is a type that runs validations on a projected type.
+type CreatetaskoutputView struct {
+	// The ID of the task
+	ID *string
+	// The timestamp when the task was created
+	CreatedAt *int64
+}
+
+// TaskdetailCollectionView is a type that runs validations on a projected type.
+type TaskdetailCollectionView []*TaskdetailView
 
 // TaskdetailView is a type that runs validations on a projected type.
 type TaskdetailView struct {
@@ -54,25 +73,13 @@ type TaskdetailView struct {
 	ActualTime *int64
 }
 
-// TaskdetailCollectionView is a type that runs validations on a projected type.
-type TaskdetailCollectionView []*TaskdetailView
-
 var (
-	// TaskdetailMap is a map indexing the attribute names of Taskdetail by view
-	// name.
-	TaskdetailMap = map[string][]string{
+	// CreatetaskoutputMap is a map indexing the attribute names of
+	// Createtaskoutput by view name.
+	CreatetaskoutputMap = map[string][]string{
 		"default": {
 			"id",
-			"parent_id",
-			"title",
-			"status",
-			"is_leaf",
 			"created_at",
-			"completed_at",
-			"started_at",
-			"lead_time",
-			"estimated_time",
-			"actual_time",
 		},
 	}
 	// TaskdetailCollectionMap is a map indexing the attribute names of
@@ -92,14 +99,31 @@ var (
 			"actual_time",
 		},
 	}
+	// TaskdetailMap is a map indexing the attribute names of Taskdetail by view
+	// name.
+	TaskdetailMap = map[string][]string{
+		"default": {
+			"id",
+			"parent_id",
+			"title",
+			"status",
+			"is_leaf",
+			"created_at",
+			"completed_at",
+			"started_at",
+			"lead_time",
+			"estimated_time",
+			"actual_time",
+		},
+	}
 )
 
-// ValidateTaskdetail runs the validations defined on the viewed result type
-// Taskdetail.
-func ValidateTaskdetail(result *Taskdetail) (err error) {
+// ValidateCreatetaskoutput runs the validations defined on the viewed result
+// type Createtaskoutput.
+func ValidateCreatetaskoutput(result *Createtaskoutput) (err error) {
 	switch result.View {
 	case "default", "":
-		err = ValidateTaskdetailView(result.Projected)
+		err = ValidateCreatetaskoutputView(result.Projected)
 	default:
 		err = goa.InvalidEnumValueError("view", result.View, []any{"default"})
 	}
@@ -118,6 +142,41 @@ func ValidateTaskdetailCollection(result TaskdetailCollection) (err error) {
 	return
 }
 
+// ValidateTaskdetail runs the validations defined on the viewed result type
+// Taskdetail.
+func ValidateTaskdetail(result *Taskdetail) (err error) {
+	switch result.View {
+	case "default", "":
+		err = ValidateTaskdetailView(result.Projected)
+	default:
+		err = goa.InvalidEnumValueError("view", result.View, []any{"default"})
+	}
+	return
+}
+
+// ValidateCreatetaskoutputView runs the validations defined on
+// CreatetaskoutputView using the "default" view.
+func ValidateCreatetaskoutputView(result *CreatetaskoutputView) (err error) {
+	if result.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "result"))
+	}
+	if result.CreatedAt == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("created_at", "result"))
+	}
+	return
+}
+
+// ValidateTaskdetailCollectionView runs the validations defined on
+// TaskdetailCollectionView using the "default" view.
+func ValidateTaskdetailCollectionView(result TaskdetailCollectionView) (err error) {
+	for _, item := range result {
+		if err2 := ValidateTaskdetailView(item); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
+	return
+}
+
 // ValidateTaskdetailView runs the validations defined on TaskdetailView using
 // the "default" view.
 func ValidateTaskdetailView(result *TaskdetailView) (err error) {
@@ -132,17 +191,6 @@ func ValidateTaskdetailView(result *TaskdetailView) (err error) {
 	}
 	if result.Status == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("status", "result"))
-	}
-	return
-}
-
-// ValidateTaskdetailCollectionView runs the validations defined on
-// TaskdetailCollectionView using the "default" view.
-func ValidateTaskdetailCollectionView(result TaskdetailCollectionView) (err error) {
-	for _, item := range result {
-		if err2 := ValidateTaskdetailView(item); err2 != nil {
-			err = goa.MergeErrors(err, err2)
-		}
 	}
 	return
 }

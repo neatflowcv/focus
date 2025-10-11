@@ -37,13 +37,13 @@ func NewClient(create, list, update, delete_ goa.Endpoint) *Client {
 //   - "InternalServerError" (type *goa.ServiceError): Internal server error
 //   - "TaskNotFound" (type *goa.ServiceError): Task not found
 //   - error: internal error
-func (c *Client) Create(ctx context.Context, p *TaskInput) (res *Taskdetail, err error) {
+func (c *Client) Create(ctx context.Context, p *CreateTaskInput) (res *Createtaskoutput, err error) {
 	var ires any
 	ires, err = c.CreateEndpoint(ctx, p)
 	if err != nil {
 		return
 	}
-	return ires.(*Taskdetail), nil
+	return ires.(*Createtaskoutput), nil
 }
 
 // List calls the "list" endpoint of the "task" service.

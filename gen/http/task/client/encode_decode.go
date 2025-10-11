@@ -39,9 +39,9 @@ func (c *Client) BuildCreateRequest(ctx context.Context, v any) (*http.Request, 
 // server.
 func EncodeCreateRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
 	return func(req *http.Request, v any) error {
-		p, ok := v.(*task.TaskInput)
+		p, ok := v.(*task.CreateTaskInput)
 		if !ok {
-			return goahttp.ErrInvalidType("task", "create", "*task.TaskInput", v)
+			return goahttp.ErrInvalidType("task", "create", "*task.CreateTaskInput", v)
 		}
 		{
 			head := p.Authorization
@@ -86,13 +86,13 @@ func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("task", "create", err)
 			}
-			p := NewCreateTaskdetailOK(&body)
+			p := NewCreatetaskoutputViewOK(&body)
 			view := "default"
-			vres := &taskviews.Taskdetail{Projected: p, View: view}
-			if err = taskviews.ValidateTaskdetail(vres); err != nil {
+			vres := &taskviews.Createtaskoutput{Projected: p, View: view}
+			if err = taskviews.ValidateCreatetaskoutput(vres); err != nil {
 				return nil, goahttp.ErrValidationError("task", "create", err)
 			}
-			res := task.NewTaskdetail(vres)
+			res := task.NewCreatetaskoutput(vres)
 			return res, nil
 		case http.StatusUnauthorized:
 			var (
