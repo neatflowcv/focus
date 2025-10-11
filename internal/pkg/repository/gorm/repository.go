@@ -319,3 +319,19 @@ func (r *Repository) ListTraces(ctx context.Context, ids []domain.TraceID) ([]*d
 
 	return ret, nil
 }
+
+func (r *Repository) ListChildTraces(ctx context.Context, parentID domain.TraceID) ([]*domain.Trace, error) {
+	traces, err := gorm.G[Trace](r.db).
+		Where(&Trace{ParentID: sql.NullString{String: string(parentID), Valid: true}}). //nolint:exhaustruct
+		Find(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list child traces: %w", err)
+	}
+
+	var ret []*domain.Trace
+	for _, trace := range traces {
+		ret = append(ret, trace.ToDomain())
+	}
+
+	return ret, nil
+}

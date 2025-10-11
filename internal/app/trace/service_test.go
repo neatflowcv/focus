@@ -210,3 +210,59 @@ func TestServiceListTraces(t *testing.T) {
 		require.Len(t, out.Traces, 2)
 	})
 }
+
+func TestServiceUpdateParent(t *testing.T) {
+	t.Parallel()
+
+	service, _ := newService(t)
+
+	_ = service.CreateTrace(t.Context(), &trace.CreateTraceInput{
+		ID:       "1",
+		ParentID: "",
+	})
+	_ = service.CreateTrace(t.Context(), &trace.CreateTraceInput{
+		ID:       "2",
+		ParentID: "",
+	})
+
+	err := service.UpdateParent(t.Context(), &trace.UpdateParentInput{
+		ID:       "1",
+		ParentID: "2",
+	})
+
+	require.NoError(t, err)
+}
+
+func TestServiceUpdateParent_Error(t *testing.T) {
+	t.Parallel()
+
+	t.Run("unknown trace", func(t *testing.T) {
+		t.Parallel()
+
+		service, _ := newService(t)
+
+		err := service.UpdateParent(t.Context(), &trace.UpdateParentInput{
+			ID:       "1",
+			ParentID: "0",
+		})
+
+		require.ErrorIs(t, err, trace.ErrTraceNotFound)
+	})
+
+	t.Run("unknown parent", func(t *testing.T) {
+		t.Parallel()
+
+		service, _ := newService(t)
+		_ = service.CreateTrace(t.Context(), &trace.CreateTraceInput{
+			ID:       "1",
+			ParentID: "",
+		})
+
+		err := service.UpdateParent(t.Context(), &trace.UpdateParentInput{
+			ID:       "1",
+			ParentID: "2",
+		})
+
+		require.ErrorIs(t, err, trace.ErrParentTraceNotFound)
+	})
+}

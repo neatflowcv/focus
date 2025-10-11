@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 	"time"
 
 	"github.com/neatflowcv/focus/internal/pkg/domain"
@@ -109,8 +110,74 @@ func (s *Service) SetActual(ctx context.Context, input *SetActualInput) error {
 	return nil
 }
 
-func (s *Service) UpdateParent(ctx context.Context, input *UpdateParentInput) error {
-	panic("not implemented")
+func (s *Service) UpdateParent(ctx context.Context, input *UpdateParentInput) error { //nolint:cyclop,funlen
+	trace, err := s.repo.GetTrace(ctx, domain.TraceID(input.ID))
+	if err != nil {
+		if errors.Is(err, repository.ErrTraceNotFound) {
+			return ErrTraceNotFound
+		}
+
+		return fmt.Errorf("failed to get trace: %w", err)
+	}
+
+	if input.ParentID != "" {
+		_, err := s.repo.GetTrace(ctx, domain.TraceID(input.ParentID))
+		if err != nil {
+			if errors.Is(err, repository.ErrTraceNotFound) {
+				return ErrParentTraceNotFound
+			}
+		}
+	}
+
+	score := s.taskScore(ctx, trace)
+
+	var updates []*domain.Trace
+
+	update := trace.SetParentID(domain.TraceID(input.ParentID))
+	updates = append(updates, update)
+
+	if score > 0 {
+		oldParents, err := s.findAncestors(ctx, trace.ParentID())
+		if err != nil {
+			return err
+		}
+
+		newParents, err := s.findAncestors(ctx, update.ParentID())
+		if err != nil {
+			return err
+		}
+
+		pivot := 0
+		for pivot < len(oldParents) && pivot < len(newParents) {
+			if oldParents[pivot].ID() != newParents[pivot].ID() {
+				break
+			}
+
+			pivot++
+		}
+
+		idx := pivot
+
+		for idx < len(oldParents) {
+			oldUpdate := oldParents[idx].SetActual(oldParents[idx].Actual() - score)
+			updates = append(updates, oldUpdate)
+			idx++
+		}
+
+		idx = pivot
+		for idx < len(newParents) {
+			newUpdate := newParents[idx].SetActual(newParents[idx].Actual() + score)
+			updates = append(updates, newUpdate)
+			idx++
+		}
+	}
+
+	err = s.repo.UpdateTraces(ctx, updates...)
+	if err != nil {
+		return fmt.Errorf("failed to update trace: %w", err)
+	}
+
+	return nil
 }
 
 func (s *Service) ListTraces(ctx context.Context, input *ListTracesInput) (*ListTracesOutput, error) {
@@ -136,4 +203,42 @@ func (s *Service) ListTraces(ctx context.Context, input *ListTracesInput) (*List
 	return &ListTracesOutput{
 		Traces: items,
 	}, nil
+}
+
+func (s *Service) taskScore(ctx context.Context, trace *domain.Trace) time.Duration {
+	traces, err := s.repo.ListChildTraces(ctx, trace.ID())
+	if err != nil {
+		return 0
+	}
+
+	sum := time.Duration(0)
+	for _, trace := range traces {
+		sum += trace.Actual()
+	}
+
+	return trace.Actual() - sum
+}
+
+func (s *Service) findAncestors(ctx context.Context, id domain.TraceID) ([]*domain.Trace, error) {
+	var parents []*domain.Trace
+
+	searchID := id
+	for searchID != "" {
+		parent, err := s.repo.GetTrace(ctx, searchID)
+		if err != nil {
+			if errors.Is(err, repository.ErrTraceNotFound) {
+				return nil, ErrParentTraceNotFound
+			}
+
+			return nil, fmt.Errorf("failed to get trace: %w", err)
+		}
+
+		parents = append(parents, parent)
+
+		searchID = parent.ParentID()
+	}
+
+	slices.Reverse(parents)
+
+	return parents, nil
 }

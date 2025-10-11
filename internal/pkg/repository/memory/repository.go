@@ -197,3 +197,15 @@ func (r *Repository) ListTraces(ctx context.Context, ids []domain.TraceID) ([]*d
 
 	return ret, nil
 }
+
+func (r *Repository) ListChildTraces(ctx context.Context, parentID domain.TraceID) ([]*domain.Trace, error) {
+	var ret []*domain.Trace
+
+	for _, trace := range r.Traces {
+		if trace.ParentID() == parentID {
+			ret = append(ret, trace)
+		}
+	}
+
+	return ret, nil
+}
