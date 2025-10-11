@@ -572,7 +572,7 @@ func NewUpdateTaskUpdateInput(body *UpdateRequestBody, taskID string, authorizat
 		Title:         *body.Title,
 		ParentID:      body.ParentID,
 		NextID:        body.NextID,
-		Status:        body.Status,
+		Status:        *body.Status,
 		EstimatedTime: body.EstimatedTime,
 	}
 	v.TaskID = taskID
@@ -602,6 +602,9 @@ func ValidateCreateRequestBody(body *CreateRequestBody) (err error) {
 func ValidateUpdateRequestBody(body *UpdateRequestBody) (err error) {
 	if body.Title == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("title", "body"))
+	}
+	if body.Status == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("status", "body"))
 	}
 	return
 }

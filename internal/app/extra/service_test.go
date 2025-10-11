@@ -2,9 +2,11 @@ package extra_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/neatflowcv/focus/internal/app/extra"
 	"github.com/neatflowcv/focus/internal/pkg/domain"
+	"github.com/neatflowcv/focus/internal/pkg/eventbus"
 	"github.com/neatflowcv/focus/internal/pkg/repository/memory"
 	"github.com/stretchr/testify/require"
 )
@@ -17,7 +19,8 @@ func newService(t *testing.T) (*extra.Service, *ServiceData) {
 	t.Helper()
 
 	repo := memory.NewRepository()
-	service := extra.NewService(repo)
+	bus := eventbus.NewBus()
+	service := extra.NewService(bus, repo)
 
 	return service, &ServiceData{
 		repo: repo,
@@ -161,8 +164,10 @@ func TestServiceCheckStatus2(t *testing.T) {
 		ID:       "parent",
 		ParentID: "",
 	})
-	_ = service.SetDone(t.Context(), &extra.SetDoneInput{
-		ID: "parent",
+	_ = service.UpdateStatus(t.Context(), &extra.UpdateStatusInput{
+		ID:     "parent",
+		Status: string(domain.TaskStatusDone),
+		Now:    time.Now(),
 	})
 	_ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
 		ID:       "child",
@@ -181,8 +186,10 @@ func TestServiceCheckStatus3(t *testing.T) {
 		ID:       "parent",
 		ParentID: "",
 	})
-	_ = service.SetDone(t.Context(), &extra.SetDoneInput{
-		ID: "parent",
+	_ = service.UpdateStatus(t.Context(), &extra.UpdateStatusInput{
+		ID:     "parent",
+		Status: string(domain.TaskStatusDone),
+		Now:    time.Now(),
 	})
 	_ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
 		ID:       "child",

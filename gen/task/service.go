@@ -117,7 +117,7 @@ type TaskUpdateInput struct {
 	// The next ID of the task
 	NextID *string
 	// The status of the task
-	Status *string
+	Status string
 	// The estimated time of the task
 	EstimatedTime *int64
 }

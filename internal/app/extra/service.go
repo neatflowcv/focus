@@ -6,15 +6,18 @@ import (
 	"fmt"
 
 	"github.com/neatflowcv/focus/internal/pkg/domain"
+	"github.com/neatflowcv/focus/internal/pkg/eventbus"
 	"github.com/neatflowcv/focus/internal/pkg/repository"
 )
 
 type Service struct {
+	bus  *eventbus.Bus
 	repo repository.ExtraRepository
 }
 
-func NewService(repo repository.ExtraRepository) *Service {
+func NewService(bus *eventbus.Bus, repo repository.ExtraRepository) *Service {
 	return &Service{
+		bus:  bus,
 		repo: repo,
 	}
 }
@@ -101,50 +104,26 @@ func (s *Service) ListExtras(ctx context.Context, input *ListExtrasInput) (*List
 	}, nil
 }
 
-func (s *Service) SetDone(ctx context.Context, input *SetDoneInput) error {
+func (s *Service) UpdateStatus(ctx context.Context, input *UpdateStatusInput) error {
 	extra, err := s.repo.GetExtra(ctx, domain.ExtraID(input.ID))
 	if err != nil {
 		return fmt.Errorf("failed to get extra: %w", err)
 	}
 
-	update := extra.SetStatus(domain.TaskStatusDone)
-
-	err = s.repo.UpdateExtra(ctx, update)
-	if err != nil {
-		return fmt.Errorf("failed to update extra: %w", err)
+	if extra.Status() == domain.TaskStatus(input.Status) {
+		return nil
 	}
 
-	return nil
-}
-
-func (s *Service) SetDoing(ctx context.Context, input *SetDoingInput) error {
-	extra, err := s.repo.GetExtra(ctx, domain.ExtraID(input.ID))
+	err = s.repo.UpdateExtra(ctx, extra.SetStatus(domain.TaskStatus(input.Status)))
 	if err != nil {
-		return fmt.Errorf("failed to get extra: %w", err)
+		return fmt.Errorf("failed to set todo: %w", err)
 	}
 
-	update := extra.SetStatus(domain.TaskStatusDoing)
-
-	err = s.repo.UpdateExtra(ctx, update)
-	if err != nil {
-		return fmt.Errorf("failed to update extra: %w", err)
-	}
-
-	return nil
-}
-
-func (s *Service) SetTodo(ctx context.Context, input *SetTodoInput) error {
-	extra, err := s.repo.GetExtra(ctx, domain.ExtraID(input.ID))
-	if err != nil {
-		return fmt.Errorf("failed to get extra: %w", err)
-	}
-
-	update := extra.SetStatus(domain.TaskStatusTodo)
-
-	err = s.repo.UpdateExtra(ctx, update)
-	if err != nil {
-		return fmt.Errorf("failed to update extra: %w", err)
-	}
+	s.bus.ExtraStatusUpdated.Publish(ctx, &eventbus.ExtraStatusUpdatedEvent{
+		ExtraID: input.ID,
+		Status:  input.Status,
+		Now:     input.Now,
+	})
 
 	return nil
 }

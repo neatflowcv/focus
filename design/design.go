@@ -147,7 +147,7 @@ var TaskUpdateInput = dsl.Type("TaskUpdateInput", func() { //nolint:gochecknoglo
 	dsl.Attribute("status", dsl.String, "The status of the task")
 	dsl.Attribute("estimated_time", dsl.Int64, "The estimated time of the task")
 
-	dsl.Required("authorization", "task_id", "title")
+	dsl.Required("authorization", "task_id", "title", "status")
 })
 
 var TaskDeleteInput = dsl.Type("TaskDeleteInput", func() { //nolint:gochecknoglobals

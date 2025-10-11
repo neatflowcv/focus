@@ -64,7 +64,7 @@ func run() error { //nolint:cyclop,funlen
 	bus := eventbus.NewBus()
 
 	flowService := flow.NewService(bus, ulid.NewIDMaker(), repo)
-	extraService := extra.NewService(repo)
+	extraService := extra.NewService(bus, repo)
 	traceService := trace.NewService(repo)
 
 	server := newServer(flowService, extraService, traceService)

@@ -161,11 +161,14 @@ func (h *Handler) Delete(ctx context.Context, input *task.TaskDeleteInput) error
 	return nil
 }
 
-func (h *Handler) Update(ctx context.Context, input *task.TaskUpdateInput) (*task.Createtaskoutput, error) {
+func (h *Handler) Update( //nolint:funlen
+	ctx context.Context,
+	input *task.TaskUpdateInput,
+) (*task.Createtaskoutput, error) {
 	log.Println("call update task")
 	defer log.Println("end update task")
 
-	username, _, err := h.authUser(input.Authorization)
+	username, now, err := h.authUser(input.Authorization)
 	if err != nil {
 		return nil, err
 	}
@@ -186,6 +189,15 @@ func (h *Handler) Update(ctx context.Context, input *task.TaskUpdateInput) (*tas
 		ParentID: parentID,
 		NextID:   nextID,
 		Title:    input.Title,
+	})
+	if err != nil {
+		return nil, task.MakeInternalServerError(err)
+	}
+
+	err = h.extraService.UpdateStatus(ctx, &extra.UpdateStatusInput{
+		ID:     input.TaskID,
+		Status: input.Status,
+		Now:    now,
 	})
 	if err != nil {
 		return nil, task.MakeInternalServerError(err)

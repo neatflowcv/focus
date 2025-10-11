@@ -1,5 +1,7 @@
 package eventbus
 
+import "time"
+
 type TaskCreatedEvent struct {
 	TaskID   string
 	ParentID string
@@ -15,4 +17,10 @@ type TaskRelationUpdatedEvent struct {
 	NewParentID string
 	OldNextID   string
 	NewNextID   string
+}
+
+type ExtraStatusUpdatedEvent struct {
+	ExtraID string
+	Status  string
+	Now     time.Time
 }

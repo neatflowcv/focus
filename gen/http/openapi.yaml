@@ -110,6 +110,7 @@ paths:
                     $ref: '#/definitions/TaskUpdateInput'
                     required:
                         - title
+                        - status
             responses:
                 "200":
                     description: OK response.
@@ -779,6 +780,7 @@ definitions:
             title: Et quo.
         required:
             - title
+            - status
     TaskUpdateInternalServerErrorResponseBody:
         title: 'Mediatype identifier: application/vnd.goa.error; view=default'
         type: object

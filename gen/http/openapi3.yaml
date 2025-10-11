@@ -480,6 +480,7 @@ components:
                 - authorization
                 - task_id
                 - title
+                - status
         TaskUpdateInput2:
             type: object
             properties:
@@ -512,5 +513,6 @@ components:
                 title: Quis aut labore.
             required:
                 - title
+                - status
 tags:
     - name: task

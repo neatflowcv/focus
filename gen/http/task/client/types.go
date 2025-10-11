@@ -32,7 +32,7 @@ type UpdateRequestBody struct {
 	// The next ID of the task
 	NextID *string `form:"next_id,omitempty" json:"next_id,omitempty" xml:"next_id,omitempty"`
 	// The status of the task
-	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
+	Status string `form:"status" json:"status" xml:"status"`
 	// The estimated time of the task
 	EstimatedTime *int64 `form:"estimated_time,omitempty" json:"estimated_time,omitempty" xml:"estimated_time,omitempty"`
 }
