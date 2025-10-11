@@ -37,6 +37,17 @@ func (s *Service) CreateTask(ctx context.Context, input *CreateTaskInput) (*Crea
 		}
 	}
 
+	if input.NextID != "" {
+		_, err := s.repo.GetTask(ctx, input.Username, domain.TaskID(input.NextID))
+		if err != nil {
+			if errors.Is(err, repository.ErrTaskNotFound) {
+				return nil, ErrNextTaskNotFound
+			}
+
+			return nil, fmt.Errorf("failed to get next task: %w", err)
+		}
+	}
+
 	task := domain.NewTask(
 		domain.TaskID(s.idmaker.MakeID()),
 		domain.TaskID(input.ParentID),

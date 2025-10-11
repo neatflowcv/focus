@@ -52,7 +52,7 @@ func TestServiceCreateTask(t *testing.T) {
 func TestServiceCreateTask_Error(t *testing.T) {
 	t.Parallel()
 
-	t.Run("not found parent", func(t *testing.T) {
+	t.Run("unknown parent", func(t *testing.T) {
 		t.Parallel()
 
 		service, _ := newService(t)
@@ -65,6 +65,21 @@ func TestServiceCreateTask_Error(t *testing.T) {
 		})
 
 		require.ErrorIs(t, err, flow.ErrParentTaskNotFound)
+	})
+
+	t.Run("unknown next", func(t *testing.T) {
+		t.Parallel()
+
+		service, _ := newService(t)
+		_, err := service.CreateTask(t.Context(), &flow.CreateTaskInput{
+			Username: "test",
+			Title:    "test",
+			Now:      time.Now(),
+			ParentID: "",
+			NextID:   "unknown",
+		})
+
+		require.ErrorIs(t, err, flow.ErrNextTaskNotFound)
 	})
 }
 
