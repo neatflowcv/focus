@@ -72,6 +72,10 @@ func (t *Task) Equals(other *Task) bool {
 		t.version == other.version
 }
 
+func (t *Task) IsDummy() bool {
+	return t.id == TaskDummyID(t.parentID)
+}
+
 func (t *Task) ID() TaskID {
 	return t.id
 }

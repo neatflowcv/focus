@@ -120,14 +120,43 @@ func (s *Service) DeleteTask(ctx context.Context, input *DeleteTaskInput) error 
 		return fmt.Errorf("failed to get task: %w", err)
 	}
 
-	err = s.repo.DeleteTask(ctx, input.Username, task)
+	var (
+		deleteTasks []*domain.Task
+		stack       []*domain.Task
+	)
+
+	deleteTasks = append(deleteTasks, task)
+	stack = append(stack, task)
+
+	for len(stack) > 0 {
+		task := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+
+		children, err := s.repo.ListTasks(ctx, input.Username, task.ID())
+		if err != nil {
+			return fmt.Errorf("failed to list tasks: %w", err)
+		}
+
+		for _, child := range children {
+			stack = append(stack, child)
+			deleteTasks = append(deleteTasks, child)
+		}
+	}
+
+	err = s.repo.DeleteTasks(ctx, input.Username, deleteTasks...)
 	if err != nil {
 		return fmt.Errorf("failed to delete task: %w", err)
 	}
 
-	s.bus.TaskDeleted.Publish(ctx, &eventbus.TaskDeletedEvent{
-		TaskID: string(task.ID()),
-	})
+	for _, task := range deleteTasks {
+		if task.IsDummy() {
+			continue
+		}
+
+		s.bus.TaskDeleted.Publish(ctx, &eventbus.TaskDeletedEvent{
+			TaskID: string(task.ID()),
+		})
+	}
 
 	return nil
 }

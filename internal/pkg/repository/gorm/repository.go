@@ -82,16 +82,31 @@ func (r *Repository) GetTask(ctx context.Context, username string, id domain.Tas
 	return task.ToDomain(), nil
 }
 
-func (r *Repository) DeleteTask(ctx context.Context, username string, task *domain.Task) error {
-	affected, err := gorm.G[Task](r.db).
-		Where(&Task{ID: string(task.ID()), Username: username}). //nolint:exhaustruct
-		Delete(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to delete task: %w", err)
-	}
+func (r *Repository) DeleteTasks(ctx context.Context, username string, tasks ...*domain.Task) error {
+	err := r.db.Transaction(func(tx *gorm.DB) error {
+		for _, task := range tasks {
+			affected, err := gorm.G[Task](tx).
+				Where(
+					&Task{ //nolint:exhaustruct
+						ID:       string(task.ID()),
+						Username: username,
+						Version:  task.Version(),
+					},
+				).
+				Delete(ctx)
+			if err != nil {
+				return fmt.Errorf("failed to delete task: %w", err)
+			}
 
-	if affected == 0 {
-		return repository.ErrTaskNotFound
+			if affected == 0 {
+				return repository.ErrTaskNotFound
+			}
+		}
+
+		return nil
+	})
+	if err != nil {
+		return fmt.Errorf("failed to delete tasks: %w", err)
 	}
 
 	return nil

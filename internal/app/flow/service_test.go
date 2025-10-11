@@ -231,25 +231,64 @@ func TestServiceListTasks(t *testing.T) { //nolint:funlen
 func TestServiceDeleteTask(t *testing.T) {
 	t.Parallel()
 
-	service, data := newService(t)
-	_ = service.CreateRootDummy(t.Context(), &flow.CreateRootDummyInput{
-		Username: "test",
-	})
-	task, _ := service.CreateTask(t.Context(), &flow.CreateTaskInput{
-		Username: "test",
-		Title:    "test",
-		Now:      time.Now(),
-		ParentID: "",
-		NextID:   "",
+	t.Run("normal", func(t *testing.T) {
+		t.Parallel()
+
+		const username = "test"
+
+		service, data := newService(t)
+		_ = service.CreateRootDummy(t.Context(), &flow.CreateRootDummyInput{
+			Username: username,
+		})
+		task, _ := service.CreateTask(t.Context(), &flow.CreateTaskInput{
+			Username: username,
+			Title:    "test",
+			Now:      time.Now(),
+			ParentID: "",
+			NextID:   "",
+		})
+
+		err := service.DeleteTask(t.Context(), &flow.DeleteTaskInput{
+			Username: username,
+			TaskID:   task.ID,
+		})
+
+		require.NoError(t, err)
+		require.Len(t, data.repo.Tasks[username], 1)
 	})
 
-	err := service.DeleteTask(t.Context(), &flow.DeleteTaskInput{
-		Username: "test",
-		TaskID:   task.ID,
-	})
+	t.Run("with children", func(t *testing.T) {
+		t.Parallel()
 
-	require.NoError(t, err)
-	require.Empty(t, data.repo.Tasks["test"][domain.TaskID(task.ID)])
+		const username = "test"
+
+		service, data := newService(t)
+		_ = service.CreateRootDummy(t.Context(), &flow.CreateRootDummyInput{
+			Username: username,
+		})
+		task, _ := service.CreateTask(t.Context(), &flow.CreateTaskInput{
+			Username: username,
+			Title:    "test",
+			Now:      time.Now(),
+			ParentID: "",
+			NextID:   "",
+		})
+		_, _ = service.CreateTask(t.Context(), &flow.CreateTaskInput{
+			Username: username,
+			Title:    "test",
+			Now:      time.Now(),
+			ParentID: task.ID,
+			NextID:   "",
+		})
+
+		err := service.DeleteTask(t.Context(), &flow.DeleteTaskInput{
+			Username: username,
+			TaskID:   task.ID,
+		})
+
+		require.NoError(t, err)
+		require.Len(t, data.repo.Tasks[username], 1)
+	})
 }
 
 func TestServiceDeleteTask_Error(t *testing.T) {

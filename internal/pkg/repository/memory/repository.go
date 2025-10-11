@@ -66,12 +66,14 @@ func (r *Repository) ListTasks(ctx context.Context, username string, parentID do
 	return ret, nil
 }
 
-func (r *Repository) DeleteTask(ctx context.Context, username string, task *domain.Task) error {
-	if _, ok := r.Tasks[username][task.ID()]; !ok {
-		return repository.ErrTaskNotFound
-	}
+func (r *Repository) DeleteTasks(ctx context.Context, username string, tasks ...*domain.Task) error {
+	for _, task := range tasks {
+		if _, ok := r.Tasks[username][task.ID()]; !ok {
+			return repository.ErrTaskNotFound
+		}
 
-	delete(r.Tasks[username], task.ID())
+		delete(r.Tasks[username], task.ID())
+	}
 
 	return nil
 }
