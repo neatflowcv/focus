@@ -54,7 +54,7 @@ type CreateRootDummyInput struct {
 type UpdateTaskInput struct {
 	Username string
 	TaskID   string
-	ParentID string
+	ParentID string // Next을 가져와 ParentID를 가져올 수는 있으나, NextID가 "" 인 경우를 위해 필요함
 	NextID   string
 	Title    string
 }

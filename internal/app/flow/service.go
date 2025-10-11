@@ -198,15 +198,48 @@ func (s *Service) GetTask(ctx context.Context, input *GetTaskInput) (*GetTaskOut
 	}, nil
 }
 
-func (s *Service) UpdateTask(ctx context.Context, input *UpdateTaskInput) error {
+func (s *Service) UpdateTask(ctx context.Context, input *UpdateTaskInput) error { //nolint:cyclop
 	task, err := s.repo.GetTask(ctx, input.Username, domain.TaskID(input.TaskID))
 	if err != nil {
+		if errors.Is(err, repository.ErrTaskNotFound) {
+			return ErrTaskNotFound
+		}
+
 		return fmt.Errorf("failed to get task: %w", err)
 	}
 
-	// updateTask := task.
-	// 	SetParentID(domain.TaskID(input.ParentID)).
-	// 	SetNextID(domain.TaskID(input.NextID))
+	if input.NextID != "" {
+		nextTask, err := s.repo.GetTask(ctx, input.Username, domain.TaskID(input.NextID))
+		if err != nil {
+			if errors.Is(err, repository.ErrTaskNotFound) {
+				return ErrNextTaskNotFound
+			}
+
+			return fmt.Errorf("failed to get next task: %w", err)
+		}
+
+		if nextTask.ParentID() != domain.TaskID(input.ParentID) {
+			return ErrParentTaskNotFound
+		}
+	}
+
+	parentID := domain.TaskID(input.ParentID)
+	for parentID != "" {
+		parent, err := s.repo.GetTask(ctx, input.Username, parentID)
+		if err != nil {
+			if errors.Is(err, repository.ErrTaskNotFound) {
+				return ErrParentTaskNotFound
+			}
+
+			return fmt.Errorf("failed to get parent task: %w", err)
+		}
+
+		if task.ID() == parent.ID() {
+			return ErrSelfParent
+		}
+
+		parentID = parent.ParentID()
+	}
 
 	if task.ParentID() != domain.TaskID(input.ParentID) || task.NextID() != domain.TaskID(input.NextID) {
 		err := s.updateTaskRelation(ctx, input.Username, task, domain.TaskID(input.ParentID), domain.TaskID(input.NextID))

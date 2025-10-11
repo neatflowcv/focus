@@ -442,3 +442,118 @@ func TestServiceUpdateTask(t *testing.T) { //nolint:funlen
 		require.Equal(t, "other", data.repo.Tasks[username][domain.TaskID(first.ID)].Title())
 	})
 }
+
+func TestServiceUpdateTask_Error(t *testing.T) { //nolint:funlen
+	t.Parallel()
+
+	t.Run("unknown task", func(t *testing.T) {
+		t.Parallel()
+
+		service, _ := newService(t)
+		_ = service.CreateRootDummy(t.Context(), &flow.CreateRootDummyInput{
+			Username: "test",
+		})
+
+		err := service.UpdateTask(t.Context(), &flow.UpdateTaskInput{
+			Username: "test",
+			TaskID:   "unknown",
+			Title:    "test",
+			ParentID: "",
+			NextID:   "",
+		})
+
+		require.ErrorIs(t, err, flow.ErrTaskNotFound)
+	})
+
+	t.Run("unknown parent", func(t *testing.T) {
+		t.Parallel()
+
+		service, _ := newService(t)
+		_ = service.CreateRootDummy(t.Context(), &flow.CreateRootDummyInput{
+			Username: "test",
+		})
+		task, _ := service.CreateTask(t.Context(), &flow.CreateTaskInput{
+			Username: "test",
+			Title:    "test",
+			Now:      time.Now(),
+			ParentID: "",
+			NextID:   "",
+		})
+
+		err := service.UpdateTask(t.Context(), &flow.UpdateTaskInput{
+			Username: "test",
+			TaskID:   task.ID,
+			ParentID: "unknown",
+			NextID:   "",
+			Title:    "test",
+		})
+
+		require.ErrorIs(t, err, flow.ErrParentTaskNotFound)
+	})
+
+	t.Run("unknown next", func(t *testing.T) {
+		t.Parallel()
+
+		service, _ := newService(t)
+		_ = service.CreateRootDummy(t.Context(), &flow.CreateRootDummyInput{
+			Username: "test",
+		})
+		task, _ := service.CreateTask(t.Context(), &flow.CreateTaskInput{
+			Username: "test",
+			Title:    "test",
+			Now:      time.Now(),
+			ParentID: "",
+			NextID:   "",
+		})
+
+		err := service.UpdateTask(t.Context(), &flow.UpdateTaskInput{
+			Username: "test",
+			TaskID:   task.ID,
+			ParentID: "",
+			NextID:   "unknown",
+			Title:    "test",
+		})
+
+		require.ErrorIs(t, err, flow.ErrNextTaskNotFound)
+	})
+
+	t.Run("self parent", func(t *testing.T) {
+		t.Parallel()
+
+		service, _ := newService(t)
+		_ = service.CreateRootDummy(t.Context(), &flow.CreateRootDummyInput{
+			Username: "test",
+		})
+		task, _ := service.CreateTask(t.Context(), &flow.CreateTaskInput{
+			Username: "test",
+			Title:    "test",
+			Now:      time.Now(),
+			ParentID: "",
+			NextID:   "",
+		})
+		inner, _ := service.CreateTask(t.Context(), &flow.CreateTaskInput{
+			Username: "test",
+			Title:    "test",
+			Now:      time.Now(),
+			ParentID: task.ID,
+			NextID:   "",
+		})
+		inner2, _ := service.CreateTask(t.Context(), &flow.CreateTaskInput{
+			Username: "test",
+			Title:    "test",
+			Now:      time.Now(),
+			ParentID: inner.ID,
+			NextID:   "",
+		})
+
+		err := service.UpdateTask(t.Context(), &flow.UpdateTaskInput{
+			Username: "test",
+			TaskID:   task.ID,
+			ParentID: inner2.ID,
+			NextID:   "",
+			Title:    "test",
+		})
+
+		require.ErrorIs(t, err, flow.ErrSelfParent)
+	})
+}
