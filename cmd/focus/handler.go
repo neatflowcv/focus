@@ -7,21 +7,27 @@ import (
 	"time"
 
 	"github.com/neatflowcv/focus/gen/task"
+	"github.com/neatflowcv/focus/internal/app/extra"
 	"github.com/neatflowcv/focus/internal/app/flow"
+	"github.com/neatflowcv/focus/internal/app/trace"
 	"github.com/neatflowcv/key-stone/pkg/vault"
 )
 
 var _ task.Service = (*Handler)(nil)
 
 type Handler struct {
-	service *flow.Service
-	vault   *vault.Vault
+	flowService  *flow.Service
+	extraService *extra.Service
+	traceService *trace.Service
+	vault        *vault.Vault
 }
 
-func NewHandler(service *flow.Service) *Handler {
+func NewHandler(flowService *flow.Service, extraService *extra.Service, traceService *trace.Service) *Handler {
 	return &Handler{
-		service: service,
-		vault:   vault.NewVault("key-stone", []byte("asdf")),
+		flowService:  flowService,
+		extraService: extraService,
+		traceService: traceService,
+		vault:        vault.NewVault("key-stone", []byte("asdf")),
 	}
 }
 
@@ -36,7 +42,7 @@ func (h *Handler) Create(ctx context.Context, input *task.CreateTaskInput) (*tas
 		parentID = *input.ParentID
 	}
 
-	out, err := h.service.CreateTask(ctx, &flow.CreateTaskInput{
+	out, err := h.flowService.CreateTask(ctx, &flow.CreateTaskInput{
 		Username: username,
 		Title:    input.Title,
 		ParentID: parentID,
@@ -61,7 +67,7 @@ func (h *Handler) List(ctx context.Context, input *task.ListPayload) (task.Taskd
 		parentID = *input.ParentID
 	}
 
-	ret, err := h.service.ListTasks(ctx, &flow.ListTasksInput{
+	ret, err := h.flowService.ListTasks(ctx, &flow.ListTasksInput{
 		Username: username,
 		ParentID: parentID,
 	})
@@ -78,7 +84,7 @@ func (h *Handler) Delete(ctx context.Context, input *task.TaskDeleteInput) error
 		return err
 	}
 
-	err = h.service.DeleteTask(ctx, &flow.DeleteTaskInput{
+	err = h.flowService.DeleteTask(ctx, &flow.DeleteTaskInput{
 		Username: username,
 		TaskID:   input.TaskID,
 	})

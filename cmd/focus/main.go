@@ -14,7 +14,9 @@ import (
 
 	taskserver "github.com/neatflowcv/focus/gen/http/task/server"
 	"github.com/neatflowcv/focus/gen/task"
+	"github.com/neatflowcv/focus/internal/app/extra"
 	"github.com/neatflowcv/focus/internal/app/flow"
+	"github.com/neatflowcv/focus/internal/app/trace"
 	"github.com/neatflowcv/focus/internal/pkg/eventbus"
 	"github.com/neatflowcv/focus/internal/pkg/idmaker/ulid"
 	"github.com/neatflowcv/focus/internal/pkg/repository/gorm"
@@ -62,8 +64,10 @@ func run() error {
 	bus := eventbus.NewBus()
 
 	flowService := flow.NewService(bus, ulid.NewIDMaker(), repo)
+	extraService := extra.NewService(repo)
+	traceService := trace.NewService(repo)
 
-	server := newServer(flowService)
+	server := newServer(flowService, extraService, traceService)
 
 	err = server.ListenAndServe()
 	if err != nil {
@@ -73,12 +77,12 @@ func run() error {
 	return nil
 }
 
-func newServer(service *flow.Service) *http.Server {
+func newServer(flowService *flow.Service, extraService *extra.Service, traceService *trace.Service) *http.Server {
 	mux := goahttp.NewMuxer()
 	requestDecoder := goahttp.RequestDecoder
 	responseEncoder := goahttp.ResponseEncoder
 
-	handler := NewHandler(service)
+	handler := NewHandler(flowService, extraService, traceService)
 	endpoints := task.NewEndpoints(handler)
 	taskServer := taskserver.New(endpoints, mux, requestDecoder, responseEncoder, nil, nil)
 	taskServer.Mount(mux)

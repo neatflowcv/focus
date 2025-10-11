@@ -13,7 +13,9 @@ import (
 )
 
 var (
-	_ repository.Repository = (*Repository)(nil)
+	_ repository.Repository      = (*Repository)(nil)
+	_ repository.ExtraRepository = (*Repository)(nil)
+	_ repository.TraceRepository = (*Repository)(nil)
 )
 
 type Repository struct {
@@ -163,6 +165,140 @@ func (r *Repository) UpdateTasks(ctx context.Context, username string, dTasks ..
 	})
 	if err != nil {
 		return fmt.Errorf("failed to update tasks: %w", err)
+	}
+
+	return nil
+}
+
+func (r *Repository) CreateExtra(ctx context.Context, dExtra *domain.Extra) error {
+	extra := FromDomainExtra(dExtra)
+
+	err := gorm.G[Extra](r.db).Create(ctx, extra)
+	if err != nil {
+		return fmt.Errorf("failed to create extra: %w", err)
+	}
+
+	return nil
+}
+
+func (r *Repository) DeleteExtra(ctx context.Context, dExtra *domain.Extra) error {
+	extra := FromDomainExtra(dExtra)
+
+	affected, err := gorm.G[Extra](r.db).
+		Where(extra).
+		Delete(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to delete extra: %w", err)
+	}
+
+	if affected == 0 {
+		return repository.ErrExtraNotFound
+	}
+
+	return nil
+}
+
+func (r *Repository) GetExtra(ctx context.Context, id domain.ExtraID) (*domain.Extra, error) {
+	extra, err := gorm.G[Extra](r.db).
+		Where(&Extra{ID: string(id)}). //nolint:exhaustruct
+		Take(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get extra: %w", err)
+	}
+
+	return extra.ToDomain(), nil
+}
+
+func (r *Repository) ListExtras(ctx context.Context, ids []domain.ExtraID) ([]*domain.Extra, error) {
+	var ret []*domain.Extra
+
+	for _, id := range ids {
+		extra, err := gorm.G[Extra](r.db).
+			Where(&Extra{ID: string(id)}). //nolint:exhaustruct
+			Take(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to list extras: %w", err)
+		}
+
+		ret = append(ret, extra.ToDomain())
+	}
+
+	return ret, nil
+}
+
+func (r *Repository) UpdateExtra(ctx context.Context, extra *domain.Extra) error {
+	affected, err := gorm.G[Extra](r.db).
+		Where(&Extra{ID: string(extra.ID())}). //nolint:exhaustruct
+		Updates(ctx, *FromDomainExtra(extra))
+	if err != nil {
+		return fmt.Errorf("failed to update extra: %w", err)
+	}
+
+	if affected == 0 {
+		return repository.ErrExtraNotFound
+	}
+
+	return nil
+}
+
+func (r *Repository) CreateTrace(ctx context.Context, dTrace *domain.Trace) error {
+	trace := FromDomainTrace(dTrace)
+
+	err := gorm.G[Trace](r.db).Create(ctx, trace)
+	if err != nil {
+		return fmt.Errorf("failed to create trace: %w", err)
+	}
+
+	return nil
+}
+
+func (r *Repository) DeleteTrace(ctx context.Context, trace *domain.Trace) error {
+	affected, err := gorm.G[Trace](r.db).
+		Where(&Trace{ID: string(trace.ID())}). //nolint:exhaustruct
+		Delete(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to delete trace: %w", err)
+	}
+
+	if affected == 0 {
+		return repository.ErrTraceNotFound
+	}
+
+	return nil
+}
+
+func (r *Repository) GetTrace(ctx context.Context, id domain.TraceID) (*domain.Trace, error) {
+	trace, err := gorm.G[Trace](r.db).
+		Where(&Trace{ID: string(id)}). //nolint:exhaustruct
+		Take(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get trace: %w", err)
+	}
+
+	return trace.ToDomain(), nil
+}
+
+func (r *Repository) UpdateTraces(ctx context.Context, dTraces ...*domain.Trace) error {
+	err := r.db.Transaction(func(tx *gorm.DB) error {
+		for _, dTrace := range dTraces {
+			trace := FromDomainTrace(dTrace)
+
+			affected, err := gorm.G[Trace](r.db).
+				Where(&Trace{ID: trace.ID}). //nolint:exhaustruct
+				Updates(ctx, *trace)
+			if err != nil {
+				return fmt.Errorf("failed to update traces: %w", err)
+			}
+
+			if affected == 0 {
+				return repository.ErrTraceNotFound
+			}
+		}
+
+		return nil
+	})
+	if err != nil {
+		return fmt.Errorf("failed to update traces: %w", err)
 	}
 
 	return nil
