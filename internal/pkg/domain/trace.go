@@ -10,6 +10,7 @@ type Trace struct {
 	estimated time.Duration
 	actual    time.Duration
 	startedAt time.Time
+	depth     uint64 // LCA(최소 공통 조상) 용도
 }
 
 func NewTrace(
@@ -18,18 +19,24 @@ func NewTrace(
 	estimated time.Duration,
 	actual time.Duration,
 	startedAt time.Time,
+	depth uint64,
 ) *Trace {
+	if depth == 0 {
+		panic("depth is required")
+	}
+
 	return &Trace{
 		id:        id,
 		parentID:  parentID,
 		estimated: estimated,
 		actual:    actual,
 		startedAt: startedAt,
+		depth:     depth,
 	}
 }
 
 func (t *Trace) Clone() *Trace {
-	return NewTrace(t.id, t.parentID, t.estimated, t.actual, t.startedAt)
+	return NewTrace(t.id, t.parentID, t.estimated, t.actual, t.startedAt, t.depth)
 }
 
 func (t *Trace) ID() TraceID {
@@ -46,6 +53,10 @@ func (t *Trace) Actual() time.Duration {
 
 func (t *Trace) ParentID() TraceID {
 	return t.parentID
+}
+
+func (t *Trace) Depth() uint64 {
+	return t.depth
 }
 
 func (t *Trace) SetEstimated(estimated time.Duration) *Trace {

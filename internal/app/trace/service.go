@@ -19,12 +19,28 @@ func NewService(repo repository.TraceRepository) *Service {
 }
 
 func (s *Service) CreateTrace(ctx context.Context, input *CreateTraceInput) error {
+	depth := uint64(1)
+
+	if input.ParentID != "" {
+		parent, err := s.repo.GetTrace(ctx, domain.TraceID(input.ParentID))
+		if err != nil {
+			if errors.Is(err, repository.ErrTraceNotFound) {
+				return ErrParentTraceNotFound
+			}
+
+			return fmt.Errorf("failed to get parent trace: %w", err)
+		}
+
+		depth = parent.Depth() + 1
+	}
+
 	trace := domain.NewTrace(
 		domain.TraceID(input.ID),
 		domain.TraceID(input.ParentID),
 		time.Duration(0),
 		time.Duration(0),
 		time.Time{},
+		depth,
 	)
 
 	err := s.repo.CreateTrace(ctx, trace)

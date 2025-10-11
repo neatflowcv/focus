@@ -31,7 +31,7 @@ func TestServiceCreateTrace(t *testing.T) {
 
 	err := service.CreateTrace(t.Context(), &trace.CreateTraceInput{
 		ID:       "1",
-		ParentID: "2",
+		ParentID: "",
 	})
 
 	require.NoError(t, err)
@@ -42,16 +42,16 @@ func TestServiceDeleteTrace(t *testing.T) {
 
 	service, data := newService(t)
 	_ = service.CreateTrace(t.Context(), &trace.CreateTraceInput{
-		ID:       "1",
-		ParentID: "2",
+		ID:       "3",
+		ParentID: "",
 	})
 	_ = service.CreateTrace(t.Context(), &trace.CreateTraceInput{
 		ID:       "2",
 		ParentID: "3",
 	})
 	_ = service.CreateTrace(t.Context(), &trace.CreateTraceInput{
-		ID:       "3",
-		ParentID: "",
+		ID:       "1",
+		ParentID: "2",
 	})
 	_ = service.SetActual(t.Context(), &trace.SetActualInput{
 		ID:     "2",
@@ -89,16 +89,16 @@ func TestServiceSetActual(t *testing.T) {
 
 	service, data := newService(t)
 	_ = service.CreateTrace(t.Context(), &trace.CreateTraceInput{
-		ID:       "1",
-		ParentID: "2",
+		ID:       "3",
+		ParentID: "",
 	})
 	_ = service.CreateTrace(t.Context(), &trace.CreateTraceInput{
 		ID:       "2",
 		ParentID: "3",
 	})
 	_ = service.CreateTrace(t.Context(), &trace.CreateTraceInput{
-		ID:       "3",
-		ParentID: "",
+		ID:       "1",
+		ParentID: "2",
 	})
 
 	err := service.SetActual(t.Context(), &trace.SetActualInput{
@@ -130,16 +130,16 @@ func TestService_Actual(t *testing.T) {
 
 	service, data := newService(t)
 	_ = service.CreateTrace(t.Context(), &trace.CreateTraceInput{
-		ID:       "1",
-		ParentID: "2",
+		ID:       "3",
+		ParentID: "",
 	})
 	_ = service.CreateTrace(t.Context(), &trace.CreateTraceInput{
 		ID:       "2",
 		ParentID: "3",
 	})
 	_ = service.CreateTrace(t.Context(), &trace.CreateTraceInput{
-		ID:       "3",
-		ParentID: "",
+		ID:       "1",
+		ParentID: "2",
 	})
 	_ = service.SetActual(t.Context(), &trace.SetActualInput{
 		ID:     "2",
@@ -155,4 +155,3 @@ func TestService_Actual(t *testing.T) {
 	require.Equal(t, 15*time.Second, data.repo.Traces["2"].Actual())
 	require.Equal(t, 15*time.Second, data.repo.Traces["3"].Actual())
 }
-
