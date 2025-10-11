@@ -29,13 +29,15 @@ func NewRepository() *Repository {
 	}
 }
 
-func (r *Repository) CreateTask(ctx context.Context, username string, task *domain.Task) error {
+func (r *Repository) CreateTasks(ctx context.Context, username string, tasks ...*domain.Task) error {
 	if _, ok := r.Tasks[username]; !ok {
 		r.Tasks[username] = make(map[domain.TaskID]*domain.Task)
 	}
 
-	r.Tasks[username][task.ID()] = task
-	r.Children[task.ParentID()] = append(r.Children[task.ParentID()], task.ID())
+	for _, task := range tasks {
+		r.Tasks[username][task.ID()] = task
+		r.Children[task.ParentID()] = append(r.Children[task.ParentID()], task.ID())
+	}
 
 	return nil
 }

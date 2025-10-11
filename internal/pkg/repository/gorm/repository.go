@@ -44,10 +44,24 @@ func NewRepository() (*Repository, error) {
 	return &Repository{db: db}, nil
 }
 
-func (r *Repository) CreateTask(ctx context.Context, username string, task *domain.Task) error {
-	err := gorm.G[Task](r.db).Create(ctx, FromDomainTask(task, username))
+func (r *Repository) CreateTasks(ctx context.Context, username string, dTasks ...*domain.Task) error {
+	var tasks []*Task
+	for _, task := range dTasks {
+		tasks = append(tasks, FromDomainTask(task, username))
+	}
+
+	err := r.db.Transaction(func(tx *gorm.DB) error {
+		for _, task := range tasks {
+			err := gorm.G[Task](tx).Create(ctx, task)
+			if err != nil {
+				return fmt.Errorf("failed to create task: %w", err)
+			}
+		}
+
+		return nil
+	})
 	if err != nil {
-		return fmt.Errorf("failed to create task: %w", err)
+		return fmt.Errorf("failed to create tasks: %w", err)
 	}
 
 	return nil

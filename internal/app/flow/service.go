@@ -56,17 +56,11 @@ func (s *Service) CreateTask(ctx context.Context, input *CreateTaskInput) (*Crea
 		input.Now,
 		1,
 	)
-
-	err := s.repo.CreateTask(ctx, input.Username, task)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create task: %w", err)
-	}
-
 	dummy := task.Dummy()
 
-	err = s.repo.CreateTask(ctx, input.Username, dummy)
+	err := s.repo.CreateTasks(ctx, input.Username, task, dummy)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create dummy task: %w", err)
+		return nil, fmt.Errorf("failed to create task: %w", err)
 	}
 
 	s.bus.TaskCreated.Publish(ctx, &eventbus.TaskCreatedEvent{
