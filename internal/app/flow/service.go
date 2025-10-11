@@ -30,6 +30,10 @@ func (s *Service) CreateRootDummy(ctx context.Context, input *CreateRootDummyInp
 
 	err := s.repo.CreateTasks(ctx, input.Username, dummy)
 	if err != nil {
+		if errors.Is(err, repository.ErrTaskAlreadyExists) {
+			return nil
+		}
+
 		return fmt.Errorf("failed to create root dummy: %w", err)
 	}
 
