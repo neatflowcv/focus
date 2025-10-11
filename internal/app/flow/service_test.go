@@ -188,6 +188,44 @@ func TestServiceListTasks(t *testing.T) { //nolint:funlen
 		require.Equal(t, firstTitle, ret.Tasks[0].Title)
 		require.Equal(t, secondTitle, ret.Tasks[1].Title)
 	})
+
+	t.Run("two-reverse", func(t *testing.T) {
+		t.Parallel()
+
+		const (
+			firstTitle  = "first"
+			secondTitle = "second"
+		)
+
+		service, _ := newService(t)
+		_ = service.CreateRootDummy(t.Context(), &flow.CreateRootDummyInput{
+			Username: "test",
+		})
+		firstTask, _ := service.CreateTask(t.Context(), &flow.CreateTaskInput{
+			Username: "test",
+			Title:    firstTitle,
+			Now:      time.Now(),
+			ParentID: "",
+			NextID:   "",
+		})
+		_, _ = service.CreateTask(t.Context(), &flow.CreateTaskInput{
+			Username: "test",
+			Title:    secondTitle,
+			Now:      time.Now(),
+			ParentID: "",
+			NextID:   firstTask.ID,
+		})
+
+		ret, err := service.ListTasks(t.Context(), &flow.ListTasksInput{
+			Username: "test",
+			ParentID: "",
+		})
+
+		require.NoError(t, err)
+		require.Len(t, ret.Tasks, 2)
+		require.Equal(t, secondTitle, ret.Tasks[0].Title)
+		require.Equal(t, firstTitle, ret.Tasks[1].Title)
+	})
 }
 
 func TestServiceDeleteTask(t *testing.T) {
