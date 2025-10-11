@@ -21,6 +21,10 @@ func NewTrace(
 	startedAt time.Time,
 	depth uint64,
 ) *Trace {
+	if id == "" {
+		panic("id is required")
+	}
+
 	if depth == 0 {
 		panic("depth is required")
 	}
