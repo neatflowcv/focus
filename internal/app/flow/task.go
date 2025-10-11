@@ -15,6 +15,7 @@ type CreateTaskInput struct {
 type CreateTaskOutput struct {
 	ID        string
 	CreatedAt time.Time
+	Version   uint64
 }
 
 type ListTasksInput struct {

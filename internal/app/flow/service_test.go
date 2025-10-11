@@ -33,20 +33,33 @@ func newService(t *testing.T) (*flow.Service, *ServiceData) {
 func TestServiceCreateTask(t *testing.T) {
 	t.Parallel()
 
-	service, _ := newService(t)
+	const (
+		userName = "test"
+		title    = "test"
+		parentID = ""
+		nextID   = ""
+	)
+
+	service, data := newService(t)
 	now := time.Now()
 
 	ret, err := service.CreateTask(t.Context(), &flow.CreateTaskInput{
-		Username: "test",
-		Title:    "test",
+		Username: userName,
+		Title:    title,
 		Now:      now,
-		ParentID: "",
-		NextID:   "",
+		ParentID: parentID,
+		NextID:   nextID,
 	})
 
 	require.NoError(t, err)
 	require.NotEmpty(t, ret.ID)
+	require.Equal(t, domain.TaskID(parentID), data.repo.Tasks[userName][domain.TaskID(ret.ID)].ParentID())
+	require.Equal(t, domain.TaskID(nextID), data.repo.Tasks[userName][domain.TaskID(ret.ID)].NextID())
+	require.Equal(t, title, data.repo.Tasks[userName][domain.TaskID(ret.ID)].Title())
 	require.Equal(t, now, ret.CreatedAt)
+	require.Equal(t, now, data.repo.Tasks[userName][domain.TaskID(ret.ID)].CreatedAt())
+	require.Equal(t, uint64(1), ret.Version)
+	require.Equal(t, uint64(1), data.repo.Tasks[userName][domain.TaskID(ret.ID)].Version())
 }
 
 func TestServiceCreateTask_Error(t *testing.T) {

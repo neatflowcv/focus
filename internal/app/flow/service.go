@@ -70,6 +70,7 @@ func (s *Service) CreateTask(ctx context.Context, input *CreateTaskInput) (*Crea
 	return &CreateTaskOutput{
 		ID:        string(task.ID()),
 		CreatedAt: task.CreatedAt(),
+		Version:   task.Version(),
 	}, nil
 }
 
