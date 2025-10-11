@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"log"
 	"strings"
 	"time"
 
@@ -32,6 +33,9 @@ func NewHandler(flowService *flow.Service, extraService *extra.Service, traceSer
 }
 
 func (h *Handler) Setup(ctx context.Context, input *task.SetupTaskInput) error {
+	log.Println("call setup")
+	defer log.Println("end setup")
+
 	username, _, err := h.authUser(input.Authorization)
 	if err != nil {
 		return err
@@ -48,6 +52,9 @@ func (h *Handler) Setup(ctx context.Context, input *task.SetupTaskInput) error {
 }
 
 func (h *Handler) Create(ctx context.Context, input *task.CreateTaskInput) (*task.Createtaskoutput, error) {
+	log.Println("call create task")
+	defer log.Println("end create task")
+
 	username, now, err := h.authUser(input.Authorization)
 	if err != nil {
 		return nil, err
@@ -73,6 +80,9 @@ func (h *Handler) Create(ctx context.Context, input *task.CreateTaskInput) (*tas
 }
 
 func (h *Handler) List(ctx context.Context, input *task.ListPayload) (task.TaskdetailCollection, error) {
+	log.Println("call list tasks")
+	defer log.Println("end list tasks")
+
 	username, _, err := h.authUser(input.Authorization)
 	if err != nil {
 		return nil, err
@@ -95,6 +105,9 @@ func (h *Handler) List(ctx context.Context, input *task.ListPayload) (task.Taskd
 }
 
 func (h *Handler) Delete(ctx context.Context, input *task.TaskDeleteInput) error {
+	log.Println("call delete task")
+	defer log.Println("end delete task")
+
 	username, _, err := h.authUser(input.Authorization)
 	if err != nil {
 		return err
@@ -116,6 +129,9 @@ func (h *Handler) Delete(ctx context.Context, input *task.TaskDeleteInput) error
 }
 
 func (h *Handler) Update(ctx context.Context, input *task.TaskUpdateInput) (*task.Taskdetail, error) {
+	log.Println("call update task")
+	defer log.Println("end update task")
+
 	panic("not implemented")
 }
 
