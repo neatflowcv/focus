@@ -1,7 +1,8 @@
 package eventbus
 
 type TaskCreatedEvent struct {
-	TaskID string
+	TaskID   string
+	ParentID string
 }
 
 type TaskDeletedEvent struct {

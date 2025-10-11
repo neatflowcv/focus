@@ -15,6 +15,7 @@ import (
 
 // Client is the "task" service client.
 type Client struct {
+	SetupEndpoint  goa.Endpoint
 	CreateEndpoint goa.Endpoint
 	ListEndpoint   goa.Endpoint
 	UpdateEndpoint goa.Endpoint
@@ -22,13 +23,25 @@ type Client struct {
 }
 
 // NewClient initializes a "task" service client given the endpoints.
-func NewClient(create, list, update, delete_ goa.Endpoint) *Client {
+func NewClient(setup, create, list, update, delete_ goa.Endpoint) *Client {
 	return &Client{
+		SetupEndpoint:  setup,
 		CreateEndpoint: create,
 		ListEndpoint:   list,
 		UpdateEndpoint: update,
 		DeleteEndpoint: delete_,
 	}
+}
+
+// Setup calls the "setup" endpoint of the "task" service.
+// Setup may return the following errors:
+//   - "Unauthorized" (type *goa.ServiceError): Unauthorized
+//   - "InternalServerError" (type *goa.ServiceError): Internal server error
+//   - "TaskNotFound" (type *goa.ServiceError): Task not found
+//   - error: internal error
+func (c *Client) Setup(ctx context.Context, p *SetupTaskInput) (err error) {
+	_, err = c.SetupEndpoint(ctx, p)
+	return
 }
 
 // Create calls the "create" endpoint of the "task" service.

@@ -15,6 +15,7 @@ import (
 
 // Endpoints wraps the "task" service endpoints.
 type Endpoints struct {
+	Setup  goa.Endpoint
 	Create goa.Endpoint
 	List   goa.Endpoint
 	Update goa.Endpoint
@@ -24,6 +25,7 @@ type Endpoints struct {
 // NewEndpoints wraps the methods of the "task" service with endpoints.
 func NewEndpoints(s Service) *Endpoints {
 	return &Endpoints{
+		Setup:  NewSetupEndpoint(s),
 		Create: NewCreateEndpoint(s),
 		List:   NewListEndpoint(s),
 		Update: NewUpdateEndpoint(s),
@@ -33,10 +35,20 @@ func NewEndpoints(s Service) *Endpoints {
 
 // Use applies the given middleware to all the "task" service endpoints.
 func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
+	e.Setup = m(e.Setup)
 	e.Create = m(e.Create)
 	e.List = m(e.List)
 	e.Update = m(e.Update)
 	e.Delete = m(e.Delete)
+}
+
+// NewSetupEndpoint returns an endpoint function that calls the method "setup"
+// of service "task".
+func NewSetupEndpoint(s Service) goa.Endpoint {
+	return func(ctx context.Context, req any) (any, error) {
+		p := req.(*SetupTaskInput)
+		return nil, s.Setup(ctx, p)
+	}
 }
 
 // NewCreateEndpoint returns an endpoint function that calls the method

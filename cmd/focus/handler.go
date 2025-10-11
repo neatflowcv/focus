@@ -31,6 +31,22 @@ func NewHandler(flowService *flow.Service, extraService *extra.Service, traceSer
 	}
 }
 
+func (h *Handler) Setup(ctx context.Context, input *task.SetupTaskInput) error {
+	username, _, err := h.authUser(input.Authorization)
+	if err != nil {
+		return err
+	}
+
+	err = h.flowService.CreateRootDummy(ctx, &flow.CreateRootDummyInput{
+		Username: username,
+	})
+	if err != nil {
+		return task.MakeInternalServerError(err)
+	}
+
+	return nil
+}
+
 func (h *Handler) Create(ctx context.Context, input *task.CreateTaskInput) (*task.Createtaskoutput, error) {
 	username, now, err := h.authUser(input.Authorization)
 	if err != nil {

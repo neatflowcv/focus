@@ -19,7 +19,7 @@ func NewService(repo repository.ExtraRepository) *Service {
 	}
 }
 
-func (s *Service) CreateExtra(ctx context.Context, input *CreateExtraInput) (*CreateExtraOutput, error) {
+func (s *Service) CreateExtra(ctx context.Context, input *CreateExtraInput) error {
 	extra := domain.NewExtra(
 		domain.ExtraID(input.ID),
 		domain.ExtraID(input.ParentID),
@@ -29,14 +29,14 @@ func (s *Service) CreateExtra(ctx context.Context, input *CreateExtraInput) (*Cr
 
 	err := s.repo.CreateExtra(ctx, extra)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create extra: %w", err)
+		return fmt.Errorf("failed to create extra: %w", err)
 	}
 
 	searchID := domain.ExtraID(input.ParentID)
 	for searchID != "" {
 		searchedExtra, err := s.repo.GetExtra(ctx, searchID)
 		if err != nil {
-			return nil, fmt.Errorf("failed to get extra: %w", err)
+			return fmt.Errorf("failed to get extra: %w", err)
 		}
 
 		if !searchedExtra.Leaf() && !searchedExtra.IsCompleted() {
@@ -50,18 +50,13 @@ func (s *Service) CreateExtra(ctx context.Context, input *CreateExtraInput) (*Cr
 
 		err = s.repo.UpdateExtra(ctx, update)
 		if err != nil {
-			return nil, fmt.Errorf("failed to update parent extra: %w", err)
+			return fmt.Errorf("failed to update parent extra: %w", err)
 		}
 
 		searchID = searchedExtra.ParentID()
 	}
 
-	return &CreateExtraOutput{
-		Extra: Extra{
-			Leaf:   extra.Leaf(),
-			Status: string(extra.Status()),
-		},
-	}, nil
+	return nil
 }
 
 func (s *Service) DeleteExtra(ctx context.Context, input *DeleteExtraInput) error {

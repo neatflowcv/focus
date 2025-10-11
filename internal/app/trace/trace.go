@@ -15,3 +15,8 @@ type SetActualInput struct {
 	ID     string
 	Actual time.Duration
 }
+
+type UpdateParentInput struct {
+	ID       string
+	ParentID string
+}

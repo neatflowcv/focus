@@ -16,6 +16,8 @@ import (
 
 // Service is the task service interface.
 type Service interface {
+	// Setup the task service.
+	Setup(context.Context, *SetupTaskInput) (err error)
 	// Create a new task.
 	Create(context.Context, *CreateTaskInput) (res *Createtaskoutput, err error)
 	// List all tasks.
@@ -40,7 +42,7 @@ const ServiceName = "task"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [4]string{"create", "list", "update", "delete"}
+var MethodNames = [5]string{"setup", "create", "list", "update", "delete"}
 
 // CreateTaskInput is the payload type of the task service create method.
 type CreateTaskInput struct {
@@ -68,6 +70,12 @@ type ListPayload struct {
 	ParentID *string
 	// Whether to include all subtasks recursively
 	Recursive *bool
+}
+
+// SetupTaskInput is the payload type of the task service setup method.
+type SetupTaskInput struct {
+	// The authorization header
+	Authorization string
 }
 
 // TaskDeleteInput is the payload type of the task service delete method.

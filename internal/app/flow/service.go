@@ -91,7 +91,8 @@ func (s *Service) CreateTask( //nolint:funlen
 	}
 
 	s.bus.TaskCreated.Publish(ctx, &eventbus.TaskCreatedEvent{
-		TaskID: string(task.ID()),
+		TaskID:   string(task.ID()),
+		ParentID: string(task.ParentID()),
 	})
 
 	return &CreateTaskOutput{

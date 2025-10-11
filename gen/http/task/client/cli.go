@@ -15,6 +15,19 @@ import (
 	task "github.com/neatflowcv/focus/gen/task"
 )
 
+// BuildSetupPayload builds the payload for the task setup endpoint from CLI
+// flags.
+func BuildSetupPayload(taskSetupAuthorization string) (*task.SetupTaskInput, error) {
+	var authorization string
+	{
+		authorization = taskSetupAuthorization
+	}
+	v := &task.SetupTaskInput{}
+	v.Authorization = authorization
+
+	return v, nil
+}
+
 // BuildCreatePayload builds the payload for the task create endpoint from CLI
 // flags.
 func BuildCreatePayload(taskCreateBody string, taskCreateAuthorization string) (*task.CreateTaskInput, error) {
@@ -23,7 +36,7 @@ func BuildCreatePayload(taskCreateBody string, taskCreateAuthorization string) (
 	{
 		err = json.Unmarshal([]byte(taskCreateBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"parent_id\": \"Ullam dolor sint odio aut enim saepe.\",\n      \"title\": \"Vel error odio corporis animi praesentium quasi.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"parent_id\": \"Asperiores nisi qui ut corporis quia numquam.\",\n      \"title\": \"Beatae nobis.\"\n   }'")
 		}
 	}
 	var authorization string
@@ -80,7 +93,7 @@ func BuildUpdatePayload(taskUpdateBody string, taskUpdateTaskID string, taskUpda
 	{
 		err = json.Unmarshal([]byte(taskUpdateBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"estimated_time\": 7275710883003218401,\n      \"next_id\": \"Quisquam necessitatibus earum dolores occaecati labore qui.\",\n      \"parent_id\": \"Reiciendis dolorum est qui ratione consequatur quis.\",\n      \"status\": \"Error eos ea ut.\",\n      \"title\": \"Assumenda assumenda dolores culpa dolore.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"estimated_time\": 3800609449116017351,\n      \"next_id\": \"Ea ut omnis.\",\n      \"parent_id\": \"Earum dolores occaecati labore qui qui error.\",\n      \"status\": \"Aut recusandae vitae quo non accusamus explicabo.\",\n      \"title\": \"Quis ullam quisquam.\"\n   }'")
 		}
 	}
 	var taskID string

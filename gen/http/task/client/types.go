@@ -77,6 +77,42 @@ type UpdateResponseBody struct {
 	ActualTime *int64 `form:"actual_time,omitempty" json:"actual_time,omitempty" xml:"actual_time,omitempty"`
 }
 
+// SetupUnauthorizedResponseBody is the type of the "task" service "setup"
+// endpoint HTTP response body for the "Unauthorized" error.
+type SetupUnauthorizedResponseBody struct {
+	// Name is the name of this class of errors.
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+	// Is the error temporary?
+	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
+	// Is the error a timeout?
+	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
+	// Is the error a server-side fault?
+	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
+}
+
+// SetupInternalServerErrorResponseBody is the type of the "task" service
+// "setup" endpoint HTTP response body for the "InternalServerError" error.
+type SetupInternalServerErrorResponseBody struct {
+	// Name is the name of this class of errors.
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+	// Is the error temporary?
+	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
+	// Is the error a timeout?
+	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
+	// Is the error a server-side fault?
+	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
+}
+
 // CreateUnauthorizedResponseBody is the type of the "task" service "create"
 // endpoint HTTP response body for the "Unauthorized" error.
 type CreateUnauthorizedResponseBody struct {
@@ -306,6 +342,35 @@ func NewUpdateRequestBody(p *task.TaskUpdateInput) *UpdateRequestBody {
 	return body
 }
 
+// NewSetupUnauthorized builds a task service setup endpoint Unauthorized error.
+func NewSetupUnauthorized(body *SetupUnauthorizedResponseBody) *goa.ServiceError {
+	v := &goa.ServiceError{
+		Name:      *body.Name,
+		ID:        *body.ID,
+		Message:   *body.Message,
+		Temporary: *body.Temporary,
+		Timeout:   *body.Timeout,
+		Fault:     *body.Fault,
+	}
+
+	return v
+}
+
+// NewSetupInternalServerError builds a task service setup endpoint
+// InternalServerError error.
+func NewSetupInternalServerError(body *SetupInternalServerErrorResponseBody) *goa.ServiceError {
+	v := &goa.ServiceError{
+		Name:      *body.Name,
+		ID:        *body.ID,
+		Message:   *body.Message,
+		Temporary: *body.Temporary,
+		Timeout:   *body.Timeout,
+		Fault:     *body.Fault,
+	}
+
+	return v
+}
+
 // NewCreatetaskoutputViewOK builds a "task" service "create" endpoint result
 // from a HTTP "OK" response.
 func NewCreatetaskoutputViewOK(body *CreateResponseBody) *taskviews.CreatetaskoutputView {
@@ -495,6 +560,54 @@ func NewDeleteInternalServerError(body *DeleteInternalServerErrorResponseBody) *
 	}
 
 	return v
+}
+
+// ValidateSetupUnauthorizedResponseBody runs the validations defined on
+// setup_Unauthorized_response_body
+func ValidateSetupUnauthorizedResponseBody(body *SetupUnauthorizedResponseBody) (err error) {
+	if body.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
+	}
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.Temporary == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
+	}
+	if body.Timeout == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
+	}
+	if body.Fault == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
+	}
+	return
+}
+
+// ValidateSetupInternalServerErrorResponseBody runs the validations defined on
+// setup_InternalServerError_response_body
+func ValidateSetupInternalServerErrorResponseBody(body *SetupInternalServerErrorResponseBody) (err error) {
+	if body.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
+	}
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.Temporary == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
+	}
+	if body.Timeout == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
+	}
+	if body.Fault == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
+	}
+	return
 }
 
 // ValidateCreateUnauthorizedResponseBody runs the validations defined on

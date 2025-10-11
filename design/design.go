@@ -19,6 +19,22 @@ var _ = dsl.Service("task", func() {
 	dsl.Error("InternalServerError", dsl.ErrorResult, "Internal server error")
 	dsl.Error("TaskNotFound", dsl.ErrorResult, "Task not found")
 
+	dsl.Method("setup", func() {
+		dsl.Description("Setup the task service.")
+
+		dsl.Payload(SetupTaskInput)
+
+		dsl.HTTP(func() {
+			dsl.POST("/setup")
+
+			dsl.Header("authorization", dsl.String, "The authorization header")
+
+			dsl.Response(dsl.StatusOK)
+			dsl.Response("Unauthorized", dsl.StatusUnauthorized)
+			dsl.Response("InternalServerError", dsl.StatusInternalServerError)
+		})
+	})
+
 	dsl.Method("create", func() {
 		dsl.Description("Create a new task.")
 
@@ -150,4 +166,10 @@ var TaskDeleteInput = dsl.Type("TaskDeleteInput", func() { //nolint:gochecknoglo
 	dsl.Attribute("task_id", dsl.String, "The ID of the task")
 
 	dsl.Required("authorization", "task_id")
+})
+
+var SetupTaskInput = dsl.Type("SetupTaskInput", func() { //nolint:gochecknoglobals
+	dsl.Attribute("authorization", dsl.String, "The authorization header")
+
+	dsl.Required("authorization")
 })

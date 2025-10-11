@@ -17,6 +17,9 @@ import (
 
 // Client lists the task service endpoint HTTP clients.
 type Client struct {
+	// Setup Doer is the HTTP client used to make requests to the setup endpoint.
+	SetupDoer goahttp.Doer
+
 	// Create Doer is the HTTP client used to make requests to the create endpoint.
 	CreateDoer goahttp.Doer
 
@@ -49,6 +52,7 @@ func NewClient(
 	restoreBody bool,
 ) *Client {
 	return &Client{
+		SetupDoer:           doer,
 		CreateDoer:          doer,
 		ListDoer:            doer,
 		UpdateDoer:          doer,
@@ -58,6 +62,30 @@ func NewClient(
 		host:                host,
 		decoder:             dec,
 		encoder:             enc,
+	}
+}
+
+// Setup returns an endpoint that makes HTTP requests to the task service setup
+// server.
+func (c *Client) Setup() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeSetupRequest(c.encoder)
+		decodeResponse = DecodeSetupResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v any) (any, error) {
+		req, err := c.BuildSetupRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.SetupDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("task", "setup", err)
+		}
+		return decodeResponse(resp)
 	}
 }
 

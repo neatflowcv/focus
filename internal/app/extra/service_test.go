@@ -29,7 +29,7 @@ func TestServiceCreateExtra(t *testing.T) {
 
 	service, data := newService(t)
 
-	_, err := service.CreateExtra(t.Context(), &extra.CreateExtraInput{
+	err := service.CreateExtra(t.Context(), &extra.CreateExtraInput{
 		ID:       "test",
 		ParentID: "",
 	})
@@ -44,7 +44,7 @@ func TestServiceDeleteExtra(t *testing.T) {
 	t.Parallel()
 
 	service, _ := newService(t)
-	_, _ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
+	_ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
 		ID:       "test",
 		ParentID: "",
 	})
@@ -85,7 +85,7 @@ func TestServiceListExtras1(t *testing.T) {
 	t.Parallel()
 
 	service, _ := newService(t)
-	_, _ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
+	_ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
 		ID:       "test",
 		ParentID: "",
 	})
@@ -102,11 +102,11 @@ func TestServiceListExtras2(t *testing.T) {
 	t.Parallel()
 
 	service, _ := newService(t)
-	_, _ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
+	_ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
 		ID:       "test1",
 		ParentID: "",
 	})
-	_, _ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
+	_ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
 		ID:       "test2",
 		ParentID: "",
 	})
@@ -123,11 +123,11 @@ func TestServiceCheckLeaf(t *testing.T) {
 	t.Parallel()
 
 	service, data := newService(t)
-	_, _ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
+	_ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
 		ID:       "parent",
 		ParentID: "",
 	})
-	_, _ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
+	_ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
 		ID:       "child",
 		ParentID: "parent",
 	})
@@ -140,11 +140,11 @@ func TestServiceCheckStatus1(t *testing.T) {
 	t.Parallel()
 
 	service, data := newService(t)
-	_, _ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
+	_ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
 		ID:       "parent",
 		ParentID: "",
 	})
-	_, _ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
+	_ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
 		ID:       "child",
 		ParentID: "parent",
 	})
@@ -157,14 +157,14 @@ func TestServiceCheckStatus2(t *testing.T) {
 	t.Parallel()
 
 	service, data := newService(t)
-	_, _ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
+	_ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
 		ID:       "parent",
 		ParentID: "",
 	})
 	_ = service.SetDone(t.Context(), &extra.SetDoneInput{
 		ID: "parent",
 	})
-	_, _ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
+	_ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
 		ID:       "child",
 		ParentID: "parent",
 	})
@@ -177,14 +177,14 @@ func TestServiceCheckStatus3(t *testing.T) {
 	t.Parallel()
 
 	service, data := newService(t)
-	_, _ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
+	_ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
 		ID:       "parent",
 		ParentID: "",
 	})
 	_ = service.SetDone(t.Context(), &extra.SetDoneInput{
 		ID: "parent",
 	})
-	_, _ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
+	_ = service.CreateExtra(t.Context(), &extra.CreateExtraInput{
 		ID:       "child",
 		ParentID: "",
 	})

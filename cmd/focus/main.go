@@ -55,7 +55,7 @@ func main() {
 	}
 }
 
-func run() error {
+func run() error { //nolint:cyclop,funlen
 	repo, err := gorm.NewRepository()
 	if err != nil {
 		return fmt.Errorf("failed to create repository: %w", err)
@@ -68,6 +68,68 @@ func run() error {
 	traceService := trace.NewService(repo)
 
 	server := newServer(flowService, extraService, traceService)
+
+	bus.TaskCreated.Subscribe(func(ctx context.Context, event *eventbus.TaskCreatedEvent) {
+		err := extraService.CreateExtra(ctx, &extra.CreateExtraInput{
+			ID:       event.TaskID,
+			ParentID: event.ParentID,
+		})
+		if err != nil {
+			log.Printf("failed to create extra: %v", err)
+		}
+	})
+	bus.TaskDeleted.Subscribe(func(ctx context.Context, event *eventbus.TaskDeletedEvent) {
+		err := extraService.DeleteExtra(ctx, &extra.DeleteExtraInput{
+			ID: event.TaskID,
+		})
+		if err != nil {
+			log.Printf("failed to delete extra: %v", err)
+		}
+	})
+	bus.TaskRelationUpdated.Subscribe(func(ctx context.Context, event *eventbus.TaskRelationUpdatedEvent) {
+		if event.OldParentID == event.NewParentID {
+			return
+		}
+
+		err := extraService.UpdateParent(ctx, &extra.UpdateParentInput{
+			ID:       event.TaskID,
+			ParentID: event.NewParentID,
+		})
+		if err != nil {
+			log.Printf("failed to update parent extra: %v", err)
+		}
+	})
+
+	bus.TaskCreated.Subscribe(func(ctx context.Context, event *eventbus.TaskCreatedEvent) {
+		err := traceService.CreateTrace(ctx, &trace.CreateTraceInput{
+			ID:       event.TaskID,
+			ParentID: event.ParentID,
+		})
+		if err != nil {
+			log.Printf("failed to create trace: %v", err)
+		}
+	})
+	bus.TaskDeleted.Subscribe(func(ctx context.Context, event *eventbus.TaskDeletedEvent) {
+		err := traceService.DeleteTrace(ctx, &trace.DeleteTraceInput{
+			ID: event.TaskID,
+		})
+		if err != nil {
+			log.Printf("failed to delete trace: %v", err)
+		}
+	})
+	bus.TaskRelationUpdated.Subscribe(func(ctx context.Context, event *eventbus.TaskRelationUpdatedEvent) {
+		if event.OldParentID == event.NewParentID {
+			return
+		}
+
+		err := traceService.UpdateParent(ctx, &trace.UpdateParentInput{
+			ID:       event.TaskID,
+			ParentID: event.NewParentID,
+		})
+		if err != nil {
+			log.Printf("failed to update parent trace: %v", err)
+		}
+	})
 
 	err = server.ListenAndServe()
 	if err != nil {

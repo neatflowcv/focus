@@ -11,6 +11,11 @@ import (
 	"fmt"
 )
 
+// SetupTaskPath returns the URL path to the task service setup HTTP endpoint.
+func SetupTaskPath() string {
+	return "/focus/tasks/setup"
+}
+
 // CreateTaskPath returns the URL path to the task service create HTTP endpoint.
 func CreateTaskPath() string {
 	return "/focus/tasks"

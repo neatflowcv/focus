@@ -77,6 +77,42 @@ type UpdateResponseBody struct {
 	ActualTime *int64 `form:"actual_time,omitempty" json:"actual_time,omitempty" xml:"actual_time,omitempty"`
 }
 
+// SetupUnauthorizedResponseBody is the type of the "task" service "setup"
+// endpoint HTTP response body for the "Unauthorized" error.
+type SetupUnauthorizedResponseBody struct {
+	// Name is the name of this class of errors.
+	Name string `form:"name" json:"name" xml:"name"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID string `form:"id" json:"id" xml:"id"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message string `form:"message" json:"message" xml:"message"`
+	// Is the error temporary?
+	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
+	// Is the error a timeout?
+	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
+	// Is the error a server-side fault?
+	Fault bool `form:"fault" json:"fault" xml:"fault"`
+}
+
+// SetupInternalServerErrorResponseBody is the type of the "task" service
+// "setup" endpoint HTTP response body for the "InternalServerError" error.
+type SetupInternalServerErrorResponseBody struct {
+	// Name is the name of this class of errors.
+	Name string `form:"name" json:"name" xml:"name"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID string `form:"id" json:"id" xml:"id"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message string `form:"message" json:"message" xml:"message"`
+	// Is the error temporary?
+	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
+	// Is the error a timeout?
+	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
+	// Is the error a server-side fault?
+	Fault bool `form:"fault" json:"fault" xml:"fault"`
+}
+
 // CreateUnauthorizedResponseBody is the type of the "task" service "create"
 // endpoint HTTP response body for the "Unauthorized" error.
 type CreateUnauthorizedResponseBody struct {
@@ -322,6 +358,34 @@ func NewUpdateResponseBody(res *taskviews.TaskdetailView) *UpdateResponseBody {
 	return body
 }
 
+// NewSetupUnauthorizedResponseBody builds the HTTP response body from the
+// result of the "setup" endpoint of the "task" service.
+func NewSetupUnauthorizedResponseBody(res *goa.ServiceError) *SetupUnauthorizedResponseBody {
+	body := &SetupUnauthorizedResponseBody{
+		Name:      res.Name,
+		ID:        res.ID,
+		Message:   res.Message,
+		Temporary: res.Temporary,
+		Timeout:   res.Timeout,
+		Fault:     res.Fault,
+	}
+	return body
+}
+
+// NewSetupInternalServerErrorResponseBody builds the HTTP response body from
+// the result of the "setup" endpoint of the "task" service.
+func NewSetupInternalServerErrorResponseBody(res *goa.ServiceError) *SetupInternalServerErrorResponseBody {
+	body := &SetupInternalServerErrorResponseBody{
+		Name:      res.Name,
+		ID:        res.ID,
+		Message:   res.Message,
+		Temporary: res.Temporary,
+		Timeout:   res.Timeout,
+		Fault:     res.Fault,
+	}
+	return body
+}
+
 // NewCreateUnauthorizedResponseBody builds the HTTP response body from the
 // result of the "create" endpoint of the "task" service.
 func NewCreateUnauthorizedResponseBody(res *goa.ServiceError) *CreateUnauthorizedResponseBody {
@@ -460,6 +524,14 @@ func NewDeleteInternalServerErrorResponseBody(res *goa.ServiceError) *DeleteInte
 		Fault:     res.Fault,
 	}
 	return body
+}
+
+// NewSetupTaskInput builds a task service setup endpoint payload.
+func NewSetupTaskInput(authorization string) *task.SetupTaskInput {
+	v := &task.SetupTaskInput{}
+	v.Authorization = authorization
+
+	return v
 }
 
 // NewCreateTaskInput builds a task service create endpoint payload.

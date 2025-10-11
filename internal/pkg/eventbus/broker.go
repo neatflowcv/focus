@@ -14,7 +14,7 @@ func NewBroker[T any]() *Broker[T] {
 	}
 }
 
-func (b *Broker[T]) Subscribe(ctx context.Context, subscriber Subscriber[T]) {
+func (b *Broker[T]) Subscribe(subscriber Subscriber[T]) {
 	b.subscribers = append(b.subscribers, subscriber)
 }
 

@@ -20,6 +20,78 @@ import (
 	goa "goa.design/goa/v3/pkg"
 )
 
+// EncodeSetupResponse returns an encoder for responses returned by the task
+// setup endpoint.
+func EncodeSetupResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
+	return func(ctx context.Context, w http.ResponseWriter, v any) error {
+		w.WriteHeader(http.StatusOK)
+		return nil
+	}
+}
+
+// DecodeSetupRequest returns a decoder for requests sent to the task setup
+// endpoint.
+func DecodeSetupRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (*task.SetupTaskInput, error) {
+	return func(r *http.Request) (*task.SetupTaskInput, error) {
+		var (
+			authorization string
+			err           error
+		)
+		authorization = r.Header.Get("authorization")
+		if authorization == "" {
+			err = goa.MergeErrors(err, goa.MissingFieldError("authorization", "header"))
+		}
+		if err != nil {
+			return nil, err
+		}
+		payload := NewSetupTaskInput(authorization)
+
+		return payload, nil
+	}
+}
+
+// EncodeSetupError returns an encoder for errors returned by the setup task
+// endpoint.
+func EncodeSetupError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder, formatter func(ctx context.Context, err error) goahttp.Statuser) func(context.Context, http.ResponseWriter, error) error {
+	encodeError := goahttp.ErrorEncoder(encoder, formatter)
+	return func(ctx context.Context, w http.ResponseWriter, v error) error {
+		var en goa.GoaErrorNamer
+		if !errors.As(v, &en) {
+			return encodeError(ctx, w, v)
+		}
+		switch en.GoaErrorName() {
+		case "Unauthorized":
+			var res *goa.ServiceError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewSetupUnauthorizedResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusUnauthorized)
+			return enc.Encode(body)
+		case "InternalServerError":
+			var res *goa.ServiceError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewSetupInternalServerErrorResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusInternalServerError)
+			return enc.Encode(body)
+		default:
+			return encodeError(ctx, w, v)
+		}
+	}
+}
+
 // EncodeCreateResponse returns an encoder for responses returned by the task
 // create endpoint.
 func EncodeCreateResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {

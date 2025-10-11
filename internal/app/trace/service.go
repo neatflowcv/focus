@@ -108,3 +108,7 @@ func (s *Service) SetActual(ctx context.Context, input *SetActualInput) error {
 
 	return nil
 }
+
+func (s *Service) UpdateParent(ctx context.Context, input *UpdateParentInput) error {
+	panic("not implemented")
+}

@@ -23,16 +23,13 @@ import (
 //	command (subcommand1|subcommand2|...)
 func UsageCommands() []string {
 	return []string{
-		"task (create|list|update|delete)",
+		"task (setup|create|list|update|delete)",
 	}
 }
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + ` task create --body '{
-      "parent_id": "Ullam dolor sint odio aut enim saepe.",
-      "title": "Vel error odio corporis animi praesentium quasi."
-   }' --authorization "Quae asperiores."` + "\n" +
+	return os.Args[0] + ` task setup --authorization "Ullam dolor sint odio aut enim saepe."` + "\n" +
 		""
 }
 
@@ -47,6 +44,9 @@ func ParseEndpoint(
 ) (goa.Endpoint, any, error) {
 	var (
 		taskFlags = flag.NewFlagSet("task", flag.ContinueOnError)
+
+		taskSetupFlags             = flag.NewFlagSet("setup", flag.ExitOnError)
+		taskSetupAuthorizationFlag = taskSetupFlags.String("authorization", "REQUIRED", "")
 
 		taskCreateFlags             = flag.NewFlagSet("create", flag.ExitOnError)
 		taskCreateBodyFlag          = taskCreateFlags.String("body", "REQUIRED", "")
@@ -67,6 +67,7 @@ func ParseEndpoint(
 		taskDeleteAuthorizationFlag = taskDeleteFlags.String("authorization", "REQUIRED", "")
 	)
 	taskFlags.Usage = taskUsage
+	taskSetupFlags.Usage = taskSetupUsage
 	taskCreateFlags.Usage = taskCreateUsage
 	taskListFlags.Usage = taskListUsage
 	taskUpdateFlags.Usage = taskUpdateUsage
@@ -106,6 +107,9 @@ func ParseEndpoint(
 		switch svcn {
 		case "task":
 			switch epn {
+			case "setup":
+				epf = taskSetupFlags
+
 			case "create":
 				epf = taskCreateFlags
 
@@ -143,6 +147,9 @@ func ParseEndpoint(
 		case "task":
 			c := taskc.NewClient(scheme, host, doer, enc, dec, restore)
 			switch epn {
+			case "setup":
+				endpoint = c.Setup()
+				data, err = taskc.BuildSetupPayload(*taskSetupAuthorizationFlag)
 			case "create":
 				endpoint = c.Create()
 				data, err = taskc.BuildCreatePayload(*taskCreateBodyFlag, *taskCreateAuthorizationFlag)
@@ -170,6 +177,7 @@ func taskUsage() {
 	fmt.Fprintln(os.Stderr, `Service is the task service interface.`)
 	fmt.Fprintf(os.Stderr, "Usage:\n    %s [globalflags] task COMMAND [flags]\n\n", os.Args[0])
 	fmt.Fprintln(os.Stderr, "COMMAND:")
+	fmt.Fprintln(os.Stderr, `    setup: Setup the task service.`)
 	fmt.Fprintln(os.Stderr, `    create: Create a new task.`)
 	fmt.Fprintln(os.Stderr, `    list: List all tasks.`)
 	fmt.Fprintln(os.Stderr, `    update: Update a task.`)
@@ -178,6 +186,25 @@ func taskUsage() {
 	fmt.Fprintln(os.Stderr, "Additional help:")
 	fmt.Fprintf(os.Stderr, "    %s task COMMAND --help\n", os.Args[0])
 }
+func taskSetupUsage() {
+	// Header with flags
+	fmt.Fprintf(os.Stderr, "%s [flags] task setup", os.Args[0])
+	fmt.Fprint(os.Stderr, " -authorization STRING")
+	fmt.Fprintln(os.Stderr)
+
+	// Description
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, `Setup the task service.`)
+
+	// Flags list
+	fmt.Fprintln(os.Stderr, `    -authorization STRING: `)
+
+	// Example block: pass example as parameter to avoid format parsing of % characters
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, "Example:")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], `task setup --authorization "Ullam dolor sint odio aut enim saepe."`)
+}
+
 func taskCreateUsage() {
 	// Header with flags
 	fmt.Fprintf(os.Stderr, "%s [flags] task create", os.Args[0])
@@ -197,9 +224,9 @@ func taskCreateUsage() {
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
 	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], `task create --body '{
-      "parent_id": "Ullam dolor sint odio aut enim saepe.",
-      "title": "Vel error odio corporis animi praesentium quasi."
-   }' --authorization "Quae asperiores."`)
+      "parent_id": "Asperiores nisi qui ut corporis quia numquam.",
+      "title": "Beatae nobis."
+   }' --authorization "Aut omnis laborum eligendi repudiandae ratione quis."`)
 }
 
 func taskListUsage() {
@@ -222,7 +249,7 @@ func taskListUsage() {
 	// Example block: pass example as parameter to avoid format parsing of % characters
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], `task list --parent-id "Iusto debitis minus minima voluptatem iste facilis." --recursive false --authorization "Autem vitae."`)
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], `task list --parent-id "Non necessitatibus." --recursive true --authorization "Distinctio et ea."`)
 }
 
 func taskUpdateUsage() {
@@ -246,12 +273,12 @@ func taskUpdateUsage() {
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
 	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], `task update --body '{
-      "estimated_time": 7275710883003218401,
-      "next_id": "Quisquam necessitatibus earum dolores occaecati labore qui.",
-      "parent_id": "Reiciendis dolorum est qui ratione consequatur quis.",
-      "status": "Error eos ea ut.",
-      "title": "Assumenda assumenda dolores culpa dolore."
-   }' --task-id "Aut recusandae vitae quo non accusamus explicabo." --authorization "Ut neque totam ipsa."`)
+      "estimated_time": 3800609449116017351,
+      "next_id": "Ea ut omnis.",
+      "parent_id": "Earum dolores occaecati labore qui qui error.",
+      "status": "Aut recusandae vitae quo non accusamus explicabo.",
+      "title": "Quis ullam quisquam."
+   }' --task-id "Neque totam ipsa ipsum non corrupti." --authorization "Voluptatem nisi."`)
 }
 
 func taskDeleteUsage() {
@@ -272,5 +299,5 @@ func taskDeleteUsage() {
 	// Example block: pass example as parameter to avoid format parsing of % characters
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], `task delete --task-id "Officia ut." --authorization "Modi aut aut quae quia repellat deleniti."`)
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], `task delete --task-id "Voluptatem qui." --authorization "Fugit repudiandae commodi beatae deserunt maiores laudantium."`)
 }
